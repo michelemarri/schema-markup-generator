@@ -1,0 +1,410 @@
+# Schema Markup Generator - Documentation
+
+Complete documentation for the Schema Markup Generator WordPress plugin.
+
+## Table of Contents
+
+1. [Installation](#installation)
+2. [Configuration](#configuration)
+3. [Schema Types](#schema-types)
+4. [Field Mapping](#field-mapping)
+5. [ACF Integration](#acf-integration)
+6. [Caching](#caching)
+7. [REST API](#rest-api)
+8. [Troubleshooting](#troubleshooting)
+
+---
+
+## Installation
+
+### Requirements
+
+- PHP 8.2 or higher
+- WordPress 6.0 or higher
+- Composer (for development only)
+
+### Installation Steps
+
+1. Download the plugin ZIP from [GitHub Releases](https://github.com/michelemarri/schema-markup-generator/releases)
+2. Navigate to **Plugins → Add New → Upload Plugin**
+3. Upload the ZIP file
+4. Click **Install Now** and then **Activate**
+
+### Automatic Updates
+
+The plugin includes automatic update functionality from GitHub. When a new release is published, you'll see an update notification in your WordPress admin.
+
+---
+
+## Configuration
+
+### General Settings
+
+Navigate to **Settings → Schema Markup** to access the plugin settings.
+
+#### Schema Output
+
+- **Enable Schema Markup**: Toggle schema output on/off globally
+- **WebSite Schema**: Adds WebSite schema with SearchAction for sitelinks
+- **Breadcrumb Schema**: Adds BreadcrumbList schema for navigation
+
+#### Organization Info
+
+Organization data is automatically pulled from WordPress settings:
+- Site Name (from General Settings)
+- Site URL
+- Logo (from Customizer → Site Identity)
+
+### Post Type Configuration
+
+In the **Post Types** tab, you can:
+
+1. **Assign Schema Types**: Select a schema type for each post type
+2. **Configure Field Mappings**: Map custom fields to schema properties
+3. **View Available Fields**: See all discoverable fields (ACF, meta, etc.)
+
+### Advanced Settings
+
+In the **Advanced** tab:
+
+- **Cache Settings**: Enable/disable caching and set TTL
+- **Debug Mode**: Enable logging for troubleshooting
+- **System Info**: View technical details about your installation
+
+---
+
+## Schema Types
+
+### Content Schemas
+
+#### Article / BlogPosting / NewsArticle
+
+For blog posts and editorial content.
+
+**Auto-populated properties:**
+- `headline` → Post title
+- `description` → Post excerpt or auto-generated
+- `author` → Post author
+- `datePublished` → Publication date
+- `dateModified` → Last modified date
+- `image` → Featured image
+- `articleSection` → Primary category
+- `keywords` → Post tags
+- `wordCount` → Auto-calculated
+
+#### WebPage
+
+For static pages with automatic type detection:
+- `ContactPage` - Contact pages
+- `AboutPage` - About pages
+- `FAQPage` - FAQ pages
+- `ProfilePage` - Profile pages
+
+### Business Schemas
+
+#### Product
+
+For e-commerce and product pages.
+
+**Required fields:**
+- `name` - Product name
+- `image` - Product image
+- `offers` - Price and availability
+
+**Recommended fields:**
+- `description`
+- `brand`
+- `sku`
+- `aggregateRating`
+
+#### Organization / LocalBusiness
+
+For business and organization pages.
+
+**Key properties:**
+- `name` - Business name
+- `logo` - Business logo
+- `address` - Physical address
+- `telephone` - Contact phone
+- `openingHours` - Business hours (LocalBusiness)
+- `geo` - Location coordinates (LocalBusiness)
+
+### Instructional Schemas
+
+#### FAQPage
+
+For FAQ pages with question/answer pairs.
+
+**Auto-extraction:**
+The plugin can automatically extract FAQs from content using H2/H3 headings followed by paragraphs.
+
+**Manual configuration:**
+Map a repeater field with `question` and `answer` sub-fields.
+
+#### HowTo
+
+For step-by-step guides.
+
+**Properties:**
+- `name` - Guide title
+- `step` - Steps (auto-extracted from lists or headings)
+- `totalTime` - Duration
+- `supply` - Materials needed
+- `tool` - Tools required
+
+#### Recipe
+
+For cooking recipes.
+
+**Required:**
+- `name`
+- `image`
+- `recipeIngredient`
+- `recipeInstructions`
+
+**Recommended:**
+- `prepTime` / `cookTime` / `totalTime`
+- `recipeYield`
+- `nutrition`
+
+---
+
+## Field Mapping
+
+### WordPress Default Fields
+
+These fields are automatically available:
+- `post_title` - Post title
+- `post_excerpt` - Post excerpt
+- `post_content` - Full content
+- `post_date` - Publication date
+- `post_modified` - Last modified date
+- `featured_image` - Featured image URL
+- `author` - Author name
+
+### Custom Meta Fields
+
+Any public post meta can be mapped to schema properties.
+
+### ACF Fields
+
+When ACF is installed, all field groups assigned to a post type are automatically discovered:
+- Text fields
+- Image fields (returns URL)
+- Gallery fields (returns array of URLs)
+- Date/time fields
+- Repeater fields
+- Group fields
+
+### Mapping Syntax
+
+**Simple mapping:**
+```
+Schema Property → Field Key
+```
+
+**Nested properties (ACF Repeater):**
+```
+offers.price → product_price
+brand.name → product_brand
+```
+
+---
+
+## ACF Integration
+
+### Supported Field Types
+
+| ACF Type | Schema Type |
+|----------|-------------|
+| text, textarea, wysiwyg | text |
+| number, range | number |
+| email | email |
+| url, link | url |
+| image, file | file/url |
+| gallery | array of urls |
+| date_picker | date |
+| date_time_picker | datetime |
+| true_false | boolean |
+| repeater | array |
+| google_map | geo coordinates |
+
+### Repeater Fields
+
+Repeater fields are ideal for:
+- FAQ items (`question` + `answer`)
+- Recipe ingredients
+- How-to steps
+- Product reviews
+
+Configure the repeater sub-fields to match schema property names.
+
+### Image Fields
+
+ACF image fields are automatically resolved:
+- Returns URL if return format is URL
+- Extracts URL from array if return format is Array
+
+---
+
+## Caching
+
+### How Caching Works
+
+1. Schema data is generated once and cached
+2. Cache is keyed by post ID and modification date
+3. Cache is automatically invalidated when post is updated
+
+### Cache Types
+
+**Object Cache (Preferred)**
+When Redis or Memcached is available, the plugin uses WordPress object cache for optimal performance.
+
+**Transients (Fallback)**
+When object cache is not available, WordPress transients are used.
+
+### Cache Settings
+
+- **Enable Caching**: Toggle on/off
+- **Cache TTL**: Time-to-live in seconds (default: 3600)
+- **Clear Cache**: Manually clear all cached schema data
+
+### Cache Invalidation
+
+Cache is automatically cleared when:
+- Post is saved or updated
+- Post is deleted
+- Plugin settings are changed
+
+---
+
+## REST API
+
+### Endpoints
+
+#### Get Schema for Post
+
+```http
+GET /wp-json/smg/v1/schema/{post_id}
+```
+
+**Response:**
+```json
+{
+    "post_id": 123,
+    "post_type": "post",
+    "schemas": [...],
+    "json_ld": "..."
+}
+```
+
+#### Validate Schema
+
+```http
+POST /wp-json/smg/v1/validate
+Content-Type: application/json
+
+{
+    "schema": {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Test Article"
+    }
+}
+```
+
+**Response:**
+```json
+{
+    "valid": false,
+    "errors": ["Missing required property: image"],
+    "warnings": ["Missing recommended property: author"]
+}
+```
+
+#### Get Settings (Admin Only)
+
+```http
+GET /wp-json/smg/v1/settings
+```
+
+#### Update Settings (Admin Only)
+
+```http
+POST /wp-json/smg/v1/settings
+Content-Type: application/json
+
+{
+    "settings": {
+        "enabled": true,
+        "cache_enabled": true
+    }
+}
+```
+
+#### Clear Cache (Admin Only)
+
+```http
+POST /wp-json/smg/v1/cache/clear
+```
+
+Optional: Clear cache for specific post:
+```json
+{
+    "post_id": 123
+}
+```
+
+---
+
+## Troubleshooting
+
+### Schema Not Appearing
+
+1. **Check if enabled**: Settings → Schema Markup → Enable Schema Markup
+2. **Check post type mapping**: Ensure a schema type is assigned
+3. **Check per-post setting**: The post may have schema disabled
+4. **Clear cache**: Try clearing the schema cache
+5. **Enable debug mode**: Check logs for errors
+
+### Duplicate Schemas
+
+If using Rank Math:
+1. The plugin automatically detects Rank Math
+2. Duplicate schema types are filtered out
+3. Check Advanced tab for integration status
+
+### Invalid Schema Errors
+
+Use the built-in validation:
+1. Open the post editor
+2. Check the Schema Markup meta box
+3. Click "Refresh" to see validation errors
+4. Use "Google Rich Results Test" link to verify
+
+### Debug Logging
+
+1. Go to Settings → Schema Markup → Advanced
+2. Enable Debug Mode
+3. Check logs in `/wp-content/plugins/schema-markup-generator/logs/`
+
+### Common Errors
+
+**"Missing required property: image"**
+- Ensure the post has a featured image
+- Or map an image field to the `image` property
+
+**"datePublished is not in valid ISO 8601 format"**
+- Check the date field format
+- Use date picker fields that return proper date strings
+
+---
+
+## Support
+
+- **Documentation**: [docs/DOCUMENTATION.md](DOCUMENTATION.md)
+- **Hooks Reference**: [docs/HOOKS.md](HOOKS.md)
+- **Extending Guide**: [docs/EXTENDING.md](EXTENDING.md)
+- **GitHub Issues**: [Report a bug](https://github.com/michelemarri/schema-markup-generator/issues)
+- **Website**: [metodo.dev](https://metodo.dev)
+

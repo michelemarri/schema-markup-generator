@@ -1,0 +1,1206 @@
+/**
+ * Schema Markup Generator - Admin Styles
+ *
+ * Modern, clean UI for the plugin settings.
+ *
+ * @package flavor\SchemaMarkupGenerator
+ * @author  Michele Marri <info@metodo.dev>
+ */
+
+/* ========================================
+   CSS Variables
+   ======================================== */
+:root {
+    --smg-primary: #2271b1;
+    --smg-primary-hover: #135e96;
+    --smg-success: #00a32a;
+    --smg-warning: #dba617;
+    --smg-error: #d63638;
+    --smg-bg: #f0f0f1;
+    --smg-card-bg: #ffffff;
+    --smg-border: #c3c4c7;
+    --smg-text: #1d2327;
+    --smg-text-secondary: #646970;
+    --smg-radius: 8px;
+    --smg-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --smg-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --smg-transition: 0.2s ease;
+}
+
+/* ========================================
+   Page Layout
+   ======================================== */
+.smg-settings-wrap {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.smg-page-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--smg-text);
+    margin-bottom: 8px;
+}
+
+.smg-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--smg-primary), #4f94d4);
+    border-radius: var(--smg-radius);
+    color: #fff;
+}
+
+.smg-description {
+    font-size: 15px;
+    color: var(--smg-text-secondary);
+    margin-bottom: 24px;
+}
+
+/* ========================================
+   Tab Navigation
+   ======================================== */
+.smg-tabs-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--smg-border);
+    padding-bottom: 0;
+}
+
+.smg-tab-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    color: var(--smg-text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    transition: all var(--smg-transition);
+}
+
+.smg-tab-link:hover {
+    color: var(--smg-primary);
+}
+
+.smg-tab-link.active {
+    color: var(--smg-primary);
+    border-bottom-color: var(--smg-primary);
+}
+
+.smg-tab-link .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+/* ========================================
+   Tab Content
+   ======================================== */
+.smg-tab-content {
+    background: var(--smg-card-bg);
+    border-radius: var(--smg-radius);
+    box-shadow: var(--smg-shadow);
+    padding: 24px;
+}
+
+.smg-tab-panel {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================================
+   Sections
+   ======================================== */
+.smg-section {
+    margin-bottom: 24px;
+}
+
+.smg-section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--smg-text);
+    margin: 0 0 8px 0;
+}
+
+.smg-section-description {
+    font-size: 14px;
+    color: var(--smg-text-secondary);
+    margin: 0;
+}
+
+/* ========================================
+   Cards Grid
+   ======================================== */
+.smg-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.smg-card {
+    background: var(--smg-card-bg);
+    border: 1px solid var(--smg-border);
+    border-radius: var(--smg-radius);
+    overflow: hidden;
+}
+
+.smg-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    background: #f9f9f9;
+    border-bottom: 1px solid var(--smg-border);
+}
+
+.smg-card-header h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.smg-card-header .dashicons {
+    color: var(--smg-primary);
+}
+
+.smg-card-body {
+    padding: 20px;
+}
+
+/* ========================================
+   Form Fields
+   ======================================== */
+.smg-field {
+    margin-bottom: 20px;
+}
+
+.smg-field:last-child {
+    margin-bottom: 0;
+}
+
+.smg-field-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--smg-text);
+}
+
+.smg-field-description {
+    display: block;
+    font-size: 13px;
+    color: var(--smg-text-secondary);
+    margin-top: 4px;
+}
+
+.smg-input,
+.smg-select {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px 12px;
+    border: 1px solid var(--smg-border);
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color var(--smg-transition), box-shadow var(--smg-transition);
+}
+
+.smg-input:focus,
+.smg-select:focus {
+    border-color: var(--smg-primary);
+    box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.2);
+    outline: none;
+}
+
+.smg-input-number {
+    max-width: 150px;
+}
+
+/* ========================================
+   Toggle Switch
+   ======================================== */
+.smg-field-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.smg-toggle {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.smg-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.smg-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: var(--smg-transition);
+    border-radius: 26px;
+}
+
+.smg-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: var(--smg-transition);
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.smg-toggle input:checked + .smg-toggle-slider {
+    background-color: var(--smg-primary);
+}
+
+.smg-toggle input:checked + .smg-toggle-slider:before {
+    transform: translateX(22px);
+}
+
+.smg-field-content {
+    flex: 1;
+}
+
+.smg-field-content .smg-field-label {
+    margin-bottom: 2px;
+}
+
+/* ========================================
+   Post Types List
+   ======================================== */
+.smg-post-types-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.smg-post-type-card {
+    border: 1px solid var(--smg-border);
+    border-radius: var(--smg-radius);
+    overflow: hidden;
+}
+
+.smg-post-type-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: #f9f9f9;
+}
+
+.smg-post-type-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.smg-post-type-info h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.smg-post-type-info code {
+    font-size: 12px;
+    padding: 2px 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    color: var(--smg-text-secondary);
+}
+
+.smg-post-type-schema {
+    min-width: 200px;
+}
+
+.smg-schema-select {
+    width: 100%;
+}
+
+.smg-toggle-fields {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.smg-toggle-fields .dashicons {
+    transition: transform var(--smg-transition);
+}
+
+.smg-toggle-fields[aria-expanded="true"] .dashicons {
+    transform: rotate(180deg);
+}
+
+.smg-post-type-fields {
+    padding: 20px;
+    border-top: 1px solid var(--smg-border);
+    background: #fff;
+}
+
+/* ========================================
+   Field Mapping Table
+   ======================================== */
+.smg-mapping-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.smg-mapping-table th,
+.smg-mapping-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--smg-border);
+}
+
+.smg-mapping-table th {
+    font-weight: 600;
+    color: var(--smg-text);
+    background: #f9f9f9;
+}
+
+.smg-mapping-table td small {
+    display: block;
+    color: var(--smg-text-secondary);
+    margin-top: 2px;
+}
+
+.smg-field-select {
+    width: 100%;
+    min-width: 200px;
+}
+
+.smg-auto-badge,
+.smg-manual-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.smg-auto-badge {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+
+.smg-auto-badge .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.smg-manual-badge {
+    background: #f0f0f0;
+    color: var(--smg-text-secondary);
+}
+
+/* ========================================
+   Schema Types Grid
+   ======================================== */
+.smg-schema-types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.smg-schema-group {
+    background: #f9f9f9;
+    border-radius: var(--smg-radius);
+    padding: 20px;
+}
+
+.smg-group-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--smg-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 16px 0;
+}
+
+.smg-schema-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.smg-schema-item {
+    background: var(--smg-card-bg);
+    border: 1px solid var(--smg-border);
+    border-radius: 6px;
+    padding: 16px;
+}
+
+.smg-schema-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.smg-schema-header h4 {
+    margin: 0;
+    font-size: 14px;
+}
+
+.smg-schema-header code {
+    font-size: 11px;
+    padding: 2px 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+}
+
+.smg-schema-description {
+    font-size: 13px;
+    color: var(--smg-text-secondary);
+    margin: 0 0 10px 0;
+}
+
+.smg-schema-props {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.smg-props-label {
+    font-size: 12px;
+    color: var(--smg-text-secondary);
+}
+
+.smg-prop-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    background: #e6f4ea;
+    color: #1e7e34;
+    border-radius: 10px;
+}
+
+.smg-schema-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--smg-primary);
+    text-decoration: none;
+}
+
+.smg-schema-link:hover {
+    text-decoration: underline;
+}
+
+.smg-schema-link .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+/* ========================================
+   Quick Start
+   ======================================== */
+.smg-quick-start {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.smg-step {
+    flex: 1;
+    display: flex;
+    gap: 16px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: var(--smg-radius);
+}
+
+.smg-step-number {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--smg-primary);
+    color: white;
+    border-radius: 50%;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.smg-step-content h4 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+}
+
+.smg-step-content p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--smg-text-secondary);
+}
+
+/* ========================================
+   Info Grid
+   ======================================== */
+.smg-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.smg-info-item {
+    padding: 12px;
+    background: #f0f0f1;
+    border-radius: 6px;
+}
+
+.smg-info-label {
+    display: block;
+    font-size: 12px;
+    color: var(--smg-text-secondary);
+    margin-bottom: 4px;
+}
+
+.smg-info-value {
+    font-weight: 500;
+    color: var(--smg-text);
+}
+
+/* ========================================
+   Notices
+   ======================================== */
+.smg-notice,
+.smg-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #f0f6fc;
+    border-left: 4px solid var(--smg-primary);
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--smg-text);
+}
+
+.smg-notice .dashicons,
+.smg-note .dashicons {
+    color: var(--smg-primary);
+    margin-top: 1px;
+}
+
+.smg-acf-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #e6f4ea;
+    border-radius: var(--smg-radius);
+    font-size: 13px;
+    color: #1e7e34;
+    margin-top: 16px;
+}
+
+/* ========================================
+   Tools Tab
+   ======================================== */
+.smg-export-form,
+.smg-import-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.smg-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.smg-file-input input {
+    width: 100%;
+}
+
+.smg-url-test {
+    display: flex;
+    gap: 8px;
+}
+
+.smg-url-test input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--smg-border);
+    border-radius: 4px;
+}
+
+.smg-cache-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* ========================================
+   Integrations
+   ======================================== */
+.smg-integrations-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.smg-integration-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #f9f9f9;
+    border-radius: var(--smg-radius);
+}
+
+.smg-integration-item.active {
+    background: #e6f4ea;
+}
+
+.smg-integration-status .dashicons {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.smg-integration-item.active .dashicons {
+    color: var(--smg-success);
+}
+
+.smg-integration-item.inactive .dashicons {
+    color: var(--smg-text-secondary);
+}
+
+.smg-integration-info h4 {
+    margin: 0 0 2px 0;
+    font-size: 14px;
+}
+
+.smg-integration-info p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--smg-text-secondary);
+}
+
+/* ========================================
+   Integrations Tab
+   ======================================== */
+.smg-integrations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.smg-integration-card {
+    background: var(--smg-card-bg);
+    border: 1px solid var(--smg-border);
+    border-radius: var(--smg-radius);
+    overflow: hidden;
+    transition: box-shadow var(--smg-transition);
+}
+
+.smg-integration-card:hover {
+    box-shadow: var(--smg-shadow-lg);
+}
+
+.smg-integration-card.active {
+    border-color: var(--smg-success);
+}
+
+.smg-integration-header {
+    padding: 16px 20px;
+    background: #f9f9f9;
+    border-bottom: 1px solid var(--smg-border);
+}
+
+.smg-integration-card.active .smg-integration-header {
+    background: #e6f4ea;
+}
+
+.smg-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+.smg-status-badge.active {
+    background: var(--smg-success);
+    color: white;
+}
+
+.smg-status-badge.inactive {
+    background: #e0e0e0;
+    color: var(--smg-text-secondary);
+}
+
+.smg-status-badge .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.smg-integration-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.smg-integration-body {
+    padding: 16px 20px;
+}
+
+.smg-integration-body p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--smg-text-secondary);
+    line-height: 1.5;
+}
+
+.smg-integration-footer {
+    padding: 12px 20px;
+    background: #f9f9f9;
+    border-top: 1px solid var(--smg-border);
+}
+
+.smg-toggle-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.smg-toggle-inline input {
+    display: none;
+}
+
+.smg-toggle-slider-small {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    background: #ccc;
+    border-radius: 20px;
+    transition: var(--smg-transition);
+}
+
+.smg-toggle-slider-small::before {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 2px;
+    top: 2px;
+    background: white;
+    border-radius: 50%;
+    transition: var(--smg-transition);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.smg-toggle-inline input:checked + .smg-toggle-slider-small {
+    background: var(--smg-success);
+}
+
+.smg-toggle-inline input:checked + .smg-toggle-slider-small::before {
+    transform: translateX(16px);
+}
+
+/* Checkboxes Grid */
+.smg-checkboxes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.smg-checkboxes-grid .smg-checkbox-label {
+    padding: 8px 12px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.smg-checkboxes-grid .smg-checkbox-label:hover {
+    background: #f0f0f1;
+}
+
+/* ACF Version Badge */
+.smg-acf-version-info {
+    text-align: center;
+    padding: 10px 0;
+}
+
+.smg-version-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.smg-version-badge.pro {
+    background: linear-gradient(135deg, #ffd700, #ffb347);
+    color: #5c4a00;
+}
+
+.smg-version-badge.free {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+
+.smg-version-badge .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.smg-acf-version-info p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--smg-text-secondary);
+}
+
+/* Suggested Integrations */
+.smg-suggested-integrations {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.smg-suggested-integration {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: #f9f9f9;
+    border: 1px dashed var(--smg-border);
+    border-radius: var(--smg-radius);
+}
+
+.smg-suggested-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e0e0e0;
+    border-radius: 50%;
+    color: var(--smg-text-secondary);
+}
+
+.smg-suggested-icon .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.smg-suggested-content h4 {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    color: var(--smg-text);
+}
+
+.smg-suggested-content p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--smg-text-secondary);
+}
+
+/* ========================================
+   System Info
+   ======================================== */
+.smg-info-table {
+    width: 100%;
+    max-width: 500px;
+    border-collapse: collapse;
+}
+
+.smg-info-table th,
+.smg-info-table td {
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--smg-border);
+}
+
+.smg-info-table th {
+    font-weight: 500;
+    color: var(--smg-text-secondary);
+    width: 200px;
+}
+
+.smg-status-ok {
+    color: var(--smg-success);
+}
+
+.smg-status-warning {
+    color: var(--smg-warning);
+}
+
+/* ========================================
+   Extend Notice
+   ======================================== */
+.smg-extend-notice {
+    display: flex;
+    gap: 16px;
+    padding: 20px;
+    background: #f0f6fc;
+    border-radius: var(--smg-radius);
+    margin-top: 24px;
+}
+
+.smg-extend-notice .dashicons {
+    color: var(--smg-primary);
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+}
+
+.smg-extend-notice h4 {
+    margin: 0 0 8px 0;
+}
+
+.smg-extend-notice p {
+    margin: 0 0 12px 0;
+    color: var(--smg-text-secondary);
+}
+
+.smg-extend-notice code {
+    display: block;
+    padding: 12px;
+    background: #fff;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: pre-wrap;
+}
+
+/* ========================================
+   Actions
+   ======================================== */
+.smg-actions {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--smg-border);
+}
+
+/* ========================================
+   Footer
+   ======================================== */
+.smg-footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--smg-text-secondary);
+    font-size: 13px;
+}
+
+.smg-footer a {
+    color: var(--smg-primary);
+    text-decoration: none;
+}
+
+.smg-footer a:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   Meta Box
+   ======================================== */
+.smg-meta-box {
+    padding: 12px;
+}
+
+.smg-meta-box-section {
+    margin-bottom: 16px;
+}
+
+.smg-meta-box-section:last-child {
+    margin-bottom: 0;
+}
+
+.smg-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.smg-preview-section {
+    background: #f9f9f9;
+    border-radius: 6px;
+    padding: 16px;
+}
+
+.smg-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.smg-preview-header h4 {
+    margin: 0;
+}
+
+.smg-preview-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.smg-schema-preview {
+    background: #1d2327;
+    color: #e6e6e6;
+    padding: 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.5;
+    max-height: 300px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.smg-preview-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: #fff;
+    border-radius: 4px;
+    color: var(--smg-text-secondary);
+}
+
+.smg-validation-status {
+    margin-top: 12px;
+}
+
+.smg-validation-status.valid {
+    color: var(--smg-success);
+}
+
+.smg-validation-status.invalid {
+    color: var(--smg-error);
+}
+
+.smg-test-links {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.smg-test-links .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ========================================
+   Log Preview
+   ======================================== */
+.smg-log-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 16px 0;
+}
+
+.smg-log-preview {
+    margin-top: 16px;
+}
+
+.smg-log-preview h4 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+}
+
+.smg-log-preview pre {
+    background: #1d2327;
+    color: #e6e6e6;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    max-height: 200px;
+    overflow: auto;
+}
+
+/* ========================================
+   Responsive
+   ======================================== */
+@media (max-width: 782px) {
+    .smg-settings-wrap {
+        padding: 0 10px;
+    }
+
+    .smg-tabs-nav {
+        flex-wrap: wrap;
+    }
+
+    .smg-tab-link {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    .smg-tab-link .dashicons {
+        display: none;
+    }
+
+    .smg-cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .smg-quick-start {
+        flex-direction: column;
+    }
+
+    .smg-post-type-header {
+        flex-wrap: wrap;
+    }
+
+    .smg-post-type-info {
+        width: 100%;
+    }
+
+    .smg-post-type-schema {
+        width: 100%;
+    }
+}
+

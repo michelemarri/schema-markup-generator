@@ -1,0 +1,159 @@
+<?php
+
+declare(strict_types=1);
+
+namespace flavor\SchemaMarkupGenerator\Admin\Tabs;
+
+/**
+ * Advanced Tab
+ *
+ * Advanced settings including cache, logging, and debug options.
+ *
+ * @package flavor\SchemaMarkupGenerator\Admin\Tabs
+ * @author  Michele Marri <info@metodo.dev>
+ */
+class AdvancedTab extends AbstractTab
+{
+    public function getTitle(): string
+    {
+        return __('Advanced', 'schema-markup-generator');
+    }
+
+    public function getIcon(): string
+    {
+        return 'dashicons-admin-generic';
+    }
+
+    public function render(): void
+    {
+        $settings = get_option('smg_settings', []);
+
+        ?>
+        <div class="smg-tab-panel" id="tab-advanced">
+            <?php $this->renderSection(
+                __('Cache Settings', 'schema-markup-generator'),
+                __('Configure how schema data is cached for better performance.', 'schema-markup-generator')
+            ); ?>
+
+            <div class="smg-cards-grid">
+                <?php
+                $this->renderCard(__('Cache Configuration', 'schema-markup-generator'), function () use ($settings) {
+                    $this->renderToggle(
+                        'smg_settings[cache_enabled]',
+                        $settings['cache_enabled'] ?? true,
+                        __('Enable Caching', 'schema-markup-generator'),
+                        __('Cache generated schema data for faster page loads.', 'schema-markup-generator')
+                    );
+
+                    $this->renderNumberField(
+                        'smg_settings[cache_ttl]',
+                        (int) ($settings['cache_ttl'] ?? 3600),
+                        __('Cache TTL (seconds)', 'schema-markup-generator'),
+                        __('How long to keep cached data. Default: 3600 (1 hour).', 'schema-markup-generator'),
+                        60,
+                        86400
+                    );
+
+                    // Show cache type
+                    $cacheType = wp_using_ext_object_cache()
+                        ? __('Object Cache (Redis/Memcached)', 'schema-markup-generator')
+                        : __('WordPress Transients', 'schema-markup-generator');
+                    ?>
+                    <div class="smg-cache-info">
+                        <span class="smg-info-label"><?php esc_html_e('Cache Type:', 'schema-markup-generator'); ?></span>
+                        <span class="smg-info-value"><?php echo esc_html($cacheType); ?></span>
+                    </div>
+                    <?php
+                }, 'dashicons-performance');
+                ?>
+            </div>
+
+            <?php $this->renderSection(
+                __('Debug & Logging', 'schema-markup-generator'),
+                __('Enable debug mode and logging for troubleshooting.', 'schema-markup-generator')
+            ); ?>
+
+            <div class="smg-cards-grid">
+                <?php
+                $this->renderCard(__('Debug Mode', 'schema-markup-generator'), function () use ($settings) {
+                    $this->renderToggle(
+                        'smg_settings[debug_mode]',
+                        $settings['debug_mode'] ?? false,
+                        __('Enable Debug Mode', 'schema-markup-generator'),
+                        __('Log schema generation details for troubleshooting. Logs are stored in the plugin\'s logs folder.', 'schema-markup-generator')
+                    );
+
+                    // Show log file location
+                    $logDir = SMG_PLUGIN_DIR . 'logs';
+                    $logFile = $logDir . '/smg-' . date('Y-m-d') . '.log';
+                    ?>
+                    <div class="smg-log-info">
+                        <span class="smg-info-label"><?php esc_html_e('Log Location:', 'schema-markup-generator'); ?></span>
+                        <code><?php echo esc_html($logDir); ?></code>
+                    </div>
+
+                    <?php if (file_exists($logFile)): ?>
+                        <div class="smg-log-preview">
+                            <h4><?php esc_html_e('Recent Log Entries', 'schema-markup-generator'); ?></h4>
+                            <pre><?php
+                            $lines = file($logFile);
+                            $lastLines = array_slice($lines, -10);
+                            echo esc_html(implode('', $lastLines));
+                            ?></pre>
+                        </div>
+                    <?php endif; ?>
+                    <?php
+                }, 'dashicons-visibility');
+                ?>
+            </div>
+
+            <?php $this->renderSection(
+                __('System Information', 'schema-markup-generator'),
+                __('Technical details about your installation.', 'schema-markup-generator')
+            ); ?>
+
+            <div class="smg-system-info">
+                <table class="smg-info-table">
+                    <tr>
+                        <th><?php esc_html_e('Plugin Version', 'schema-markup-generator'); ?></th>
+                        <td><?php echo esc_html(SMG_VERSION); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e('WordPress Version', 'schema-markup-generator'); ?></th>
+                        <td><?php echo esc_html(get_bloginfo('version')); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e('PHP Version', 'schema-markup-generator'); ?></th>
+                        <td><?php echo esc_html(PHP_VERSION); ?></td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e('Object Cache', 'schema-markup-generator'); ?></th>
+                        <td>
+                            <?php
+                            if (wp_using_ext_object_cache()) {
+                                echo '<span class="smg-status-ok">';
+                                esc_html_e('Enabled', 'schema-markup-generator');
+                                echo '</span>';
+                            } else {
+                                echo '<span class="smg-status-warning">';
+                                esc_html_e('Not Available', 'schema-markup-generator');
+                                echo '</span>';
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e('Max Execution Time', 'schema-markup-generator'); ?></th>
+                        <td><?php echo esc_html(ini_get('max_execution_time')); ?>s</td>
+                    </tr>
+                    <tr>
+                        <th><?php esc_html_e('Memory Limit', 'schema-markup-generator'); ?></th>
+                        <td><?php echo esc_html(ini_get('memory_limit')); ?></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <?php
+    }
+}
+

@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: Create release directory
+        run: |
+          mkdir -p release/schema-markup-generator
+          
+          # Copy plugin files
+          cp -r src release/schema-markup-generator/
+          cp -r assets release/schema-markup-generator/
+          cp -r vendor release/schema-markup-generator/
+          cp -r docs release/schema-markup-generator/ 2>/dev/null || true
+          cp schema-markup-generator.php release/schema-markup-generator/
+          cp composer.json release/schema-markup-generator/
+          cp uninstall.php release/schema-markup-generator/
+          cp README.md release/schema-markup-generator/
+          cp LICENSE release/schema-markup-generator/
+          
+          # Create logs directory placeholder
+          mkdir -p release/schema-markup-generator/logs
+          echo "<?php // Silence is golden" > release/schema-markup-generator/logs/index.php
+          echo "Deny from all" > release/schema-markup-generator/logs/.htaccess
+
+      - name: Create ZIP archive
+        run: |
+          cd release
+          zip -r ../schema-markup-generator-${{ steps.get_version.outputs.VERSION }}.zip schema-markup-generator
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## Schema Markup Generator v${{ steps.get_version.outputs.VERSION }}
+            
+            ### Installation
+            1. Download the ZIP file below
+            2. Go to WordPress Admin → Plugins → Add New → Upload Plugin
+            3. Upload the ZIP file and activate
+            
+            ### Changelog
+            See [CHANGELOG.md](https://github.com/michelemarri/schema-markup-generator/blob/main/docs/DOCUMENTATION.md) for details.
+          files: schema-markup-generator-${{ steps.get_version.outputs.VERSION }}.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

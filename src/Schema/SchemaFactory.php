@@ -1,0 +1,244 @@
+<?php
+
+declare(strict_types=1);
+
+namespace flavor\SchemaMarkupGenerator\Schema;
+
+use flavor\SchemaMarkupGenerator\Schema\Types\ArticleSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\ProductSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\OrganizationSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\PersonSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\FAQSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\HowToSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\EventSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\RecipeSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\ReviewSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\BreadcrumbSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\WebSiteSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\WebPageSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\VideoObjectSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\CourseSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\SoftwareAppSchema;
+
+/**
+ * Schema Factory
+ *
+ * Creates schema instances based on type identifier.
+ *
+ * @package flavor\SchemaMarkupGenerator\Schema
+ * @author  Michele Marri <info@metodo.dev>
+ */
+class SchemaFactory
+{
+    /**
+     * Registered schema types
+     *
+     * @var array<string, class-string<SchemaInterface>>
+     */
+    private array $types = [];
+
+    /**
+     * Schema instances cache
+     *
+     * @var array<string, SchemaInterface>
+     */
+    private array $instances = [];
+
+    public function __construct()
+    {
+        $this->registerDefaultTypes();
+    }
+
+    /**
+     * Register default schema types
+     */
+    private function registerDefaultTypes(): void
+    {
+        $defaultTypes = [
+            'Article' => ArticleSchema::class,
+            'BlogPosting' => ArticleSchema::class,
+            'NewsArticle' => ArticleSchema::class,
+            'Product' => ProductSchema::class,
+            'Organization' => OrganizationSchema::class,
+            'LocalBusiness' => OrganizationSchema::class,
+            'Person' => PersonSchema::class,
+            'FAQPage' => FAQSchema::class,
+            'HowTo' => HowToSchema::class,
+            'Event' => EventSchema::class,
+            'Recipe' => RecipeSchema::class,
+            'Review' => ReviewSchema::class,
+            'BreadcrumbList' => BreadcrumbSchema::class,
+            'WebSite' => WebSiteSchema::class,
+            'WebPage' => WebPageSchema::class,
+            'VideoObject' => VideoObjectSchema::class,
+            'Course' => CourseSchema::class,
+            'SoftwareApplication' => SoftwareAppSchema::class,
+        ];
+
+        foreach ($defaultTypes as $type => $class) {
+            $this->types[$type] = $class;
+        }
+
+        /**
+         * Filter to register custom schema types
+         *
+         * @param array $types Associative array of type => class
+         */
+        $this->types = apply_filters('smg_register_schema_types', $this->types);
+    }
+
+    /**
+     * Create a schema instance by type
+     *
+     * @param string $type The schema type identifier
+     * @return SchemaInterface|null
+     */
+    public function create(string $type): ?SchemaInterface
+    {
+        if (!isset($this->types[$type])) {
+            return null;
+        }
+
+        // Return cached instance if available
+        if (isset($this->instances[$type])) {
+            return $this->instances[$type];
+        }
+
+        $class = $this->types[$type];
+
+        if (!class_exists($class)) {
+            return null;
+        }
+
+        $instance = new $class();
+
+        // For types that share a class (like BlogPosting -> ArticleSchema)
+        // we need to set the specific type
+        if (method_exists($instance, 'setType')) {
+            $instance->setType($type);
+        }
+
+        $this->instances[$type] = $instance;
+
+        return $instance;
+    }
+
+    /**
+     * Check if a schema type is registered
+     */
+    public function hasType(string $type): bool
+    {
+        return isset($this->types[$type]);
+    }
+
+    /**
+     * Get all registered schema types
+     *
+     * @return array<string, string> Type => Label pairs
+     */
+    public function getTypes(): array
+    {
+        $types = [];
+
+        foreach (array_keys($this->types) as $type) {
+            $schema = $this->create($type);
+            if ($schema) {
+                $types[$type] = $schema->getLabel();
+            }
+        }
+
+        return $types;
+    }
+
+    /**
+     * Get all registered schema types with descriptions
+     *
+     * @return array<string, array> Type => [label, description]
+     */
+    public function getTypesWithDescriptions(): array
+    {
+        $types = [];
+
+        foreach (array_keys($this->types) as $type) {
+            $schema = $this->create($type);
+            if ($schema) {
+                $types[$type] = [
+                    'label' => $schema->getLabel(),
+                    'description' => $schema->getDescription(),
+                ];
+            }
+        }
+
+        return $types;
+    }
+
+    /**
+     * Get schema types grouped by category
+     *
+     * @return array<string, array>
+     */
+    public function getTypesGrouped(): array
+    {
+        return [
+            __('Content', 'schema-markup-generator') => [
+                'Article' => __('Article', 'schema-markup-generator'),
+                'BlogPosting' => __('Blog Post', 'schema-markup-generator'),
+                'NewsArticle' => __('News Article', 'schema-markup-generator'),
+                'WebPage' => __('Web Page', 'schema-markup-generator'),
+            ],
+            __('Business', 'schema-markup-generator') => [
+                'Organization' => __('Organization', 'schema-markup-generator'),
+                'LocalBusiness' => __('Local Business', 'schema-markup-generator'),
+                'Product' => __('Product', 'schema-markup-generator'),
+            ],
+            __('People & Reviews', 'schema-markup-generator') => [
+                'Person' => __('Person', 'schema-markup-generator'),
+                'Review' => __('Review', 'schema-markup-generator'),
+            ],
+            __('Instructional', 'schema-markup-generator') => [
+                'FAQPage' => __('FAQ Page', 'schema-markup-generator'),
+                'HowTo' => __('How-To Guide', 'schema-markup-generator'),
+                'Recipe' => __('Recipe', 'schema-markup-generator'),
+                'Course' => __('Course', 'schema-markup-generator'),
+            ],
+            __('Media & Events', 'schema-markup-generator') => [
+                'Event' => __('Event', 'schema-markup-generator'),
+                'VideoObject' => __('Video', 'schema-markup-generator'),
+            ],
+            __('Technical', 'schema-markup-generator') => [
+                'SoftwareApplication' => __('Software Application', 'schema-markup-generator'),
+                'WebSite' => __('Website', 'schema-markup-generator'),
+                'BreadcrumbList' => __('Breadcrumb', 'schema-markup-generator'),
+            ],
+        ];
+    }
+
+    /**
+     * Register a custom schema type
+     *
+     * @param string $type  The type identifier
+     * @param string $class The fully qualified class name
+     */
+    public function registerType(string $type, string $class): void
+    {
+        if (!is_subclass_of($class, SchemaInterface::class)) {
+            throw new \InvalidArgumentException(
+                sprintf('Class %s must implement SchemaInterface', $class)
+            );
+        }
+
+        $this->types[$type] = $class;
+
+        // Clear instance cache for this type
+        unset($this->instances[$type]);
+    }
+
+    /**
+     * Unregister a schema type
+     */
+    public function unregisterType(string $type): void
+    {
+        unset($this->types[$type], $this->instances[$type]);
+    }
+}
+

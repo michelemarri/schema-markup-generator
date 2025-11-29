@@ -1,0 +1,28 @@
+{
+    "name": "metodo-dev/schema-markup-generator",
+    "description": "WordPress plugin for automatic schema markup generation optimized for LLMs",
+    "type": "wordpress-plugin",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Michele Marri",
+            "email": "info@metodo.dev",
+            "homepage": "https://metodo.dev"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=8.2",
+        "yahnis-elsts/plugin-update-checker": "^5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "flavor\\SchemaMarkupGenerator\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}
+

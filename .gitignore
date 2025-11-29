@@ -1,0 +1,30 @@
+# Dependencies
+/vendor/
+
+# Logs
+/logs/*.log
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+/node_modules/
+/dist/
+
+# Environment
+.env
+.env.local
+
+# Composer
+composer.lock
+
+# Debug
+debug.log
+
