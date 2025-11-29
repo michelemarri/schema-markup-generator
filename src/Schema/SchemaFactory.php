@@ -18,6 +18,7 @@ use flavor\SchemaMarkupGenerator\Schema\Types\WebSiteSchema;
 use flavor\SchemaMarkupGenerator\Schema\Types\WebPageSchema;
 use flavor\SchemaMarkupGenerator\Schema\Types\VideoObjectSchema;
 use flavor\SchemaMarkupGenerator\Schema\Types\CourseSchema;
+use flavor\SchemaMarkupGenerator\Schema\Types\LearningResourceSchema;
 use flavor\SchemaMarkupGenerator\Schema\Types\SoftwareAppSchema;
 
 /**
@@ -55,23 +56,53 @@ class SchemaFactory
     private function registerDefaultTypes(): void
     {
         $defaultTypes = [
+            // Content types
             'Article' => ArticleSchema::class,
             'BlogPosting' => ArticleSchema::class,
             'NewsArticle' => ArticleSchema::class,
+
+            // Business types
             'Product' => ProductSchema::class,
             'Organization' => OrganizationSchema::class,
             'LocalBusiness' => OrganizationSchema::class,
+
+            // Person
             'Person' => PersonSchema::class,
+
+            // FAQ (standalone)
             'FAQPage' => FAQSchema::class,
+
+            // Instructional
             'HowTo' => HowToSchema::class,
             'Event' => EventSchema::class,
             'Recipe' => RecipeSchema::class,
             'Review' => ReviewSchema::class,
+
+            // Global schemas
             'BreadcrumbList' => BreadcrumbSchema::class,
             'WebSite' => WebSiteSchema::class,
+
+            // Page types (all use WebPageSchema with different @type)
             'WebPage' => WebPageSchema::class,
+            'AboutPage' => WebPageSchema::class,
+            'ContactPage' => WebPageSchema::class,
+            'CollectionPage' => WebPageSchema::class,
+            'ItemPage' => WebPageSchema::class,
+            'CheckoutPage' => WebPageSchema::class,
+            'SearchResultsPage' => WebPageSchema::class,
+            'ProfilePage' => WebPageSchema::class,
+            'QAPage' => WebPageSchema::class,
+            'RealEstateListing' => WebPageSchema::class,
+            'MedicalWebPage' => WebPageSchema::class,
+
+            // Media
             'VideoObject' => VideoObjectSchema::class,
+
+            // Education
             'Course' => CourseSchema::class,
+            'LearningResource' => LearningResourceSchema::class,
+
+            // Technical
             'SoftwareApplication' => SoftwareAppSchema::class,
         ];
 
@@ -200,6 +231,7 @@ class SchemaFactory
                 'HowTo' => __('How-To Guide', 'schema-markup-generator'),
                 'Recipe' => __('Recipe', 'schema-markup-generator'),
                 'Course' => __('Course', 'schema-markup-generator'),
+                'LearningResource' => __('Learning Resource', 'schema-markup-generator'),
             ],
             __('Media & Events', 'schema-markup-generator') => [
                 'Event' => __('Event', 'schema-markup-generator'),

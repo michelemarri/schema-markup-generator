@@ -1,235 +1,30 @@
-/**
- * Schema Markup Generator - Admin JavaScript
- *
- * Handles UI interactions for the plugin settings.
- *
- * @package flavor\SchemaMarkupGenerator
- * @author  Michele Marri <info@metodo.dev>
- */
-
-(function($) {
-    'use strict';
-
-    const SMGAdmin = {
-        /**
-         * Initialize
-         */
-        init: function() {
-            this.bindEvents();
-            this.initPreview();
-        },
-
-        /**
-         * Bind event handlers
-         */
-        bindEvents: function() {
-            // Toggle field mappings
-            $(document).on('click', '.smg-toggle-fields', this.toggleFields);
-
-            // Schema type change - update field mappings
-            $(document).on('change', '.smg-schema-select', this.onSchemaTypeChange);
-
-            // Refresh preview
-            $(document).on('click', '.smg-refresh-preview', this.refreshPreview);
-
-            // Copy schema
-            $(document).on('click', '.smg-copy-schema', this.copySchema);
-
-            // Google Rich Results Test link
-            $(document).on('click', '#smg-test-google', this.openGoogleTest);
-
-            // Schema.org Validator link
-            $(document).on('click', '#smg-validate-schema', this.openSchemaValidator);
-        },
-
-        /**
-         * Toggle field mappings panel
-         */
-        toggleFields: function(e) {
-            e.preventDefault();
-            const $button = $(this);
-            const $card = $button.closest('.smg-post-type-card');
-            const $fields = $card.find('.smg-post-type-fields');
-            const isExpanded = $button.attr('aria-expanded') === 'true';
-
-            $button.attr('aria-expanded', !isExpanded);
-            $fields.slideToggle(200);
-        },
-
-        /**
-         * Handle schema type change
-         */
-        onSchemaTypeChange: function() {
-            const $select = $(this);
-            const postType = $select.data('post-type');
-            const schemaType = $select.val();
-
-            // Could refresh field mappings via AJAX here
-            // For now, page reload is required to see updated mappings
-        },
-
-        /**
-         * Initialize preview functionality
-         */
-        initPreview: function() {
-            const $preview = $('#smg-schema-preview');
-            if ($preview.length && smgAdmin) {
-                this.validateCurrentSchema();
-            }
-        },
-
-        /**
-         * Refresh schema preview
-         */
-        refreshPreview: function(e) {
-            e.preventDefault();
-            const $button = $(this);
-            const $preview = $('#smg-schema-preview');
-            const $status = $('#smg-validation-status');
-            const postId = $('input[name="smg_post_id"]').val();
-
-            if (!postId) return;
-
-            $button.prop('disabled', true);
-            $preview.css('opacity', '0.5');
-
-            $.ajax({
-                url: smgAdmin.ajaxUrl,
-                type: 'POST',
-                data: {
-                    action: 'smg_preview_schema',
-                    nonce: smgAdmin.nonce,
-                    post_id: postId
-                },
-                success: function(response) {
-                    if (response.success) {
-                        $preview.text(response.data.json);
-                        SMGAdmin.showValidation(response.data.validation, $status);
-                    }
-                },
-                complete: function() {
-                    $button.prop('disabled', false);
-                    $preview.css('opacity', '1');
-                }
-            });
-        },
-
-        /**
-         * Validate current schema
-         */
-        validateCurrentSchema: function() {
-            const $preview = $('#smg-schema-preview');
-            const $status = $('#smg-validation-status');
-            const postId = $('input[name="smg_post_id"]').val();
-
-            if (!postId || !$preview.length) return;
-
-            $.ajax({
-                url: smgAdmin.ajaxUrl,
-                type: 'POST',
-                data: {
-                    action: 'smg_preview_schema',
-                    nonce: smgAdmin.nonce,
-                    post_id: postId
-                },
-                success: function(response) {
-                    if (response.success) {
-                        SMGAdmin.showValidation(response.data.validation, $status);
-                    }
-                }
-            });
-        },
-
-        /**
-         * Show validation status
-         */
-        showValidation: function(validation, $container) {
-            if (!validation) return;
-
-            let html = '';
-
-            if (validation.valid) {
-                html = '<div class="smg-validation-status valid">';
-                html += '<span class="dashicons dashicons-yes-alt"></span> ';
-                html += smgAdmin.strings.valid;
-                html += '</div>';
-            } else {
-                html = '<div class="smg-validation-status invalid">';
-                html += '<span class="dashicons dashicons-warning"></span> ';
-                html += smgAdmin.strings.invalid;
-
-                if (validation.errors && validation.errors.length) {
-                    html += '<ul>';
-                    validation.errors.forEach(function(error) {
-                        html += '<li>' + error + '</li>';
-                    });
-                    html += '</ul>';
-                }
-
-                html += '</div>';
-            }
-
-            if (validation.warnings && validation.warnings.length) {
-                html += '<div class="smg-validation-warnings">';
-                html += '<strong>Warnings:</strong>';
-                html += '<ul>';
-                validation.warnings.forEach(function(warning) {
-                    html += '<li>' + warning + '</li>';
-                });
-                html += '</ul>';
-                html += '</div>';
-            }
-
-            $container.html(html);
-        },
-
-        /**
-         * Copy schema to clipboard
-         */
-        copySchema: function(e) {
-            e.preventDefault();
-            const $preview = $('#smg-schema-preview');
-            const schema = $preview.text();
-
-            if (!schema) return;
-
-            navigator.clipboard.writeText(schema).then(function() {
-                const $button = $(e.currentTarget);
-                const originalText = $button.html();
-
-                $button.html('<span class="dashicons dashicons-yes"></span> ' + smgAdmin.strings.copied);
-
-                setTimeout(function() {
-                    $button.html(originalText);
-                }, 2000);
-            });
-        },
-
-        /**
-         * Open Google Rich Results Test
-         */
-        openGoogleTest: function(e) {
-            e.preventDefault();
-            const url = $('#smg-test-url').val() || window.location.origin;
-            const testUrl = 'https://search.google.com/test/rich-results?url=' + encodeURIComponent(url);
-            window.open(testUrl, '_blank');
-        },
-
-        /**
-         * Open Schema.org Validator
-         */
-        openSchemaValidator: function(e) {
-            e.preventDefault();
-            const url = $('#smg-validate-url').val() || window.location.origin;
-            const testUrl = 'https://validator.schema.org/?url=' + encodeURIComponent(url);
-            window.open(testUrl, '_blank');
-        }
-    };
-
-    // Initialize on document ready
-    $(document).ready(function() {
-        SMGAdmin.init();
-    });
-
-})(jQuery);
-
+(()=>{(function(){"use strict";let o={config:{animationDuration:200,toastDuration:3e3,debounceDelay:300},elements:{},init(){this.cacheElements(),this.bindEvents(),this.initComponents(),this.initAnimations()},cacheElements(){this.elements={settingsForm:document.getElementById("smg-settings-form"),tabsNav:document.querySelector(".smg-tabs-nav"),tabContent:document.querySelector(".smg-tab-content"),schemaPreview:document.getElementById("smg-schema-preview"),validationStatus:document.getElementById("smg-validation-status")}},bindEvents(){document.addEventListener("click",t=>{t.target.closest(".smg-toggle-fields")&&this.handleToggleFields(t)}),document.addEventListener("change",t=>{t.target.classList.contains("smg-schema-select")&&this.handleSchemaTypeChange(t)}),document.addEventListener("click",t=>{t.target.closest(".smg-refresh-preview")&&this.handleRefreshPreview(t)}),document.addEventListener("click",t=>{t.target.closest(".smg-copy-schema")&&this.handleCopySchema(t)}),document.addEventListener("click",t=>{(t.target.id==="smg-test-google"||t.target.closest("#smg-test-google"))&&this.handleGoogleTest(t)}),document.addEventListener("click",t=>{(t.target.id==="smg-validate-schema"||t.target.closest("#smg-validate-schema"))&&this.handleSchemaValidator(t)}),this.elements.settingsForm&&this.elements.settingsForm.addEventListener("submit",t=>{this.handleFormSubmit(t)}),document.addEventListener("change",t=>{t.target.closest(".smg-toggle input")&&this.animateToggle(t.target)}),document.addEventListener("click",t=>{t.target.closest(".smg-apply-suggestion")&&this.handleApplySuggestion(t)}),document.addEventListener("keypress",t=>{t.target.classList.contains("smg-pagination-input")&&t.key==="Enter"&&this.handlePaginationInput(t)}),document.addEventListener("change",t=>{t.target.classList.contains("smg-pagination-input")&&this.handlePaginationInput(t)})},initComponents(){this.initPreview(),this.initTooltips(),this.initCollapsibles()},initAnimations(){document.querySelectorAll(".smg-card, .smg-post-type-card, .smg-integration-card, .smg-step").forEach((s,a)=>{s.style.opacity="0",s.style.transform="translateY(10px)",setTimeout(()=>{s.style.transition="opacity 0.3s ease, transform 0.3s ease",s.style.opacity="1",s.style.transform="translateY(0)"},50*a)}),document.querySelectorAll(".smg-schema-item").forEach((s,a)=>{s.style.opacity="0",setTimeout(()=>{s.style.transition="opacity 0.3s ease",s.style.opacity="1"},30*a)}),document.querySelectorAll(".smg-page-row").forEach((s,a)=>{s.style.opacity="0",s.style.transform="translateX(-10px)",setTimeout(()=>{s.style.transition="opacity 0.3s ease, transform 0.3s ease",s.style.opacity="1",s.style.transform="translateX(0)"},30*a)})},handleToggleFields(t){t.preventDefault();let e=t.target.closest(".smg-toggle-fields"),s=e.closest(".smg-post-type-card").querySelector(".smg-post-type-fields"),a=e.getAttribute("aria-expanded")==="true";e.setAttribute("aria-expanded",!a),a?this.slideUp(s):this.slideDown(s)},handleSchemaTypeChange(t){let e=t.target,n=e.dataset.postType,s=e.value,a=e.closest(".smg-post-type-card");a.style.transition="border-color 0.3s ease",a.style.borderColor="var(--smg-primary-300)",setTimeout(()=>{a.style.borderColor=""},1e3),console.log(`Schema type changed for ${n}: ${s}`)},initPreview(){this.elements.schemaPreview&&typeof smgAdmin<"u"&&this.validateCurrentSchema()},async handleRefreshPreview(t){t.preventDefault();let e=t.target.closest(".smg-refresh-preview"),n=document.querySelector('input[name="smg_post_id"]');if(!n)return;let s=n.value;e.disabled=!0,e.classList.add("loading"),this.elements.schemaPreview.style.opacity="0.5";try{let a=await this.fetchPreview(s);a.success&&(this.elements.schemaPreview.textContent=a.data.json,this.showValidation(a.data.validation),this.elements.schemaPreview.style.transition="opacity 0.3s ease",this.elements.schemaPreview.style.opacity="1")}catch(a){console.error("Preview refresh failed:",a),this.showToast("Failed to refresh preview","error")}finally{e.disabled=!1,e.classList.remove("loading")}},fetchPreview(t){return new Promise((e,n)=>{let s=new FormData;s.append("action","smg_preview_schema"),s.append("nonce",smgAdmin.nonce),s.append("post_id",t),fetch(smgAdmin.ajaxUrl,{method:"POST",body:s,credentials:"same-origin"}).then(a=>a.json()).then(a=>e(a)).catch(a=>n(a))})},async validateCurrentSchema(){let t=document.querySelector('input[name="smg_post_id"]');if(!(!t||!this.elements.schemaPreview))try{let e=await this.fetchPreview(t.value);e.success&&e.data.validation&&this.showValidation(e.data.validation)}catch(e){console.error("Validation failed:",e)}},showValidation(t){if(!t||!this.elements.validationStatus)return;let e="";t.valid?e=`
+                    <div class="smg-validation-status valid smg-animate-fade-in">
+                        <span class="dashicons dashicons-yes-alt"></span>
+                        ${smgAdmin.strings.valid}
+                    </div>
+                `:e=`
+                    <div class="smg-validation-status invalid smg-animate-fade-in">
+                        <span class="dashicons dashicons-warning"></span>
+                        ${smgAdmin.strings.invalid}
+                        ${t.errors&&t.errors.length?`
+                            <ul>
+                                ${t.errors.map(n=>`<li>${n}</li>`).join("")}
+                            </ul>
+                        `:""}
+                    </div>
+                `,t.warnings&&t.warnings.length&&(e+=`
+                    <div class="smg-validation-warnings smg-animate-fade-in">
+                        <strong>Warnings:</strong>
+                        <ul>
+                            ${t.warnings.map(n=>`<li>${n}</li>`).join("")}
+                        </ul>
+                    </div>
+                `),this.elements.validationStatus.innerHTML=e},async handleCopySchema(t){t.preventDefault();let e=t.target.closest(".smg-copy-schema"),n=this.elements.schemaPreview?.textContent;if(n)try{await navigator.clipboard.writeText(n);let s=e.innerHTML;e.innerHTML='<span class="dashicons dashicons-yes"></span> '+smgAdmin.strings.copied,e.classList.add("smg-btn-success"),setTimeout(()=>{e.innerHTML=s,e.classList.remove("smg-btn-success")},2e3),this.showToast(smgAdmin.strings.copied,"success")}catch(s){console.error("Copy failed:",s),this.showToast("Failed to copy","error")}},handleGoogleTest(t){t.preventDefault();let n=document.getElementById("smg-test-url")?.value||window.location.origin,s=`https://search.google.com/test/rich-results?url=${encodeURIComponent(n)}`;window.open(s,"_blank","noopener,noreferrer")},handleSchemaValidator(t){t.preventDefault();let n=document.getElementById("smg-validate-url")?.value||window.location.origin,s=`https://validator.schema.org/?url=${encodeURIComponent(n)}`;window.open(s,"_blank","noopener,noreferrer")},handleFormSubmit(t){let e=this.elements.settingsForm.querySelector('[type="submit"]');e&&e.classList.add("loading")},handleApplySuggestion(t){t.preventDefault();let e=t.target.closest(".smg-apply-suggestion"),n=e.dataset.pageId,s=e.dataset.schema,a=document.querySelector(`select[name="smg_page_mappings[${n}]"]`);if(a&&s){a.value=s;let i=e.closest(".smg-page-row");i.style.transition="background-color 0.3s ease",i.style.backgroundColor="var(--smg-success-50)",setTimeout(()=>{i.style.backgroundColor=""},1e3);let r=e.closest(".smg-col-suggestion");r.innerHTML=`
+                    <span class="smg-suggestion-applied">
+                        <span class="dashicons dashicons-yes-alt"></span>
+                    </span>
+                `,a.dispatchEvent(new Event("change",{bubbles:!0}))}},handlePaginationInput(t){t.preventDefault();let e=t.target,n=e.dataset.baseUrl,s=parseInt(e.value,10),a=parseInt(e.max,10);s&&s>=1&&s<=a&&n&&(window.location.href=`${n}&paged=${s}`)},animateToggle(t){let e=t.closest(".smg-toggle");e&&(e.style.transform="scale(0.95)",setTimeout(()=>{e.style.transform="scale(1)"},100))},initTooltips(){},initCollapsibles(){document.querySelectorAll(".smg-meta-box-panel-header").forEach(t=>{t.addEventListener("click",()=>{t.closest(".smg-meta-box-panel").classList.toggle("collapsed")})})},slideUp(t){t.style.height=t.scrollHeight+"px",t.offsetHeight,t.style.transition=`height ${this.config.animationDuration}ms ease`,t.style.height="0",t.style.overflow="hidden",setTimeout(()=>{t.style.display="none",t.style.height="",t.style.overflow="",t.style.transition=""},this.config.animationDuration)},slideDown(t){t.style.display="block",t.style.height="0",t.style.overflow="hidden",t.offsetHeight;let e=t.scrollHeight;t.style.transition=`height ${this.config.animationDuration}ms ease`,t.style.height=e+"px",setTimeout(()=>{t.style.height="",t.style.overflow="",t.style.transition=""},this.config.animationDuration)},showToast(t,e="info"){let n=document.createElement("div");n.className=`smg-toast smg-toast-${e} smg-animate-slide-in-right`,n.innerHTML=`
+                <span class="dashicons dashicons-${e==="success"?"yes-alt":e==="error"?"warning":"info"}"></span>
+                ${t}
+            `;let s=document.querySelector(".smg-toast-container");s||(s=document.createElement("div"),s.className="smg-toast-container",s.style.cssText="position: fixed; top: 50px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;",document.body.appendChild(s)),s.appendChild(n),setTimeout(()=>{n.style.opacity="0",n.style.transform="translateX(20px)",setTimeout(()=>n.remove(),300)},this.config.toastDuration)},debounce(t,e){let n;return function(...a){let i=()=>{clearTimeout(n),t(...a)};clearTimeout(n),n=setTimeout(i,e)}}};document.readyState==="loading"?document.addEventListener("DOMContentLoaded",()=>o.init()):o.init(),window.SMGAdmin=o})();})();

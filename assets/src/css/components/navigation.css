@@ -1,0 +1,97 @@
+/**
+ * Tab Navigation
+ */
+
+.smg-tabs-nav {
+  display: flex;
+  gap: var(--smg-space-1);
+  margin-bottom: var(--smg-space-6);
+  padding: var(--smg-space-1);
+  background: var(--smg-surface-100);
+  border-radius: var(--smg-radius-lg);
+  overflow-x: auto;
+}
+
+.smg-tab-link {
+  display: flex;
+  align-items: center;
+  gap: var(--smg-space-2);
+  padding: var(--smg-space-3) var(--smg-space-5);
+  color: var(--smg-text-secondary);
+  font-size: var(--smg-text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: var(--smg-radius);
+  transition: all var(--smg-transition);
+  white-space: nowrap;
+  position: relative;
+}
+
+.smg-tab-link:hover {
+  color: var(--smg-text);
+  background: var(--smg-bg-elevated);
+}
+
+.smg-tab-link.active {
+  color: var(--smg-primary);
+  background: var(--smg-bg-elevated);
+  box-shadow: var(--smg-shadow-sm);
+}
+
+.smg-tab-link .dashicons {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  transition: transform var(--smg-transition);
+}
+
+.smg-tab-link:hover .dashicons {
+  transform: scale(1.1);
+}
+
+.smg-tab-link.active .dashicons {
+  color: var(--smg-primary);
+}
+
+/* Tab Content */
+.smg-tab-content {
+  background: var(--smg-bg-elevated);
+  border-radius: var(--smg-radius-xl);
+  box-shadow: var(--smg-shadow);
+  padding: var(--smg-space-8);
+  border: 1px solid var(--smg-border);
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.smg-tab-panel {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Inline Navigation */
+.smg-inline-nav {
+  display: flex;
+  gap: var(--smg-space-4);
+  padding-bottom: var(--smg-space-4);
+  border-bottom: 1px solid var(--smg-border);
+  margin-bottom: var(--smg-space-6);
+}
+
+.smg-inline-nav a {
+  font-size: var(--smg-text-sm);
+  font-weight: 500;
+  color: var(--smg-text-secondary);
+  padding-bottom: var(--smg-space-4);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all var(--smg-transition);
+}
+
+.smg-inline-nav a:hover {
+  color: var(--smg-text);
+}
+
+.smg-inline-nav a.active {
+  color: var(--smg-primary);
+  border-bottom-color: var(--smg-primary);
+}
+

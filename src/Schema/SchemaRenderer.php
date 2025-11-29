@@ -83,11 +83,17 @@ class SchemaRenderer
         $schemas = [];
         $mappings = get_option('smg_post_type_mappings', []);
         $fieldMappings = get_option('smg_field_mappings', []);
+        $pageMappings = get_option('smg_page_mappings', []);
 
         // Get schema type for this post type
         $schemaType = $mappings[$post->post_type] ?? null;
 
-        // Check for per-post override
+        // Check for page-specific mapping (for pages)
+        if ($post->post_type === 'page' && isset($pageMappings[$post->ID])) {
+            $schemaType = $pageMappings[$post->ID];
+        }
+
+        // Check for per-post override (highest priority)
         $postSchemaType = get_post_meta($post->ID, '_smg_schema_type', true);
         if ($postSchemaType) {
             $schemaType = $postSchemaType;

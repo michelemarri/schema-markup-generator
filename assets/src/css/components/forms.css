@@ -1,0 +1,305 @@
+/**
+ * Form Elements
+ */
+
+.smg-field {
+  margin-bottom: var(--smg-space-6);
+}
+
+.smg-field:last-child {
+  margin-bottom: 0;
+}
+
+.smg-field-label {
+  display: block;
+  font-size: var(--smg-text-sm);
+  font-weight: 600;
+  color: var(--smg-text);
+  margin-bottom: var(--smg-space-2);
+}
+
+.smg-field-label.required::after {
+  content: '*';
+  color: var(--smg-error);
+  margin-left: var(--smg-space-1);
+}
+
+.smg-field-description {
+  display: block;
+  font-size: var(--smg-text-sm);
+  color: var(--smg-text-secondary);
+  margin-top: var(--smg-space-2);
+  line-height: 1.5;
+}
+
+/* Text Input */
+.smg-input {
+  width: 100%;
+  max-width: 420px;
+  padding: var(--smg-space-3) var(--smg-space-4);
+  font-size: var(--smg-text-sm);
+  font-family: inherit;
+  color: var(--smg-text);
+  background: var(--smg-bg-elevated);
+  border: 1px solid var(--smg-border);
+  border-radius: var(--smg-radius);
+  transition: all var(--smg-transition);
+}
+
+.smg-input:hover {
+  border-color: var(--smg-border-hover);
+}
+
+.smg-input:focus {
+  border-color: var(--smg-primary);
+  box-shadow: 0 0 0 3px var(--smg-primary-100);
+  outline: none;
+}
+
+.smg-input::placeholder {
+  color: var(--smg-text-muted);
+}
+
+.smg-input:disabled {
+  background: var(--smg-surface-100);
+  color: var(--smg-text-muted);
+  cursor: not-allowed;
+}
+
+.smg-input-number {
+  max-width: 160px;
+}
+
+.smg-input-lg {
+  padding: var(--smg-space-4) var(--smg-space-5);
+  font-size: var(--smg-text-base);
+}
+
+/* Select */
+.smg-select {
+  width: 100%;
+  max-width: 420px;
+  padding: var(--smg-space-3) var(--smg-space-4);
+  padding-right: var(--smg-space-10);
+  font-size: var(--smg-text-sm);
+  font-family: inherit;
+  color: var(--smg-text);
+  background: var(--smg-bg-elevated);
+  border: 1px solid var(--smg-border);
+  border-radius: var(--smg-radius);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  transition: all var(--smg-transition);
+}
+
+.smg-select:hover {
+  border-color: var(--smg-border-hover);
+}
+
+.smg-select:focus {
+  border-color: var(--smg-primary);
+  box-shadow: 0 0 0 3px var(--smg-primary-100);
+  outline: none;
+}
+
+.smg-schema-select,
+.smg-field-select {
+  width: 100%;
+  min-width: 200px;
+}
+
+/* Textarea */
+.smg-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: var(--smg-space-3) var(--smg-space-4);
+  font-size: var(--smg-text-sm);
+  font-family: inherit;
+  color: var(--smg-text);
+  background: var(--smg-bg-elevated);
+  border: 1px solid var(--smg-border);
+  border-radius: var(--smg-radius);
+  resize: vertical;
+  transition: all var(--smg-transition);
+}
+
+.smg-textarea:focus {
+  border-color: var(--smg-primary);
+  box-shadow: 0 0 0 3px var(--smg-primary-100);
+  outline: none;
+}
+
+/* Checkbox */
+.smg-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--smg-space-3);
+  cursor: pointer;
+  font-size: var(--smg-text-sm);
+  color: var(--smg-text);
+  user-select: none;
+}
+
+.smg-checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--smg-primary);
+  cursor: pointer;
+  border-radius: var(--smg-radius-sm);
+}
+
+.smg-checkboxes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--smg-space-3);
+}
+
+.smg-checkboxes-grid .smg-checkbox-label {
+  padding: var(--smg-space-3) var(--smg-space-4);
+  background: var(--smg-surface-50);
+  border-radius: var(--smg-radius);
+  border: 1px solid transparent;
+  transition: all var(--smg-transition);
+}
+
+.smg-checkboxes-grid .smg-checkbox-label:hover {
+  background: var(--smg-surface-100);
+  border-color: var(--smg-border);
+}
+
+/* Field Toggle Layout */
+.smg-field-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--smg-space-4);
+}
+
+.smg-field-content {
+  flex: 1;
+}
+
+.smg-field-content .smg-field-label {
+  margin-bottom: var(--smg-space-1);
+}
+
+/* File Input */
+.smg-file-input {
+  position: relative;
+}
+
+.smg-file-input input[type="file"] {
+  width: 100%;
+  padding: var(--smg-space-4);
+  font-size: var(--smg-text-sm);
+  color: var(--smg-text-secondary);
+  background: var(--smg-surface-50);
+  border: 2px dashed var(--smg-surface-300);
+  border-radius: var(--smg-radius-lg);
+  cursor: pointer;
+  transition: all var(--smg-transition);
+}
+
+.smg-file-input input[type="file"]:hover {
+  border-color: var(--smg-primary-300);
+  background: var(--smg-primary-50);
+}
+
+.smg-file-input input[type="file"]:focus {
+  outline: none;
+  border-color: var(--smg-primary-400);
+  background: var(--smg-primary-50);
+  box-shadow: 0 0 0 3px var(--smg-primary-100);
+}
+
+/* URL Test */
+.smg-url-test {
+  display: flex;
+  gap: var(--smg-space-3);
+}
+
+.smg-url-test input {
+  flex: 1;
+}
+
+/* Form Actions */
+.smg-form-actions {
+  display: flex;
+  gap: var(--smg-space-3);
+  margin-top: var(--smg-space-6);
+}
+
+/* Export/Import Forms */
+.smg-export-form,
+.smg-import-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--smg-space-5);
+}
+
+.smg-export-form p,
+.smg-import-form p {
+  color: var(--smg-text-secondary);
+  font-size: var(--smg-text-sm);
+  line-height: 1.5;
+  margin: 0 0 var(--smg-space-2) 0;
+}
+
+.smg-export-form .smg-checkbox,
+.smg-import-form .smg-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--smg-space-3);
+  padding: var(--smg-space-3) var(--smg-space-4);
+  background: var(--smg-surface-50);
+  border: 1px solid var(--smg-border);
+  border-radius: var(--smg-radius);
+  font-size: var(--smg-text-sm);
+  color: var(--smg-text);
+  cursor: pointer;
+  transition: all var(--smg-transition-fast);
+}
+
+.smg-export-form .smg-checkbox:hover,
+.smg-import-form .smg-checkbox:hover {
+  background: var(--smg-surface-100);
+  border-color: var(--smg-border-hover);
+}
+
+.smg-export-form .smg-checkbox input[type="checkbox"],
+.smg-import-form .smg-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--smg-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.smg-export-form .button,
+.smg-import-form .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--smg-space-2);
+  margin-top: var(--smg-space-2);
+  width: 100%;
+}
+
+.smg-export-form .button .dashicons,
+.smg-import-form .button .dashicons {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/* Cache Actions */
+.smg-cache-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--smg-space-4);
+}
+

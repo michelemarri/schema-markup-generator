@@ -17,14 +17,45 @@ use WP_Post;
  */
 class WebPageSchema extends AbstractSchema
 {
+    /**
+     * The specific page type (can be overridden)
+     */
+    private string $specificType = 'WebPage';
+
+    /**
+     * Page type labels
+     */
+    private const TYPE_LABELS = [
+        'WebPage' => 'Web Page',
+        'AboutPage' => 'About Page',
+        'ContactPage' => 'Contact Page',
+        'FAQPage' => 'FAQ Page',
+        'CollectionPage' => 'Collection Page',
+        'ItemPage' => 'Item Page',
+        'CheckoutPage' => 'Checkout Page',
+        'SearchResultsPage' => 'Search Results Page',
+        'ProfilePage' => 'Profile Page',
+        'QAPage' => 'Q&A Page',
+        'RealEstateListing' => 'Real Estate Listing',
+        'MedicalWebPage' => 'Medical Web Page',
+    ];
+
     public function getType(): string
     {
-        return 'WebPage';
+        return $this->specificType;
+    }
+
+    /**
+     * Set the specific page type
+     */
+    public function setType(string $type): void
+    {
+        $this->specificType = $type;
     }
 
     public function getLabel(): string
     {
-        return __('Web Page', 'schema-markup-generator');
+        return __(self::TYPE_LABELS[$this->specificType] ?? 'Web Page', 'schema-markup-generator');
     }
 
     public function getDescription(): string
@@ -68,13 +99,18 @@ class WebPageSchema extends AbstractSchema
             '@id' => $this->getPostUrl($post) . '#breadcrumb',
         ];
 
-        // Special page types
-        $pageType = $this->getMappedValue($post, $mapping, 'pageType');
-        if ($pageType) {
-            $data['@type'] = $pageType;
+        // Use the specific type set, or auto-detect if it's generic WebPage
+        if ($this->specificType !== 'WebPage') {
+            $data['@type'] = $this->specificType;
         } else {
-            // Auto-detect special pages
-            $data['@type'] = $this->detectPageType($post);
+            // Check for manual override via mapping
+            $pageType = $this->getMappedValue($post, $mapping, 'pageType');
+            if ($pageType) {
+                $data['@type'] = $pageType;
+            } else {
+                // Auto-detect special pages
+                $data['@type'] = $this->detectPageType($post);
+            }
         }
 
         /**

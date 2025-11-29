@@ -1,0 +1,236 @@
+/**
+ * Button Components
+ */
+
+/* Base Button */
+.smg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--smg-space-2);
+  padding: var(--smg-space-3) var(--smg-space-5);
+  font-family: inherit;
+  font-size: var(--smg-text-sm);
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--smg-radius);
+  cursor: pointer;
+  transition: all var(--smg-transition);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.smg-btn:focus-visible {
+  outline: 2px solid var(--smg-primary);
+  outline-offset: 2px;
+}
+
+.smg-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.smg-btn .dashicons {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/* Primary Button */
+.smg-btn-primary {
+  color: #fff;
+  background: linear-gradient(135deg, var(--smg-primary-600), var(--smg-primary-700));
+  border-color: var(--smg-primary-700);
+  box-shadow: var(--smg-shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.smg-btn-primary:hover {
+  background: linear-gradient(135deg, var(--smg-primary-700), var(--smg-primary-800));
+  box-shadow: var(--smg-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.smg-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--smg-shadow-xs);
+}
+
+/* Secondary Button */
+.smg-btn-secondary {
+  color: var(--smg-text);
+  background: var(--smg-bg-elevated);
+  border-color: var(--smg-border);
+  box-shadow: var(--smg-shadow-xs);
+}
+
+.smg-btn-secondary:hover {
+  background: var(--smg-surface-50);
+  border-color: var(--smg-border-hover);
+  box-shadow: var(--smg-shadow-sm);
+}
+
+/* Ghost Button */
+.smg-btn-ghost {
+  color: var(--smg-text-secondary);
+  background: transparent;
+  border-color: transparent;
+}
+
+.smg-btn-ghost:hover {
+  color: var(--smg-text);
+  background: var(--smg-surface-100);
+}
+
+/* Accent Button */
+.smg-btn-accent {
+  color: #fff;
+  background: linear-gradient(135deg, var(--smg-accent-500), var(--smg-accent-600));
+  border-color: var(--smg-accent-600);
+}
+
+.smg-btn-accent:hover {
+  background: linear-gradient(135deg, var(--smg-accent-600), var(--smg-accent-700));
+}
+
+/* Success Button */
+.smg-btn-success {
+  color: #fff;
+  background: linear-gradient(135deg, var(--smg-success-500), var(--smg-success-600));
+  border-color: var(--smg-success-600);
+}
+
+.smg-btn-success:hover {
+  background: linear-gradient(135deg, var(--smg-success-600), var(--smg-success-700));
+}
+
+/* Danger Button */
+.smg-btn-danger {
+  color: #fff;
+  background: linear-gradient(135deg, var(--smg-error-500), var(--smg-error-600));
+  border-color: var(--smg-error-600);
+}
+
+.smg-btn-danger:hover {
+  background: linear-gradient(135deg, var(--smg-error-600), var(--smg-error-700));
+}
+
+/* Link Button */
+.smg-btn-link {
+  color: var(--smg-primary);
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.smg-btn-link:hover {
+  color: var(--smg-primary-hover);
+  text-decoration: underline;
+}
+
+/* Button Sizes */
+.smg-btn-sm {
+  padding: var(--smg-space-2) var(--smg-space-3);
+  font-size: var(--smg-text-xs);
+}
+
+.smg-btn-sm .dashicons {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.smg-btn-lg {
+  padding: var(--smg-space-4) var(--smg-space-6);
+  font-size: var(--smg-text-base);
+}
+
+/* Icon Only Button */
+.smg-btn-icon {
+  padding: var(--smg-space-2);
+  min-width: 36px;
+  min-height: 36px;
+}
+
+.smg-btn-icon.smg-btn-sm {
+  min-width: 28px;
+  min-height: 28px;
+  padding: var(--smg-space-1);
+}
+
+/* Button Group */
+.smg-btn-group {
+  display: inline-flex;
+}
+
+.smg-btn-group .smg-btn {
+  border-radius: 0;
+}
+
+.smg-btn-group .smg-btn:first-child {
+  border-radius: var(--smg-radius) 0 0 var(--smg-radius);
+}
+
+.smg-btn-group .smg-btn:last-child {
+  border-radius: 0 var(--smg-radius) var(--smg-radius) 0;
+}
+
+.smg-btn-group .smg-btn:not(:last-child) {
+  border-right-width: 0;
+}
+
+/* Loading State */
+.smg-btn.loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.smg-btn.loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+.smg-btn-primary.loading::after {
+  border-color: rgba(255, 255, 255, 0.3);
+  border-right-color: transparent;
+}
+
+/* WordPress Admin Button Override */
+.smg-settings-wrap .button.button-primary {
+  background: linear-gradient(135deg, var(--smg-primary-600), var(--smg-primary-700)) !important;
+  border-color: var(--smg-primary-700) !important;
+  box-shadow: var(--smg-shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  border-radius: var(--smg-radius) !important;
+  padding: var(--smg-space-3) var(--smg-space-5) !important;
+  height: auto !important;
+  font-weight: 500 !important;
+  transition: all var(--smg-transition) !important;
+}
+
+.smg-settings-wrap .button.button-primary:hover {
+  background: linear-gradient(135deg, var(--smg-primary-700), var(--smg-primary-800)) !important;
+  box-shadow: var(--smg-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-1px);
+}
+
+.smg-settings-wrap .button:not(.button-primary) {
+  background: var(--smg-bg-elevated) !important;
+  border-color: var(--smg-border) !important;
+  border-radius: var(--smg-radius) !important;
+  box-shadow: var(--smg-shadow-xs) !important;
+  transition: all var(--smg-transition) !important;
+}
+
+.smg-settings-wrap .button:not(.button-primary):hover {
+  background: var(--smg-surface-50) !important;
+  border-color: var(--smg-border-hover) !important;
+}
+

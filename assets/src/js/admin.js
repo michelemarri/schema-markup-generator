@@ -1,0 +1,594 @@
+/**
+ * Schema Markup Generator - Admin JavaScript
+ *
+ * Modern ES6+ implementation with smooth animations and better UX.
+ *
+ * @package flavor\SchemaMarkupGenerator
+ * @author  Michele Marri <info@metodo.dev>
+ */
+
+(function() {
+    'use strict';
+
+    /**
+     * SMGAdmin - Main admin module
+     */
+    const SMGAdmin = {
+        /**
+         * Configuration
+         */
+        config: {
+            animationDuration: 200,
+            toastDuration: 3000,
+            debounceDelay: 300,
+        },
+
+        /**
+         * DOM elements cache
+         */
+        elements: {},
+
+        /**
+         * Initialize the module
+         */
+        init() {
+            this.cacheElements();
+            this.bindEvents();
+            this.initComponents();
+            this.initAnimations();
+        },
+
+        /**
+         * Cache frequently used DOM elements
+         */
+        cacheElements() {
+            this.elements = {
+                settingsForm: document.getElementById('smg-settings-form'),
+                tabsNav: document.querySelector('.smg-tabs-nav'),
+                tabContent: document.querySelector('.smg-tab-content'),
+                schemaPreview: document.getElementById('smg-schema-preview'),
+                validationStatus: document.getElementById('smg-validation-status'),
+            };
+        },
+
+        /**
+         * Bind event handlers
+         */
+        bindEvents() {
+            // Toggle field mappings
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.smg-toggle-fields')) {
+                    this.handleToggleFields(e);
+                }
+            });
+
+            // Schema type change
+            document.addEventListener('change', (e) => {
+                if (e.target.classList.contains('smg-schema-select')) {
+                    this.handleSchemaTypeChange(e);
+                }
+            });
+
+            // Refresh preview
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.smg-refresh-preview')) {
+                    this.handleRefreshPreview(e);
+                }
+            });
+
+            // Copy schema
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.smg-copy-schema')) {
+                    this.handleCopySchema(e);
+                }
+            });
+
+            // Google test
+            document.addEventListener('click', (e) => {
+                if (e.target.id === 'smg-test-google' || e.target.closest('#smg-test-google')) {
+                    this.handleGoogleTest(e);
+                }
+            });
+
+            // Schema validator
+            document.addEventListener('click', (e) => {
+                if (e.target.id === 'smg-validate-schema' || e.target.closest('#smg-validate-schema')) {
+                    this.handleSchemaValidator(e);
+                }
+            });
+
+            // Form submit animation
+            if (this.elements.settingsForm) {
+                this.elements.settingsForm.addEventListener('submit', (e) => {
+                    this.handleFormSubmit(e);
+                });
+            }
+
+            // Toggle switch animation
+            document.addEventListener('change', (e) => {
+                if (e.target.closest('.smg-toggle input')) {
+                    this.animateToggle(e.target);
+                }
+            });
+
+            // Pages tab: Apply suggestion
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.smg-apply-suggestion')) {
+                    this.handleApplySuggestion(e);
+                }
+            });
+
+            // Pages tab: Pagination input
+            document.addEventListener('keypress', (e) => {
+                if (e.target.classList.contains('smg-pagination-input') && e.key === 'Enter') {
+                    this.handlePaginationInput(e);
+                }
+            });
+
+            // Pages tab: Pagination input blur
+            document.addEventListener('change', (e) => {
+                if (e.target.classList.contains('smg-pagination-input')) {
+                    this.handlePaginationInput(e);
+                }
+            });
+        },
+
+        /**
+         * Initialize UI components
+         */
+        initComponents() {
+            this.initPreview();
+            this.initTooltips();
+            this.initCollapsibles();
+        },
+
+        /**
+         * Initialize staggered animations for list items
+         */
+        initAnimations() {
+            // Animate cards on page load
+            const cards = document.querySelectorAll('.smg-card, .smg-post-type-card, .smg-integration-card, .smg-step');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(10px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 50 * index);
+            });
+
+            // Animate schema items
+            const schemaItems = document.querySelectorAll('.smg-schema-item');
+            schemaItems.forEach((item, index) => {
+                item.style.opacity = '0';
+                
+                setTimeout(() => {
+                    item.style.transition = 'opacity 0.3s ease';
+                    item.style.opacity = '1';
+                }, 30 * index);
+            });
+
+            // Animate page rows in Pages tab
+            const pageRows = document.querySelectorAll('.smg-page-row');
+            pageRows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(-10px)';
+                
+                setTimeout(() => {
+                    row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateX(0)';
+                }, 30 * index);
+            });
+        },
+
+        /**
+         * Handle toggle fields button click
+         */
+        handleToggleFields(e) {
+            e.preventDefault();
+            const button = e.target.closest('.smg-toggle-fields');
+            const card = button.closest('.smg-post-type-card');
+            const fields = card.querySelector('.smg-post-type-fields');
+            const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+            button.setAttribute('aria-expanded', !isExpanded);
+            
+            if (isExpanded) {
+                this.slideUp(fields);
+            } else {
+                this.slideDown(fields);
+            }
+        },
+
+        /**
+         * Handle schema type change
+         */
+        handleSchemaTypeChange(e) {
+            const select = e.target;
+            const postType = select.dataset.postType;
+            const schemaType = select.value;
+            const card = select.closest('.smg-post-type-card');
+            
+            // Add visual feedback
+            card.style.transition = 'border-color 0.3s ease';
+            card.style.borderColor = 'var(--smg-primary-300)';
+            
+            setTimeout(() => {
+                card.style.borderColor = '';
+            }, 1000);
+
+            // Could trigger AJAX update here for field mappings
+            console.log(`Schema type changed for ${postType}: ${schemaType}`);
+        },
+
+        /**
+         * Initialize preview functionality
+         */
+        initPreview() {
+            if (this.elements.schemaPreview && typeof smgAdmin !== 'undefined') {
+                this.validateCurrentSchema();
+            }
+        },
+
+        /**
+         * Handle refresh preview
+         */
+        async handleRefreshPreview(e) {
+            e.preventDefault();
+            const button = e.target.closest('.smg-refresh-preview');
+            const postIdInput = document.querySelector('input[name="smg_post_id"]');
+            
+            if (!postIdInput) return;
+            
+            const postId = postIdInput.value;
+            
+            // Add loading state
+            button.disabled = true;
+            button.classList.add('loading');
+            this.elements.schemaPreview.style.opacity = '0.5';
+
+            try {
+                const response = await this.fetchPreview(postId);
+                
+                if (response.success) {
+                    this.elements.schemaPreview.textContent = response.data.json;
+                    this.showValidation(response.data.validation);
+                    
+                    // Flash animation
+                    this.elements.schemaPreview.style.transition = 'opacity 0.3s ease';
+                    this.elements.schemaPreview.style.opacity = '1';
+                }
+            } catch (error) {
+                console.error('Preview refresh failed:', error);
+                this.showToast('Failed to refresh preview', 'error');
+            } finally {
+                button.disabled = false;
+                button.classList.remove('loading');
+            }
+        },
+
+        /**
+         * Fetch preview via AJAX
+         */
+        fetchPreview(postId) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('action', 'smg_preview_schema');
+                formData.append('nonce', smgAdmin.nonce);
+                formData.append('post_id', postId);
+
+                fetch(smgAdmin.ajaxUrl, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                })
+                .then(response => response.json())
+                .then(data => resolve(data))
+                .catch(error => reject(error));
+            });
+        },
+
+        /**
+         * Validate current schema
+         */
+        async validateCurrentSchema() {
+            const postIdInput = document.querySelector('input[name="smg_post_id"]');
+            
+            if (!postIdInput || !this.elements.schemaPreview) return;
+            
+            try {
+                const response = await this.fetchPreview(postIdInput.value);
+                
+                if (response.success && response.data.validation) {
+                    this.showValidation(response.data.validation);
+                }
+            } catch (error) {
+                console.error('Validation failed:', error);
+            }
+        },
+
+        /**
+         * Show validation status
+         */
+        showValidation(validation) {
+            if (!validation || !this.elements.validationStatus) return;
+
+            let html = '';
+
+            if (validation.valid) {
+                html = `
+                    <div class="smg-validation-status valid smg-animate-fade-in">
+                        <span class="dashicons dashicons-yes-alt"></span>
+                        ${smgAdmin.strings.valid}
+                    </div>
+                `;
+            } else {
+                html = `
+                    <div class="smg-validation-status invalid smg-animate-fade-in">
+                        <span class="dashicons dashicons-warning"></span>
+                        ${smgAdmin.strings.invalid}
+                        ${validation.errors && validation.errors.length ? `
+                            <ul>
+                                ${validation.errors.map(error => `<li>${error}</li>`).join('')}
+                            </ul>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            if (validation.warnings && validation.warnings.length) {
+                html += `
+                    <div class="smg-validation-warnings smg-animate-fade-in">
+                        <strong>Warnings:</strong>
+                        <ul>
+                            ${validation.warnings.map(warning => `<li>${warning}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            this.elements.validationStatus.innerHTML = html;
+        },
+
+        /**
+         * Handle copy schema
+         */
+        async handleCopySchema(e) {
+            e.preventDefault();
+            const button = e.target.closest('.smg-copy-schema');
+            const schema = this.elements.schemaPreview?.textContent;
+
+            if (!schema) return;
+
+            try {
+                await navigator.clipboard.writeText(schema);
+                
+                // Visual feedback
+                const originalHtml = button.innerHTML;
+                button.innerHTML = '<span class="dashicons dashicons-yes"></span> ' + smgAdmin.strings.copied;
+                button.classList.add('smg-btn-success');
+
+                setTimeout(() => {
+                    button.innerHTML = originalHtml;
+                    button.classList.remove('smg-btn-success');
+                }, 2000);
+
+                this.showToast(smgAdmin.strings.copied, 'success');
+            } catch (error) {
+                console.error('Copy failed:', error);
+                this.showToast('Failed to copy', 'error');
+            }
+        },
+
+        /**
+         * Handle Google test
+         */
+        handleGoogleTest(e) {
+            e.preventDefault();
+            const urlInput = document.getElementById('smg-test-url');
+            const url = urlInput?.value || window.location.origin;
+            const testUrl = `https://search.google.com/test/rich-results?url=${encodeURIComponent(url)}`;
+            window.open(testUrl, '_blank', 'noopener,noreferrer');
+        },
+
+        /**
+         * Handle Schema validator
+         */
+        handleSchemaValidator(e) {
+            e.preventDefault();
+            const urlInput = document.getElementById('smg-validate-url');
+            const url = urlInput?.value || window.location.origin;
+            const testUrl = `https://validator.schema.org/?url=${encodeURIComponent(url)}`;
+            window.open(testUrl, '_blank', 'noopener,noreferrer');
+        },
+
+        /**
+         * Handle form submit
+         */
+        handleFormSubmit(e) {
+            const submitBtn = this.elements.settingsForm.querySelector('[type="submit"]');
+            if (submitBtn) {
+                submitBtn.classList.add('loading');
+            }
+        },
+
+        /**
+         * Handle apply suggestion button click (Pages tab)
+         */
+        handleApplySuggestion(e) {
+            e.preventDefault();
+            const button = e.target.closest('.smg-apply-suggestion');
+            const pageId = button.dataset.pageId;
+            const schema = button.dataset.schema;
+            const select = document.querySelector(`select[name="smg_page_mappings[${pageId}]"]`);
+            
+            if (select && schema) {
+                select.value = schema;
+                
+                // Visual feedback
+                const row = button.closest('.smg-page-row');
+                row.style.transition = 'background-color 0.3s ease';
+                row.style.backgroundColor = 'var(--smg-success-50)';
+                
+                setTimeout(() => {
+                    row.style.backgroundColor = '';
+                }, 1000);
+                
+                // Replace button with check mark
+                const cell = button.closest('.smg-col-suggestion');
+                cell.innerHTML = `
+                    <span class="smg-suggestion-applied">
+                        <span class="dashicons dashicons-yes-alt"></span>
+                    </span>
+                `;
+                
+                // Trigger change event for any listeners
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        },
+
+        /**
+         * Handle pagination input (Pages tab)
+         */
+        handlePaginationInput(e) {
+            e.preventDefault();
+            const input = e.target;
+            const baseUrl = input.dataset.baseUrl;
+            const page = parseInt(input.value, 10);
+            const max = parseInt(input.max, 10);
+            
+            if (page && page >= 1 && page <= max && baseUrl) {
+                window.location.href = `${baseUrl}&paged=${page}`;
+            }
+        },
+
+        /**
+         * Animate toggle switch
+         */
+        animateToggle(input) {
+            const toggle = input.closest('.smg-toggle');
+            if (toggle) {
+                toggle.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    toggle.style.transform = 'scale(1)';
+                }, 100);
+            }
+        },
+
+        /**
+         * Initialize tooltips
+         */
+        initTooltips() {
+            // Could implement custom tooltips here
+        },
+
+        /**
+         * Initialize collapsible panels
+         */
+        initCollapsibles() {
+            document.querySelectorAll('.smg-meta-box-panel-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const panel = header.closest('.smg-meta-box-panel');
+                    panel.classList.toggle('collapsed');
+                });
+            });
+        },
+
+        /**
+         * Slide up animation
+         */
+        slideUp(element) {
+            element.style.height = element.scrollHeight + 'px';
+            element.offsetHeight; // Force reflow
+            element.style.transition = `height ${this.config.animationDuration}ms ease`;
+            element.style.height = '0';
+            element.style.overflow = 'hidden';
+            
+            setTimeout(() => {
+                element.style.display = 'none';
+                element.style.height = '';
+                element.style.overflow = '';
+                element.style.transition = '';
+            }, this.config.animationDuration);
+        },
+
+        /**
+         * Slide down animation
+         */
+        slideDown(element) {
+            element.style.display = 'block';
+            element.style.height = '0';
+            element.style.overflow = 'hidden';
+            element.offsetHeight; // Force reflow
+            
+            const height = element.scrollHeight;
+            element.style.transition = `height ${this.config.animationDuration}ms ease`;
+            element.style.height = height + 'px';
+            
+            setTimeout(() => {
+                element.style.height = '';
+                element.style.overflow = '';
+                element.style.transition = '';
+            }, this.config.animationDuration);
+        },
+
+        /**
+         * Show toast notification
+         */
+        showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `smg-toast smg-toast-${type} smg-animate-slide-in-right`;
+            toast.innerHTML = `
+                <span class="dashicons dashicons-${type === 'success' ? 'yes-alt' : type === 'error' ? 'warning' : 'info'}"></span>
+                ${message}
+            `;
+
+            // Create container if doesn't exist
+            let container = document.querySelector('.smg-toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.className = 'smg-toast-container';
+                container.style.cssText = 'position: fixed; top: 50px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;';
+                document.body.appendChild(container);
+            }
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, this.config.toastDuration);
+        },
+
+        /**
+         * Debounce utility
+         */
+        debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        },
+    };
+
+    // Initialize on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => SMGAdmin.init());
+    } else {
+        SMGAdmin.init();
+    }
+
+    // Expose for external use if needed
+    window.SMGAdmin = SMGAdmin;
+
+})();
+

@@ -142,6 +142,7 @@ GET /wp-json/smg/v1/settings
 schema-markup-generator/
 ├── src/
 │   ├── Admin/           # Admin UI components
+│   │   └── Tabs/        # Settings page tabs
 │   ├── Cache/           # Caching layer
 │   ├── Discovery/       # Post type/field discovery
 │   ├── Integration/     # Third-party integrations
@@ -149,25 +150,64 @@ schema-markup-generator/
 │   ├── Mapper/          # Field mapping
 │   ├── Rest/            # REST API
 │   ├── Schema/          # Schema types and rendering
+│   │   └── Types/       # Schema type implementations
 │   ├── Tools/           # Import/Export
 │   ├── Updater/         # GitHub auto-updates
 │   └── Plugin.php       # Main plugin class
 ├── assets/
-│   ├── css/             # Admin styles
-│   └── js/              # Admin scripts
+│   ├── src/             # Source files
+│   │   ├── css/         # Tailwind CSS source
+│   │   │   └── components/  # Design system components
+│   │   └── js/          # ES6+ JavaScript source
+│   ├── css/             # Compiled CSS
+│   └── js/              # Compiled JavaScript
 ├── docs/                # Documentation
-└── vendor/              # Composer dependencies
+├── vendor/              # Composer dependencies
+├── package.json         # Node.js dependencies
+├── tailwind.config.js   # Tailwind configuration
+└── postcss.config.js    # PostCSS configuration
 ```
 
 ### Building
 
 ```bash
-# Install dependencies
+# Install PHP dependencies
 composer install
+
+# Install Node.js dependencies (for CSS/JS build)
+npm install
+
+# Build CSS and JS assets
+npm run build
+
+# Watch for changes during development
+npm run watch
 
 # For production (no dev dependencies)
 composer install --no-dev --optimize-autoloader
+npm run build
 ```
+
+### Asset Build System
+
+The plugin uses **Tailwind CSS** with a modern build system:
+
+- `assets/src/css/` - Source CSS files with Tailwind utilities
+- `assets/src/js/` - Source JavaScript (ES6+)
+- `assets/css/` - Compiled CSS (do not edit directly)
+- `assets/js/` - Compiled JavaScript (do not edit directly)
+
+**Design System:**
+
+The plugin includes a micro design system with:
+- Custom color tokens (primary, accent, success, warning, error)
+- Typography scale
+- Spacing system
+- Shadow and radius utilities
+- Animation library
+- Responsive breakpoints
+
+All tokens are defined in `assets/src/css/components/tokens.css` and synced with `tailwind.config.js`.
 
 ### Creating a Release
 

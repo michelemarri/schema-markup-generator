@@ -183,27 +183,45 @@ class Plugin
 
     /**
      * Enqueue admin assets
+     * 
+     * Assets are loaded only on plugin pages (settings page and configured post types)
+     * to avoid impacting other admin pages.
      */
     public function enqueueAdminAssets(string $hook): void
     {
-        // Only load on our settings page and post edit screens
-        $screens = ['settings_page_schema-markup-generator', 'post.php', 'post-new.php'];
-
-        if (!in_array($hook, $screens, true)) {
+        // Check if we're on the settings page
+        $isSettingsPage = $hook === 'settings_page_schema-markup-generator';
+        
+        // Check if we're on a post edit screen with schema enabled
+        $isSchemaPostEdit = false;
+        if (in_array($hook, ['post.php', 'post-new.php'], true)) {
+            $isSchemaPostEdit = $this->isSchemaEnabledForCurrentPost();
+        }
+        
+        // Only load assets on relevant pages
+        if (!$isSettingsPage && !$isSchemaPostEdit) {
             return;
         }
+
+        // Enqueue Inter font for modern typography
+        wp_enqueue_style(
+            'smg-fonts',
+            'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap',
+            [],
+            null
+        );
 
         wp_enqueue_style(
             'smg-admin',
             SMG_PLUGIN_URL . 'assets/css/admin.css',
-            [],
+            ['smg-fonts'],
             SMG_VERSION
         );
 
         wp_enqueue_script(
             'smg-admin',
             SMG_PLUGIN_URL . 'assets/js/admin.js',
-            ['jquery'],
+            [], // No jQuery dependency - pure ES6
             SMG_VERSION,
             true
         );
@@ -211,14 +229,42 @@ class Plugin
         wp_localize_script('smg-admin', 'smgAdmin', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('smg_admin_nonce'),
+            'isSettingsPage' => $isSettingsPage,
             'strings' => [
                 'validating' => __('Validating...', 'schema-markup-generator'),
                 'valid' => __('Schema is valid', 'schema-markup-generator'),
                 'invalid' => __('Schema has errors', 'schema-markup-generator'),
                 'preview' => __('Preview', 'schema-markup-generator'),
                 'copied' => __('Copied to clipboard', 'schema-markup-generator'),
+                'copyFailed' => __('Failed to copy', 'schema-markup-generator'),
+                'refreshFailed' => __('Failed to refresh preview', 'schema-markup-generator'),
             ],
         ]);
+    }
+
+    /**
+     * Check if schema is enabled for the current post being edited
+     */
+    private function isSchemaEnabledForCurrentPost(): bool
+    {
+        global $post;
+        
+        if (!$post) {
+            return false;
+        }
+
+        // Get configured post type mappings
+        $mappings = get_option('smg_post_type_mappings', []);
+        
+        // Check if this post type has a schema mapping
+        if (!empty($mappings[$post->post_type])) {
+            return true;
+        }
+        
+        // Default supported post types
+        $defaultTypes = ['post', 'page'];
+        
+        return in_array($post->post_type, $defaultTypes, true);
     }
 
     /**

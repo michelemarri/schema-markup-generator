@@ -10,6 +10,7 @@ use flavor\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
 use flavor\SchemaMarkupGenerator\Integration\ACFIntegration;
 use flavor\SchemaMarkupGenerator\Admin\Tabs\GeneralTab;
 use flavor\SchemaMarkupGenerator\Admin\Tabs\PostTypesTab;
+use flavor\SchemaMarkupGenerator\Admin\Tabs\PagesTab;
 use flavor\SchemaMarkupGenerator\Admin\Tabs\SchemaTypesTab;
 use flavor\SchemaMarkupGenerator\Admin\Tabs\IntegrationsTab;
 use flavor\SchemaMarkupGenerator\Admin\Tabs\ToolsTab;
@@ -62,6 +63,7 @@ class SettingsPage
                 $this->taxonomyDiscovery,
                 $this->acfIntegration
             ),
+            'pages' => new PagesTab(),
             'schema-types' => new SchemaTypesTab(),
             'integrations' => new IntegrationsTab(),
             'tools' => new ToolsTab(),
@@ -109,6 +111,11 @@ class SettingsPage
         register_setting('smg_settings', 'smg_field_mappings', [
             'type' => 'array',
             'sanitize_callback' => [$this, 'sanitizeFieldMappings'],
+        ]);
+
+        register_setting('smg_settings', 'smg_page_mappings', [
+            'type' => 'array',
+            'sanitize_callback' => [$this, 'sanitizePageMappings'],
         ]);
 
         // Let each tab register its settings
@@ -174,6 +181,38 @@ class SettingsPage
 
             foreach ($mappings as $schemaProperty => $fieldKey) {
                 $sanitized[sanitize_key($postType)][sanitize_key($schemaProperty)] = sanitize_text_field($fieldKey);
+            }
+        }
+
+        return $sanitized;
+    }
+
+    /**
+     * Sanitize page mappings
+     */
+    public function sanitizePageMappings(?array $input): array
+    {
+        if ($input === null) {
+            return [];
+        }
+
+        // Get existing mappings to merge with new ones (for pagination support)
+        $existing = get_option('smg_page_mappings', []);
+        $sanitized = is_array($existing) ? $existing : [];
+
+        foreach ($input as $pageId => $schemaType) {
+            $pageId = absint($pageId);
+            if ($pageId === 0) {
+                continue;
+            }
+
+            $schemaType = sanitize_text_field($schemaType);
+
+            // Remove empty mappings, keep valid ones
+            if (empty($schemaType)) {
+                unset($sanitized[$pageId]);
+            } else {
+                $sanitized[$pageId] = $schemaType;
             }
         }
 
