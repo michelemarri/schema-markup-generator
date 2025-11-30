@@ -103,6 +103,44 @@ class VideoObjectSchema extends AbstractSchema
             $data['isFamilyFriendly'] = (bool) $isFamilyFriendly;
         }
 
+        // Keywords
+        $keywords = $this->getMappedValue($post, $mapping, 'keywords');
+        if ($keywords) {
+            $data['keywords'] = is_array($keywords) ? implode(', ', $keywords) : $keywords;
+        } else {
+            // Fallback to post tags
+            $tags = get_the_tags($post->ID);
+            if ($tags && !is_wp_error($tags)) {
+                $data['keywords'] = implode(', ', wp_list_pluck($tags, 'name'));
+            }
+        }
+
+        // Language
+        $inLanguage = $this->getMappedValue($post, $mapping, 'inLanguage');
+        if ($inLanguage) {
+            $data['inLanguage'] = $inLanguage;
+        } else {
+            $data['inLanguage'] = get_bloginfo('language');
+        }
+
+        // Video Chapters (hasPart with Clip)
+        $chapters = $this->getMappedValue($post, $mapping, 'hasPart');
+        if (is_array($chapters) && !empty($chapters)) {
+            $data['hasPart'] = $this->buildVideoChapters($chapters, $data['embedUrl'] ?? null);
+        } else {
+            // Try to auto-extract chapters from content
+            $extractedChapters = $this->extractChaptersFromContent($post->post_content, $data['embedUrl'] ?? null);
+            if (!empty($extractedChapters)) {
+                $data['hasPart'] = $extractedChapters;
+            }
+        }
+
+        // Requires subscription (for premium content)
+        $requiresSubscription = $this->getMappedValue($post, $mapping, 'requiresSubscription');
+        if ($requiresSubscription !== null) {
+            $data['isAccessibleForFree'] = !((bool) $requiresSubscription);
+        }
+
         /**
          * Filter video schema data
          */
@@ -194,6 +232,124 @@ class VideoObjectSchema extends AbstractSchema
         return null;
     }
 
+    /**
+     * Build video chapters from mapped data
+     */
+    private function buildVideoChapters(array $chapters, ?string $videoUrl): array
+    {
+        $result = [];
+        $position = 1;
+        
+        foreach ($chapters as $chapter) {
+            $chapterData = [
+                '@type' => 'Clip',
+                'position' => $position++,
+            ];
+            
+            if (is_array($chapter)) {
+                if (!empty($chapter['name']) || !empty($chapter['title'])) {
+                    $chapterData['name'] = $chapter['name'] ?? $chapter['title'];
+                }
+                if (!empty($chapter['startOffset']) || !empty($chapter['time'])) {
+                    $offset = $chapter['startOffset'] ?? $chapter['time'];
+                    $chapterData['startOffset'] = $this->parseTimeToSeconds($offset);
+                }
+                if (!empty($chapter['endOffset'])) {
+                    $chapterData['endOffset'] = $this->parseTimeToSeconds($chapter['endOffset']);
+                }
+                if (!empty($chapter['url'])) {
+                    $chapterData['url'] = $chapter['url'];
+                } elseif ($videoUrl && strpos($videoUrl, 'youtube') !== false && isset($chapterData['startOffset'])) {
+                    // Auto-generate YouTube timestamp URL
+                    $baseUrl = str_replace('/embed/', '/watch?v=', $videoUrl);
+                    $chapterData['url'] = $baseUrl . '&t=' . $chapterData['startOffset'];
+                }
+            } else {
+                // Simple string format: "0:00 Chapter Name"
+                if (preg_match('/^(?:(\d+):)?(\d+):(\d+)\s+(.+)$/', $chapter, $match)) {
+                    $hours = !empty($match[1]) ? (int) $match[1] : 0;
+                    $chapterData['startOffset'] = ($hours * 3600) + ((int) $match[2] * 60) + (int) $match[3];
+                    $chapterData['name'] = trim($match[4]);
+                } else {
+                    $chapterData['name'] = $chapter;
+                }
+            }
+            
+            $result[] = $chapterData;
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Extract video chapters from content
+     * 
+     * Looks for timestamp patterns like:
+     * - 0:00 Introduction
+     * - 1:30 - Getting Started
+     * - 00:05:30 Advanced Topics
+     */
+    private function extractChaptersFromContent(string $content, ?string $videoUrl): array
+    {
+        $chapters = [];
+        
+        // Pattern to match chapter timestamps
+        $pattern = '/(?:^|\n)\s*(?:(\d{1,2}):)?(\d{1,2}):(\d{2})\s*[-–—:]?\s*(.+?)(?=\n|$)/m';
+        
+        if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
+            $position = 1;
+            
+            foreach ($matches as $match) {
+                $hours = !empty($match[1]) ? (int) $match[1] : 0;
+                $minutes = (int) $match[2];
+                $seconds = (int) $match[3];
+                $title = trim($match[4]);
+                
+                // Skip if title is too short or looks like a timestamp
+                if (strlen($title) < 3 || preg_match('/^\d+:\d+/', $title)) {
+                    continue;
+                }
+                
+                $startOffset = ($hours * 3600) + ($minutes * 60) + $seconds;
+                
+                $chapter = [
+                    '@type' => 'Clip',
+                    'name' => $title,
+                    'startOffset' => $startOffset,
+                    'position' => $position++,
+                ];
+                
+                // Add URL with timestamp if it's YouTube
+                if ($videoUrl && strpos($videoUrl, 'youtube') !== false) {
+                    $baseUrl = str_replace('/embed/', '/watch?v=', $videoUrl);
+                    $chapter['url'] = $baseUrl . '&t=' . $startOffset;
+                }
+                
+                $chapters[] = $chapter;
+            }
+        }
+        
+        return $chapters;
+    }
+
+    /**
+     * Parse time string to seconds
+     */
+    private function parseTimeToSeconds(mixed $time): int
+    {
+        if (is_numeric($time)) {
+            return (int) $time;
+        }
+        
+        // Parse HH:MM:SS or MM:SS format
+        if (preg_match('/^(?:(\d+):)?(\d+):(\d+)$/', $time, $match)) {
+            $hours = !empty($match[1]) ? (int) $match[1] : 0;
+            return ($hours * 3600) + ((int) $match[2] * 60) + (int) $match[3];
+        }
+        
+        return 0;
+    }
+
     public function getRequiredProperties(): array
     {
         return ['name', 'description', 'thumbnailUrl', 'uploadDate'];
@@ -201,7 +357,7 @@ class VideoObjectSchema extends AbstractSchema
 
     public function getRecommendedProperties(): array
     {
-        return ['contentUrl', 'embedUrl', 'duration', 'publisher'];
+        return ['contentUrl', 'embedUrl', 'duration', 'publisher', 'hasPart', 'keywords'];
     }
 
     public function getPropertyDefinitions(): array
@@ -228,10 +384,30 @@ class VideoObjectSchema extends AbstractSchema
             'embedUrl' => [
                 'type' => 'url',
                 'description' => __('Player embed URL (YouTube, Vimeo). Auto-detected from content if embedded.', 'schema-markup-generator'),
+                'auto' => 'post_content',
             ],
             'duration' => [
                 'type' => 'text',
                 'description' => __('Video length (HH:MM:SS or seconds). Shown in video rich results.', 'schema-markup-generator'),
+            ],
+            'hasPart' => [
+                'type' => 'repeater',
+                'description' => __('Video Chapters. Creates clickable segments in Google Search and YouTube. Auto-extracted from timestamp patterns in content.', 'schema-markup-generator'),
+                'auto' => 'post_content',
+                'auto_description' => __('Auto-extracted from patterns like "0:00 Introduction", "5:30 Main Topic"', 'schema-markup-generator'),
+                'fields' => [
+                    'time' => ['type' => 'text', 'description' => __('Start time (MM:SS or HH:MM:SS)', 'schema-markup-generator')],
+                    'name' => ['type' => 'text', 'description' => __('Chapter title', 'schema-markup-generator')],
+                ],
+            ],
+            'keywords' => [
+                'type' => 'text',
+                'description' => __('Video keywords (comma-separated). Helps with video SEO and AI indexing.', 'schema-markup-generator'),
+                'auto' => 'tags',
+            ],
+            'inLanguage' => [
+                'type' => 'text',
+                'description' => __('Video language (e.g., "it", "en"). Auto-detected from WordPress settings.', 'schema-markup-generator'),
             ],
             'interactionCount' => [
                 'type' => 'number',
@@ -244,6 +420,10 @@ class VideoObjectSchema extends AbstractSchema
             'isFamilyFriendly' => [
                 'type' => 'boolean',
                 'description' => __('Safe for all audiences. Affects content filtering in search.', 'schema-markup-generator'),
+            ],
+            'requiresSubscription' => [
+                'type' => 'boolean',
+                'description' => __('Premium/paid content. Sets isAccessibleForFree accordingly.', 'schema-markup-generator'),
             ],
         ];
     }

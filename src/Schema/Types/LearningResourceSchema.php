@@ -260,12 +260,19 @@ class LearningResourceSchema extends AbstractSchema
 
     /**
      * Build video data if present
+     * 
+     * First checks for mapped video URL, then auto-extracts from content
      */
     private function buildVideo(WP_Post $post, array $mapping): ?array
     {
         $videoUrl = $this->getMappedValue($post, $mapping, 'videoUrl');
 
+        // If no mapped video, try to extract from content
         if (!$videoUrl) {
+            $extractedVideo = $this->extractVideoFromContent($post);
+            if ($extractedVideo) {
+                return $extractedVideo;
+            }
             return null;
         }
 
@@ -298,7 +305,357 @@ class LearningResourceSchema extends AbstractSchema
             $video['uploadDate'] = $this->formatDate($post->post_date);
         }
 
+        // Add video chapters if available
+        $chapters = $this->getMappedValue($post, $mapping, 'videoChapters');
+        if (is_array($chapters) && !empty($chapters)) {
+            $video['hasPart'] = $this->buildVideoChapters($chapters);
+        }
+
         return $video;
+    }
+
+    /**
+     * Extract video from post content (YouTube, Vimeo, WordPress embeds)
+     */
+    private function extractVideoFromContent(WP_Post $post): ?array
+    {
+        $content = $post->post_content;
+        
+        // Try to extract YouTube video
+        $youtubeData = $this->extractYouTubeVideo($content);
+        if ($youtubeData) {
+            return $this->buildVideoFromEmbed($youtubeData, $post);
+        }
+
+        // Try to extract Vimeo video
+        $vimeoData = $this->extractVimeoVideo($content);
+        if ($vimeoData) {
+            return $this->buildVideoFromEmbed($vimeoData, $post);
+        }
+
+        // Try WordPress embed blocks
+        $embedData = $this->extractWordPressEmbed($content);
+        if ($embedData) {
+            return $this->buildVideoFromEmbed($embedData, $post);
+        }
+
+        return null;
+    }
+
+    /**
+     * Extract YouTube video data from content
+     */
+    private function extractYouTubeVideo(string $content): ?array
+    {
+        // Match various YouTube URL patterns
+        $patterns = [
+            // Standard YouTube URLs
+            '/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/',
+            // Short YouTube URLs
+            '/(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})/',
+            // YouTube embed URLs
+            '/(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/',
+            // YouTube in iframe
+            '/<iframe[^>]+src=["\'](?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})[^"\']*["\'][^>]*>/',
+            // WordPress YouTube embed block
+            '/<!-- wp:embed {"url":"https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})[^"]*","type":"video","providerNameSlug":"youtube"/',
+            // WordPress core-embed/youtube block
+            '/<!-- wp:core-embed\/youtube {"url":"https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $content, $matches)) {
+                $videoId = $matches[1];
+                return [
+                    'platform' => 'youtube',
+                    'id' => $videoId,
+                    'embedUrl' => 'https://www.youtube.com/embed/' . $videoId,
+                    'contentUrl' => 'https://www.youtube.com/watch?v=' . $videoId,
+                    'thumbnailUrl' => 'https://img.youtube.com/vi/' . $videoId . '/maxresdefault.jpg',
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extract Vimeo video data from content
+     */
+    private function extractVimeoVideo(string $content): ?array
+    {
+        $patterns = [
+            // Standard Vimeo URLs
+            '/(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/',
+            // Vimeo player embed
+            '/(?:https?:\/\/)?player\.vimeo\.com\/video\/(\d+)/',
+            // Vimeo in iframe
+            '/<iframe[^>]+src=["\'](?:https?:\/\/)?player\.vimeo\.com\/video\/(\d+)[^"\']*["\'][^>]*>/',
+            // WordPress Vimeo embed block
+            '/<!-- wp:embed {"url":"https?:\/\/(?:www\.)?vimeo\.com\/(\d+)[^"]*","type":"video","providerNameSlug":"vimeo"/',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $content, $matches)) {
+                $videoId = $matches[1];
+                return [
+                    'platform' => 'vimeo',
+                    'id' => $videoId,
+                    'embedUrl' => 'https://player.vimeo.com/video/' . $videoId,
+                    'contentUrl' => 'https://vimeo.com/' . $videoId,
+                    'thumbnailUrl' => null, // Will be fetched via oEmbed
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extract WordPress embed block data
+     */
+    private function extractWordPressEmbed(string $content): ?array
+    {
+        // Match WordPress embed blocks for video providers
+        if (preg_match('/<!-- wp:embed {"url":"([^"]+)"[^}]*"type":"video"/', $content, $matches)) {
+            $url = $matches[1];
+            
+            // Determine platform from URL
+            if (strpos($url, 'youtube') !== false || strpos($url, 'youtu.be') !== false) {
+                return $this->extractYouTubeVideo($url);
+            }
+            if (strpos($url, 'vimeo') !== false) {
+                return $this->extractVimeoVideo($url);
+            }
+
+            return [
+                'platform' => 'other',
+                'embedUrl' => $url,
+                'contentUrl' => $url,
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Build VideoObject from extracted embed data
+     */
+    private function buildVideoFromEmbed(array $embedData, WP_Post $post): array
+    {
+        $video = [
+            '@type' => 'VideoObject',
+            'name' => html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8'),
+            'description' => $this->getPostDescription($post),
+            'uploadDate' => $this->formatDate($post->post_date),
+        ];
+
+        if (!empty($embedData['embedUrl'])) {
+            $video['embedUrl'] = $embedData['embedUrl'];
+        }
+
+        if (!empty($embedData['contentUrl'])) {
+            $video['contentUrl'] = $embedData['contentUrl'];
+        }
+
+        // Try to get thumbnail
+        if (!empty($embedData['thumbnailUrl'])) {
+            $video['thumbnailUrl'] = $embedData['thumbnailUrl'];
+        } else {
+            // Try featured image as fallback
+            $image = $this->getFeaturedImage($post);
+            if ($image) {
+                $video['thumbnailUrl'] = $image['url'];
+            }
+        }
+
+        // Try to fetch additional data via oEmbed (duration, etc.)
+        $oEmbedData = $this->fetchOEmbedData($embedData);
+        if ($oEmbedData) {
+            if (!empty($oEmbedData['duration'])) {
+                $video['duration'] = $this->formatVideoDuration($oEmbedData['duration']);
+            }
+            if (!empty($oEmbedData['thumbnail_url']) && empty($video['thumbnailUrl'])) {
+                $video['thumbnailUrl'] = $oEmbedData['thumbnail_url'];
+            }
+            if (!empty($oEmbedData['author_name'])) {
+                $video['author'] = [
+                    '@type' => 'Person',
+                    'name' => $oEmbedData['author_name'],
+                ];
+            }
+        }
+
+        // Try to extract chapters from content
+        $chapters = $this->extractChaptersFromContent($post->post_content, $embedData);
+        if (!empty($chapters)) {
+            $video['hasPart'] = $chapters;
+        }
+
+        return $video;
+    }
+
+    /**
+     * Fetch oEmbed data for video metadata
+     */
+    private function fetchOEmbedData(array $embedData): ?array
+    {
+        if (empty($embedData['contentUrl'])) {
+            return null;
+        }
+
+        // Use WordPress oEmbed to get data
+        $oEmbed = _wp_oembed_get_object();
+        $provider = $oEmbed->get_provider($embedData['contentUrl']);
+        
+        if (!$provider) {
+            return null;
+        }
+
+        $data = $oEmbed->fetch($provider, $embedData['contentUrl']);
+        
+        if (!$data) {
+            return null;
+        }
+
+        return (array) $data;
+    }
+
+    /**
+     * Format video duration from seconds to ISO 8601
+     */
+    private function formatVideoDuration(int $seconds): string
+    {
+        $hours = floor($seconds / 3600);
+        $minutes = floor(($seconds % 3600) / 60);
+        $secs = $seconds % 60;
+
+        $duration = 'PT';
+        if ($hours > 0) {
+            $duration .= "{$hours}H";
+        }
+        if ($minutes > 0) {
+            $duration .= "{$minutes}M";
+        }
+        if ($secs > 0) {
+            $duration .= "{$secs}S";
+        }
+
+        return $duration;
+    }
+
+    /**
+     * Extract video chapters from content
+     * 
+     * Looks for timestamp patterns in content like:
+     * - 0:00 Introduction
+     * - 1:30 - Getting Started
+     * - 00:05:30 Advanced Topics
+     */
+    private function extractChaptersFromContent(string $content, array $embedData): array
+    {
+        $chapters = [];
+        
+        // Pattern to match chapter timestamps
+        // Matches: 0:00, 1:30, 00:05:30, etc. followed by chapter title
+        $pattern = '/(?:^|\n)\s*(?:(\d{1,2}):)?(\d{1,2}):(\d{2})\s*[-–—:]?\s*(.+?)(?=\n|$)/m';
+        
+        if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
+            $position = 1;
+            
+            foreach ($matches as $match) {
+                $hours = !empty($match[1]) ? (int) $match[1] : 0;
+                $minutes = (int) $match[2];
+                $seconds = (int) $match[3];
+                $title = trim($match[4]);
+                
+                // Skip if title is too short or looks like a timestamp
+                if (strlen($title) < 3 || preg_match('/^\d+:\d+/', $title)) {
+                    continue;
+                }
+                
+                $startOffset = ($hours * 3600) + ($minutes * 60) + $seconds;
+                
+                $chapter = [
+                    '@type' => 'Clip',
+                    'name' => $title,
+                    'startOffset' => $startOffset,
+                    'position' => $position++,
+                ];
+                
+                // Add URL with timestamp if it's YouTube
+                if ($embedData['platform'] === 'youtube' && !empty($embedData['contentUrl'])) {
+                    $chapter['url'] = $embedData['contentUrl'] . '&t=' . $startOffset;
+                }
+                
+                $chapters[] = $chapter;
+            }
+        }
+        
+        return $chapters;
+    }
+
+    /**
+     * Build video chapters from mapped data
+     */
+    private function buildVideoChapters(array $chapters): array
+    {
+        $result = [];
+        $position = 1;
+        
+        foreach ($chapters as $chapter) {
+            $chapterData = [
+                '@type' => 'Clip',
+                'position' => $position++,
+            ];
+            
+            if (is_array($chapter)) {
+                if (!empty($chapter['name']) || !empty($chapter['title'])) {
+                    $chapterData['name'] = $chapter['name'] ?? $chapter['title'];
+                }
+                if (!empty($chapter['startOffset']) || !empty($chapter['time'])) {
+                    $offset = $chapter['startOffset'] ?? $chapter['time'];
+                    $chapterData['startOffset'] = $this->parseTimeToSeconds($offset);
+                }
+                if (!empty($chapter['endOffset'])) {
+                    $chapterData['endOffset'] = $this->parseTimeToSeconds($chapter['endOffset']);
+                }
+                if (!empty($chapter['url'])) {
+                    $chapterData['url'] = $chapter['url'];
+                }
+            } else {
+                // Simple string format: "0:00 Chapter Name"
+                if (preg_match('/^(?:(\d+):)?(\d+):(\d+)\s+(.+)$/', $chapter, $match)) {
+                    $hours = !empty($match[1]) ? (int) $match[1] : 0;
+                    $chapterData['startOffset'] = ($hours * 3600) + ((int) $match[2] * 60) + (int) $match[3];
+                    $chapterData['name'] = trim($match[4]);
+                } else {
+                    $chapterData['name'] = $chapter;
+                }
+            }
+            
+            $result[] = $chapterData;
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Parse time string to seconds
+     */
+    private function parseTimeToSeconds(mixed $time): int
+    {
+        if (is_numeric($time)) {
+            return (int) $time;
+        }
+        
+        // Parse HH:MM:SS or MM:SS format
+        if (preg_match('/^(?:(\d+):)?(\d+):(\d+)$/', $time, $match)) {
+            $hours = !empty($match[1]) ? (int) $match[1] : 0;
+            return ($hours * 3600) + ((int) $match[2] * 60) + (int) $match[3];
+        }
+        
+        return 0;
     }
 
     /**
@@ -431,11 +788,23 @@ class LearningResourceSchema extends AbstractSchema
             ],
             'videoUrl' => [
                 'type' => 'url',
-                'description' => __('Video content URL. Enables video rich results and better content matching.', 'schema-markup-generator'),
+                'description' => __('Video content URL. Auto-extracted from YouTube/Vimeo embeds if not set.', 'schema-markup-generator'),
+                'auto' => 'post_content',
+                'auto_description' => __('Auto-extracted from embedded YouTube/Vimeo videos in content', 'schema-markup-generator'),
             ],
             'videoDuration' => [
                 'type' => 'number',
-                'description' => __('Video length in minutes. Shown in video rich results.', 'schema-markup-generator'),
+                'description' => __('Video length in minutes. Auto-fetched via oEmbed when possible.', 'schema-markup-generator'),
+            ],
+            'videoChapters' => [
+                'type' => 'repeater',
+                'description' => __('Video chapters/segments. Auto-extracted from timestamp patterns in content (e.g., "0:00 Introduction").', 'schema-markup-generator'),
+                'auto' => 'post_content',
+                'auto_description' => __('Auto-extracted from timestamp patterns like "0:00 Introduction", "1:30 Getting Started"', 'schema-markup-generator'),
+                'fields' => [
+                    'time' => ['type' => 'text', 'description' => __('Start time (MM:SS or HH:MM:SS)', 'schema-markup-generator')],
+                    'name' => ['type' => 'text', 'description' => __('Chapter title', 'schema-markup-generator')],
+                ],
             ],
         ];
     }
