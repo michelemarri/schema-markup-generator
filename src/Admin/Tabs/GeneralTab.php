@@ -24,9 +24,45 @@ class GeneralTab extends AbstractTab
         return 'dashicons-admin-settings';
     }
 
+    public function getSettingsGroup(): string
+    {
+        return 'smg_general';
+    }
+
+    public function getRegisteredOptions(): array
+    {
+        return [
+            'smg_general_settings' => [
+                'type' => 'array',
+                'sanitize_callback' => [$this, 'sanitizeSettings'],
+                'default' => [
+                    'enabled' => true,
+                    'enable_website_schema' => true,
+                    'enable_breadcrumb_schema' => true,
+                    'output_format' => 'json-ld',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Sanitize general settings
+     */
+    public function sanitizeSettings(?array $input): array
+    {
+        $input = $input ?? [];
+
+        return [
+            'enabled' => !empty($input['enabled']),
+            'enable_website_schema' => !empty($input['enable_website_schema']),
+            'enable_breadcrumb_schema' => !empty($input['enable_breadcrumb_schema']),
+            'output_format' => sanitize_text_field($input['output_format'] ?? 'json-ld'),
+        ];
+    }
+
     public function render(): void
     {
-        $settings = get_option('smg_settings', []);
+        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('general');
 
         ?>
         <div class="smg-tab-panel" id="tab-general">
@@ -39,21 +75,21 @@ class GeneralTab extends AbstractTab
                 <?php
                 $this->renderCard(__('Schema Output', 'schema-markup-generator'), function () use ($settings) {
                     $this->renderToggle(
-                        'smg_settings[enabled]',
+                        'smg_general_settings[enabled]',
                         $settings['enabled'] ?? true,
                         __('Enable Schema Markup', 'schema-markup-generator'),
                         __('Enable or disable schema output on the frontend.', 'schema-markup-generator')
                     );
 
                     $this->renderToggle(
-                        'smg_settings[enable_website_schema]',
+                        'smg_general_settings[enable_website_schema]',
                         $settings['enable_website_schema'] ?? true,
                         __('WebSite Schema', 'schema-markup-generator'),
                         __('Add WebSite schema with SearchAction for sitelinks search box.', 'schema-markup-generator')
                     );
 
                     $this->renderToggle(
-                        'smg_settings[enable_breadcrumb_schema]',
+                        'smg_general_settings[enable_breadcrumb_schema]',
                         $settings['enable_breadcrumb_schema'] ?? true,
                         __('Breadcrumb Schema', 'schema-markup-generator'),
                         __('Add BreadcrumbList schema for navigation trails.', 'schema-markup-generator')

@@ -27,12 +27,22 @@ class UpdateTab extends AbstractTab
         return 'dashicons-update';
     }
 
-    public function registerSettings(): void
+    public function getSettingsGroup(): string
     {
-        register_setting('smg_settings', 'smg_update_settings', [
-            'type' => 'array',
-            'sanitize_callback' => [$this, 'sanitizeUpdateSettings'],
-        ]);
+        return 'smg_update';
+    }
+
+    public function getRegisteredOptions(): array
+    {
+        return [
+            'smg_update_settings' => [
+                'type' => 'array',
+                'sanitize_callback' => [$this, 'sanitizeUpdateSettings'],
+                'default' => [
+                    'auto_update' => false,
+                ],
+            ],
+        ];
     }
 
     /**
@@ -41,6 +51,13 @@ class UpdateTab extends AbstractTab
     public function sanitizeUpdateSettings(?array $input): array
     {
         $input = $input ?? [];
+        
+        // Get existing settings to preserve encrypted token
+        $existing = get_option('smg_update_settings', []);
+        if (!is_array($existing)) {
+            $existing = [];
+        }
+        
         $sanitized = [];
 
         // Handle GitHub token - encrypt before saving
@@ -54,9 +71,13 @@ class UpdateTab extends AbstractTab
                     $sanitized['github_token_encrypted'] = $encryption->encrypt($token);
                 } else {
                     // Keep existing encrypted token
-                    $existing = get_option('smg_update_settings', []);
                     $sanitized['github_token_encrypted'] = $existing['github_token_encrypted'] ?? '';
                 }
+            }
+        } else {
+            // Preserve existing token if not in input
+            if (isset($existing['github_token_encrypted'])) {
+                $sanitized['github_token_encrypted'] = $existing['github_token_encrypted'];
             }
         }
 

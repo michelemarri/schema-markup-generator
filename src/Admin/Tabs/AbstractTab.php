@@ -30,11 +30,59 @@ abstract class AbstractTab
     abstract public function render(): void;
 
     /**
+     * Get the settings group for this tab
+     *
+     * Each tab should have its own settings group to avoid conflicts.
+     * Override this method to specify the group name.
+     *
+     * @return string Settings group name (e.g., 'smg_general')
+     */
+    public function getSettingsGroup(): string
+    {
+        return '';
+    }
+
+    /**
+     * Get the options registered by this tab
+     *
+     * Returns an array of option configurations:
+     * [
+     *     'option_name' => [
+     *         'type' => 'array',
+     *         'sanitize_callback' => callable,
+     *         'default' => mixed,
+     *     ],
+     * ]
+     *
+     * @return array<string, array{type: string, sanitize_callback?: callable, default?: mixed}>
+     */
+    public function getRegisteredOptions(): array
+    {
+        return [];
+    }
+
+    /**
      * Register tab-specific settings
+     *
+     * This method is called automatically by SettingsPage.
+     * Tabs should override getSettingsGroup() and getRegisteredOptions() instead.
      */
     public function registerSettings(): void
     {
-        // Override in child classes if needed
+        $group = $this->getSettingsGroup();
+        $options = $this->getRegisteredOptions();
+
+        if (empty($group) || empty($options)) {
+            return;
+        }
+
+        foreach ($options as $optionName => $config) {
+            register_setting($group, $optionName, [
+                'type' => $config['type'] ?? 'array',
+                'sanitize_callback' => $config['sanitize_callback'] ?? null,
+                'default' => $config['default'] ?? [],
+            ]);
+        }
     }
 
     /**

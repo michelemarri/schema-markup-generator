@@ -146,7 +146,7 @@ class SchemaRenderer
     private function buildGlobalSchemas(WP_Post $post): array
     {
         $schemas = [];
-        $settings = get_option('smg_settings', []);
+        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('general');
 
         // WebSite schema (only on home or if enabled globally)
         if (is_front_page() || ($settings['enable_website_schema'] ?? true)) {
@@ -172,7 +172,7 @@ class SchemaRenderer
      */
     private function renderGlobalSchemas(): void
     {
-        $settings = get_option('smg_settings', []);
+        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('general');
         $schemas = [];
 
         // WebSite schema on home page

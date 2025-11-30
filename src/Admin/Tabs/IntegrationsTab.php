@@ -24,9 +24,56 @@ class IntegrationsTab extends AbstractTab
         return 'dashicons-admin-plugins';
     }
 
+    public function getSettingsGroup(): string
+    {
+        return 'smg_integrations';
+    }
+
+    public function getRegisteredOptions(): array
+    {
+        return [
+            'smg_integrations_settings' => [
+                'type' => 'array',
+                'sanitize_callback' => [$this, 'sanitizeSettings'],
+                'default' => [],
+            ],
+        ];
+    }
+
+    /**
+     * Sanitize integrations settings
+     */
+    public function sanitizeSettings(?array $input): array
+    {
+        $input = $input ?? [];
+
+        return [
+            // Rank Math
+            'rankmath_avoid_duplicates' => !empty($input['rankmath_avoid_duplicates']),
+            'rankmath_takeover_types' => isset($input['rankmath_takeover_types']) && is_array($input['rankmath_takeover_types'])
+                ? array_map('sanitize_text_field', $input['rankmath_takeover_types'])
+                : [],
+            // Integration toggles
+            'integration_rankmath_enabled' => !empty($input['integration_rankmath_enabled']),
+            'integration_acf_enabled' => !empty($input['integration_acf_enabled']),
+            'integration_woocommerce_enabled' => !empty($input['integration_woocommerce_enabled']),
+            'integration_memberpress_courses_enabled' => !empty($input['integration_memberpress_courses_enabled']),
+            // ACF
+            'acf_auto_discover' => !empty($input['acf_auto_discover']),
+            'acf_include_nested' => !empty($input['acf_include_nested']),
+            // MemberPress Courses
+            'mpcs_auto_parent_course' => !empty($input['mpcs_auto_parent_course']),
+            'mpcs_include_curriculum' => !empty($input['mpcs_include_curriculum']),
+            // WooCommerce
+            'woo_auto_product' => !empty($input['woo_auto_product']),
+            'woo_include_reviews' => !empty($input['woo_include_reviews']),
+            'woo_include_offers' => !empty($input['woo_include_offers']),
+        ];
+    }
+
     public function render(): void
     {
-        $settings = get_option('smg_settings', []);
+        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('integrations');
 
         ?>
         <div class="smg-tab-panel" id="tab-integrations">
@@ -81,7 +128,7 @@ class IntegrationsTab extends AbstractTab
                     <?php
                     $this->renderCard(__('Duplicate Prevention', 'schema-markup-generator'), function () use ($settings) {
                         $this->renderToggle(
-                            'smg_settings[rankmath_avoid_duplicates]',
+                            'smg_integrations_settings[rankmath_avoid_duplicates]',
                             $settings['rankmath_avoid_duplicates'] ?? true,
                             __('Avoid Duplicate Schemas', 'schema-markup-generator'),
                             __('Automatically skip schema types that Rank Math already generates.', 'schema-markup-generator')
@@ -109,7 +156,7 @@ class IntegrationsTab extends AbstractTab
                             <?php foreach ($schemaTypes as $type => $label): ?>
                                 <label class="smg-checkbox-label">
                                     <input type="checkbox"
-                                           name="smg_settings[rankmath_takeover_types][]"
+                                           name="smg_integrations_settings[rankmath_takeover_types][]"
                                            value="<?php echo esc_attr($type); ?>"
                                            <?php checked(in_array($type, $takeoverTypes, true)); ?>>
                                     <?php echo esc_html($label); ?>
@@ -132,14 +179,14 @@ class IntegrationsTab extends AbstractTab
                     <?php
                     $this->renderCard(__('Field Discovery', 'schema-markup-generator'), function () use ($settings) {
                         $this->renderToggle(
-                            'smg_settings[acf_auto_discover]',
+                            'smg_integrations_settings[acf_auto_discover]',
                             $settings['acf_auto_discover'] ?? true,
                             __('Auto-discover ACF Fields', 'schema-markup-generator'),
                             __('Automatically include ACF fields in the field mapping dropdown.', 'schema-markup-generator')
                         );
 
                         $this->renderToggle(
-                            'smg_settings[acf_include_nested]',
+                            'smg_integrations_settings[acf_include_nested]',
                             $settings['acf_include_nested'] ?? true,
                             __('Include Nested Fields', 'schema-markup-generator'),
                             __('Include fields from repeaters, groups, and flexible content.', 'schema-markup-generator')
@@ -180,14 +227,14 @@ class IntegrationsTab extends AbstractTab
                     <?php
                     $this->renderCard(__('Course Hierarchy', 'schema-markup-generator'), function () use ($settings) {
                         $this->renderToggle(
-                            'smg_settings[mpcs_auto_parent_course]',
+                            'smg_integrations_settings[mpcs_auto_parent_course]',
                             $settings['mpcs_auto_parent_course'] ?? true,
                             __('Auto-detect Parent Course', 'schema-markup-generator'),
                             __('Automatically link lessons to their parent course in the schema (isPartOf).', 'schema-markup-generator')
                         );
 
                         $this->renderToggle(
-                            'smg_settings[mpcs_include_curriculum]',
+                            'smg_integrations_settings[mpcs_include_curriculum]',
                             $settings['mpcs_include_curriculum'] ?? false,
                             __('Include Curriculum in Course Schema', 'schema-markup-generator'),
                             __('Add sections and lessons list to Course schema (may increase page size).', 'schema-markup-generator')
@@ -240,21 +287,21 @@ class IntegrationsTab extends AbstractTab
                     <?php
                     $this->renderCard(__('Product Schema', 'schema-markup-generator'), function () use ($settings) {
                         $this->renderToggle(
-                            'smg_settings[woo_auto_product]',
+                            'smg_integrations_settings[woo_auto_product]',
                             $settings['woo_auto_product'] ?? true,
                             __('Auto-generate Product Schema', 'schema-markup-generator'),
                             __('Automatically generate Product schema for WooCommerce products.', 'schema-markup-generator')
                         );
 
                         $this->renderToggle(
-                            'smg_settings[woo_include_reviews]',
+                            'smg_integrations_settings[woo_include_reviews]',
                             $settings['woo_include_reviews'] ?? true,
                             __('Include Reviews', 'schema-markup-generator'),
                             __('Include product reviews in the schema aggregate rating.', 'schema-markup-generator')
                         );
 
                         $this->renderToggle(
-                            'smg_settings[woo_include_offers]',
+                            'smg_integrations_settings[woo_include_offers]',
                             $settings['woo_include_offers'] ?? true,
                             __('Include Offers', 'schema-markup-generator'),
                             __('Include pricing and availability as Offer schema.', 'schema-markup-generator')
@@ -298,7 +345,7 @@ class IntegrationsTab extends AbstractTab
                 <div class="smg-integration-footer">
                     <label class="smg-toggle-inline">
                         <input type="checkbox"
-                               name="smg_settings[integration_<?php echo esc_attr($slug); ?>_enabled]"
+                               name="smg_integrations_settings[integration_<?php echo esc_attr($slug); ?>_enabled]"
                                value="1"
                                <?php checked($settings['integration_' . $slug . '_enabled'] ?? true); ?>>
                         <span class="smg-toggle-slider-small"></span>

@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Plugin Name:       Schema Markup Generator
  * Plugin URI:        https://github.com/michelemarri/schema-markup-generator
  * Description:       Automatic schema markup generation optimized for LLMs. Auto-discovers post types, custom fields, and taxonomies.
- * Version:           1.2.1
+ * Version:           1.3.0
  * Requires at least: 6.0
  * Requires PHP:      8.2
  * Author:            Michele Marri
@@ -27,7 +27,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('SMG_VERSION', '1.2.1');
+define('SMG_VERSION', '1.3.0');
 define('SMG_PLUGIN_FILE', __FILE__);
 define('SMG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SMG_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -41,6 +41,145 @@ if (file_exists(SMG_PLUGIN_DIR . 'vendor/autoload.php')) {
 }
 
 /**
+ * Get settings for a specific section
+ *
+ * This function handles both the new separated options and legacy smg_settings.
+ *
+ * @param string $section Section name: 'general', 'advanced', 'integrations', 'update'
+ * @return array Settings array
+ */
+function smg_get_settings(string $section): array
+{
+    // New option names
+    $optionMap = [
+        'general' => 'smg_general_settings',
+        'advanced' => 'smg_advanced_settings',
+        'integrations' => 'smg_integrations_settings',
+        'update' => 'smg_update_settings',
+    ];
+
+    // Default values
+    $defaults = [
+        'general' => [
+            'enabled' => true,
+            'enable_website_schema' => true,
+            'enable_breadcrumb_schema' => true,
+            'output_format' => 'json-ld',
+        ],
+        'advanced' => [
+            'cache_enabled' => true,
+            'cache_ttl' => 3600,
+            'debug_mode' => false,
+        ],
+        'integrations' => [
+            'rankmath_avoid_duplicates' => true,
+            'rankmath_takeover_types' => [],
+            'integration_rankmath_enabled' => true,
+            'integration_acf_enabled' => true,
+            'integration_woocommerce_enabled' => true,
+            'integration_memberpress_courses_enabled' => true,
+            'acf_auto_discover' => true,
+            'acf_include_nested' => true,
+            'mpcs_auto_parent_course' => true,
+            'mpcs_include_curriculum' => false,
+            'woo_auto_product' => true,
+            'woo_include_reviews' => true,
+            'woo_include_offers' => true,
+        ],
+        'update' => [
+            'auto_update' => false,
+        ],
+    ];
+
+    if (!isset($optionMap[$section])) {
+        return [];
+    }
+
+    // Try to get new option first
+    $settings = get_option($optionMap[$section], null);
+
+    // If new option exists, return it with defaults
+    if ($settings !== null && is_array($settings)) {
+        return array_merge($defaults[$section] ?? [], $settings);
+    }
+
+    // Fallback to legacy smg_settings for migration
+    $legacySettings = get_option('smg_settings', []);
+    if (!is_array($legacySettings)) {
+        $legacySettings = [];
+    }
+
+    // Extract relevant keys from legacy settings
+    $result = $defaults[$section] ?? [];
+    foreach (array_keys($result) as $key) {
+        if (isset($legacySettings[$key])) {
+            $result[$key] = $legacySettings[$key];
+        }
+    }
+
+    return $result;
+}
+
+/**
+ * Migrate legacy settings to new format
+ *
+ * Run once on plugin update to migrate from smg_settings to separate options.
+ */
+function smg_maybe_migrate_settings(): void
+{
+    // Check if migration is needed
+    $migrated = get_option('smg_settings_migrated', false);
+    if ($migrated) {
+        return;
+    }
+
+    $legacySettings = get_option('smg_settings', []);
+    if (empty($legacySettings) || !is_array($legacySettings)) {
+        update_option('smg_settings_migrated', true);
+        return;
+    }
+
+    // Migrate general settings
+    $general = [
+        'enabled' => $legacySettings['enabled'] ?? true,
+        'enable_website_schema' => $legacySettings['enable_website_schema'] ?? true,
+        'enable_breadcrumb_schema' => $legacySettings['enable_breadcrumb_schema'] ?? true,
+        'output_format' => $legacySettings['output_format'] ?? 'json-ld',
+    ];
+    update_option('smg_general_settings', $general);
+
+    // Migrate advanced settings
+    $advanced = [
+        'cache_enabled' => $legacySettings['cache_enabled'] ?? true,
+        'cache_ttl' => $legacySettings['cache_ttl'] ?? 3600,
+        'debug_mode' => $legacySettings['debug_mode'] ?? false,
+    ];
+    update_option('smg_advanced_settings', $advanced);
+
+    // Migrate integrations settings
+    $integrations = [];
+    $integrationKeys = [
+        'rankmath_avoid_duplicates', 'rankmath_takeover_types',
+        'integration_rankmath_enabled', 'integration_acf_enabled',
+        'integration_woocommerce_enabled', 'integration_memberpress_courses_enabled',
+        'acf_auto_discover', 'acf_include_nested',
+        'mpcs_auto_parent_course', 'mpcs_include_curriculum',
+        'woo_auto_product', 'woo_include_reviews', 'woo_include_offers',
+    ];
+    foreach ($integrationKeys as $key) {
+        if (isset($legacySettings[$key])) {
+            $integrations[$key] = $legacySettings[$key];
+        }
+    }
+    if (!empty($integrations)) {
+        update_option('smg_integrations_settings', $integrations);
+    }
+
+    // Mark as migrated
+    update_option('smg_settings_migrated', true);
+}
+
+/**
  * Initialize the plugin
  *
  * @return Plugin
@@ -50,6 +189,9 @@ function smg_init(): Plugin
     static $plugin = null;
 
     if ($plugin === null) {
+        // Run migration if needed
+        smg_maybe_migrate_settings();
+
         $plugin = new Plugin();
         $plugin->init();
     }
@@ -64,14 +206,21 @@ add_action('plugins_loaded', __NAMESPACE__ . '\\smg_init');
  * Activation hook
  */
 register_activation_hook(__FILE__, function (): void {
-    // Set default options
-    if (!get_option('smg_settings')) {
-        update_option('smg_settings', [
+    // Set default options for new installations
+    if (!get_option('smg_general_settings')) {
+        update_option('smg_general_settings', [
             'enabled' => true,
+            'enable_website_schema' => true,
+            'enable_breadcrumb_schema' => true,
             'output_format' => 'json-ld',
-            'debug_mode' => false,
+        ]);
+    }
+
+    if (!get_option('smg_advanced_settings')) {
+        update_option('smg_advanced_settings', [
             'cache_enabled' => true,
             'cache_ttl' => 3600,
+            'debug_mode' => false,
         ]);
     }
 

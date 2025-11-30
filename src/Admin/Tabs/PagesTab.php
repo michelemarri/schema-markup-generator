@@ -24,6 +24,54 @@ class PagesTab extends AbstractTab
      */
     private const PER_PAGE = 20;
 
+    public function getSettingsGroup(): string
+    {
+        return 'smg_pages';
+    }
+
+    public function getRegisteredOptions(): array
+    {
+        return [
+            'smg_page_mappings' => [
+                'type' => 'array',
+                'sanitize_callback' => [$this, 'sanitizePageMappings'],
+                'default' => [],
+            ],
+        ];
+    }
+
+    /**
+     * Sanitize page mappings
+     */
+    public function sanitizePageMappings(?array $input): array
+    {
+        if ($input === null) {
+            return [];
+        }
+
+        // Get existing mappings to merge (for pagination support)
+        $existing = get_option('smg_page_mappings', []);
+        $sanitized = is_array($existing) ? $existing : [];
+
+        foreach ($input as $pageId => $schemaType) {
+            $pageId = absint($pageId);
+            if ($pageId === 0) {
+                continue;
+            }
+
+            $schemaType = sanitize_text_field($schemaType);
+
+            // Remove empty mappings, keep valid ones
+            if (empty($schemaType)) {
+                unset($sanitized[$pageId]);
+            } else {
+                $sanitized[$pageId] = $schemaType;
+            }
+        }
+
+        return $sanitized;
+    }
+
     /**
      * Suggested schemas based on page slug patterns
      */

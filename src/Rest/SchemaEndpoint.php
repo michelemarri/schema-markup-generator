@@ -166,9 +166,16 @@ class SchemaEndpoint
     public function getSettings(WP_REST_Request $request): WP_REST_Response
     {
         return new WP_REST_Response([
-            'settings' => get_option('smg_settings', []),
+            // New separated settings
+            'general_settings' => get_option('smg_general_settings', []),
+            'advanced_settings' => get_option('smg_advanced_settings', []),
+            'integrations_settings' => get_option('smg_integrations_settings', []),
+            // Mappings
             'post_type_mappings' => get_option('smg_post_type_mappings', []),
             'field_mappings' => get_option('smg_field_mappings', []),
+            'page_mappings' => get_option('smg_page_mappings', []),
+            // Legacy (for backward compatibility)
+            'settings' => get_option('smg_settings', []),
         ]);
     }
 

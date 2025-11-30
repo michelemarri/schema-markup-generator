@@ -49,6 +49,71 @@ class PostTypesTab extends AbstractTab
         return 'dashicons-admin-post';
     }
 
+    public function getSettingsGroup(): string
+    {
+        return 'smg_post_types';
+    }
+
+    public function getRegisteredOptions(): array
+    {
+        return [
+            'smg_post_type_mappings' => [
+                'type' => 'array',
+                'sanitize_callback' => [$this, 'sanitizePostTypeMappings'],
+                'default' => [
+                    'post' => 'Article',
+                    'page' => 'WebPage',
+                ],
+            ],
+            'smg_field_mappings' => [
+                'type' => 'array',
+                'sanitize_callback' => [$this, 'sanitizeFieldMappings'],
+                'default' => [],
+            ],
+        ];
+    }
+
+    /**
+     * Sanitize post type mappings
+     */
+    public function sanitizePostTypeMappings(?array $input): array
+    {
+        if ($input === null) {
+            return [];
+        }
+
+        $sanitized = [];
+        foreach ($input as $postType => $schemaType) {
+            $sanitized[sanitize_key($postType)] = sanitize_text_field($schemaType);
+        }
+
+        return $sanitized;
+    }
+
+    /**
+     * Sanitize field mappings
+     */
+    public function sanitizeFieldMappings(?array $input): array
+    {
+        if ($input === null) {
+            return [];
+        }
+
+        $sanitized = [];
+        foreach ($input as $postType => $mappings) {
+            if (!is_array($mappings)) {
+                continue;
+            }
+
+            $sanitized[sanitize_key($postType)] = [];
+            foreach ($mappings as $schemaProperty => $fieldKey) {
+                $sanitized[sanitize_key($postType)][sanitize_key($schemaProperty)] = sanitize_text_field($fieldKey);
+            }
+        }
+
+        return $sanitized;
+    }
+
     public function render(): void
     {
         $postTypes = $this->postTypeDiscovery->getPostTypes();

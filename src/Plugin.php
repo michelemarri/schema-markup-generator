@@ -57,13 +57,11 @@ class Plugin
      */
     private function loadSettings(): void
     {
-        $this->settings = get_option('smg_settings', [
-            'enabled' => true,
-            'output_format' => 'json-ld',
-            'debug_mode' => false,
-            'cache_enabled' => true,
-            'cache_ttl' => 3600,
-        ]);
+        // Merge settings from all sections
+        $general = \flavor\SchemaMarkupGenerator\smg_get_settings('general');
+        $advanced = \flavor\SchemaMarkupGenerator\smg_get_settings('advanced');
+
+        $this->settings = array_merge($general, $advanced);
     }
 
     /**

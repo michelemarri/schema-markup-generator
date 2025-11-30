@@ -231,6 +231,15 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.3.0
+- **Major refactoring**: Complete redesign of settings architecture
+- **New**: Each tab now has its own WordPress settings group (smg_general, smg_post_types, smg_pages, etc.)
+- **New**: Separated options for each settings section (smg_general_settings, smg_advanced_settings, smg_integrations_settings)
+- **New**: Automatic migration from legacy smg_settings to new format
+- **New**: Helper function `smg_get_settings($section)` for accessing settings
+- **Fixed**: Settings from different tabs being reset when saving another tab (now impossible by design)
+- **Improved**: Export/Import now supports both legacy and new settings format
+
 ### 1.2.1
 - **Fixed**: Settings from different tabs being reset when saving another tab
 - **Improved**: Each settings tab now saves independently, preserving settings from other tabs

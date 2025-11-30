@@ -24,9 +24,43 @@ class AdvancedTab extends AbstractTab
         return 'dashicons-admin-generic';
     }
 
+    public function getSettingsGroup(): string
+    {
+        return 'smg_advanced';
+    }
+
+    public function getRegisteredOptions(): array
+    {
+        return [
+            'smg_advanced_settings' => [
+                'type' => 'array',
+                'sanitize_callback' => [$this, 'sanitizeSettings'],
+                'default' => [
+                    'cache_enabled' => true,
+                    'cache_ttl' => 3600,
+                    'debug_mode' => false,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Sanitize advanced settings
+     */
+    public function sanitizeSettings(?array $input): array
+    {
+        $input = $input ?? [];
+
+        return [
+            'cache_enabled' => !empty($input['cache_enabled']),
+            'cache_ttl' => absint($input['cache_ttl'] ?? 3600),
+            'debug_mode' => !empty($input['debug_mode']),
+        ];
+    }
+
     public function render(): void
     {
-        $settings = get_option('smg_settings', []);
+        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('advanced');
 
         ?>
         <div class="smg-tab-panel" id="tab-advanced">
@@ -39,14 +73,14 @@ class AdvancedTab extends AbstractTab
                 <?php
                 $this->renderCard(__('Cache Configuration', 'schema-markup-generator'), function () use ($settings) {
                     $this->renderToggle(
-                        'smg_settings[cache_enabled]',
+                        'smg_advanced_settings[cache_enabled]',
                         $settings['cache_enabled'] ?? true,
                         __('Enable Caching', 'schema-markup-generator'),
                         __('Cache generated schema data for faster page loads.', 'schema-markup-generator')
                     );
 
                     $this->renderNumberField(
-                        'smg_settings[cache_ttl]',
+                        'smg_advanced_settings[cache_ttl]',
                         (int) ($settings['cache_ttl'] ?? 3600),
                         __('Cache TTL (seconds)', 'schema-markup-generator'),
                         __('How long to keep cached data. Default: 3600 (1 hour).', 'schema-markup-generator'),
@@ -77,7 +111,7 @@ class AdvancedTab extends AbstractTab
                 <?php
                 $this->renderCard(__('Debug Mode', 'schema-markup-generator'), function () use ($settings) {
                     $this->renderToggle(
-                        'smg_settings[debug_mode]',
+                        'smg_advanced_settings[debug_mode]',
                         $settings['debug_mode'] ?? false,
                         __('Enable Debug Mode', 'schema-markup-generator'),
                         __('Log schema generation details for troubleshooting. Logs are stored in the plugin\'s logs folder.', 'schema-markup-generator')

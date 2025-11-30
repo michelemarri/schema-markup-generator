@@ -88,7 +88,7 @@ class RankMathIntegration
             return $schemas;
         }
 
-        $settings = get_option('smg_settings', []);
+        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('integrations');
         $avoidDuplicates = $settings['rankmath_avoid_duplicates'] ?? true;
 
         if (!$avoidDuplicates) {
@@ -150,7 +150,7 @@ class RankMathIntegration
      */
     public function filterRankMathSchema(array $data, $jsonld): array
     {
-        $settings = get_option('smg_settings', []);
+        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('integrations');
         $takeOver = $settings['rankmath_takeover_types'] ?? [];
 
         if (empty($takeOver)) {
