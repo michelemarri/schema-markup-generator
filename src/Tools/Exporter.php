@@ -27,13 +27,10 @@ class Exporter
             'version' => SMG_VERSION,
             'exported_at' => current_time('c'),
             'site_url' => home_url('/'),
-            // Export new separated settings
             'general_settings' => get_option('smg_general_settings', []),
             'advanced_settings' => get_option('smg_advanced_settings', []),
             'integrations_settings' => get_option('smg_integrations_settings', []),
             'update_settings' => get_option('smg_update_settings', []),
-            // Keep legacy for backward compatibility
-            'settings' => get_option('smg_settings', []),
         ];
 
         if ($includeMappings) {

@@ -6,29 +6,29 @@
  */
 
 :root {
-  /* Primary Colors */
-  --smg-primary-50: #eff6ff;
-  --smg-primary-100: #dbeafe;
-  --smg-primary-200: #bfdbfe;
-  --smg-primary-300: #93c5fd;
-  --smg-primary-400: #60a5fa;
-  --smg-primary-500: #3b82f6;
-  --smg-primary-600: #2563eb;
-  --smg-primary-700: #1d4ed8;
-  --smg-primary-800: #1e40af;
-  --smg-primary-900: #1e3a8a;
-  --smg-primary: #2563eb;
-  --smg-primary-hover: #1d4ed8;
+  /* Primary Colors - Grayscale */
+  --smg-primary-50: #fafafa;
+  --smg-primary-100: #f5f5f5;
+  --smg-primary-200: #e5e5e5;
+  --smg-primary-300: #d4d4d4;
+  --smg-primary-400: #a3a3a3;
+  --smg-primary-500: #737373;
+  --smg-primary-600: #525252;
+  --smg-primary-700: #404040;
+  --smg-primary-800: #262626;
+  --smg-primary-900: #171717;
+  --smg-primary: #171717;
+  --smg-primary-hover: #262626;
 
-  /* Accent Colors */
-  --smg-accent-50: #ecfeff;
-  --smg-accent-100: #cffafe;
-  --smg-accent-200: #a5f3fc;
-  --smg-accent-300: #67e8f9;
-  --smg-accent-400: #22d3ee;
-  --smg-accent-500: #06b6d4;
-  --smg-accent-600: #0891b2;
-  --smg-accent: #06b6d4;
+  /* Accent Colors - Black */
+  --smg-accent-50: #fafafa;
+  --smg-accent-100: #f5f5f5;
+  --smg-accent-200: #e5e5e5;
+  --smg-accent-300: #d4d4d4;
+  --smg-accent-400: #a3a3a3;
+  --smg-accent-500: #525252;
+  --smg-accent-600: #262626;
+  --smg-accent: #171717;
 
   /* Success Colors */
   --smg-success-50: #f0fdf4;
@@ -111,7 +111,7 @@
   --smg-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --smg-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --smg-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --smg-shadow-glow: 0 0 20px rgb(37 99 235 / 0.3);
+  --smg-shadow-glow: 0 0 20px rgb(0 0 0 / 0.15);
 
   /* Transitions */
   --smg-transition-fast: 150ms ease;

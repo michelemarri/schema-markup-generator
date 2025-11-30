@@ -35,7 +35,7 @@ class Importer
          */
         $data = apply_filters('smg_import_data', $data);
 
-        // Import new separated settings (preferred)
+        // Import settings
         if (isset($data['general_settings'])) {
             $this->importOption('smg_general_settings', $data['general_settings'], $mergeExisting);
         }
@@ -47,12 +47,6 @@ class Importer
         }
         if (isset($data['update_settings'])) {
             $this->importOption('smg_update_settings', $data['update_settings'], $mergeExisting);
-        }
-
-        // Import legacy settings (for backward compatibility)
-        if (isset($data['settings']) && !isset($data['general_settings'])) {
-            // Only import legacy if new format is not present
-            $this->importLegacySettings($data['settings'], $mergeExisting);
         }
 
         // Import post type mappings
@@ -107,48 +101,6 @@ class Importer
     }
 
     /**
-     * Import legacy settings to new format
-     */
-    private function importLegacySettings(array $settings, bool $merge): void
-    {
-        // General settings
-        $general = [
-            'enabled' => $settings['enabled'] ?? true,
-            'enable_website_schema' => $settings['enable_website_schema'] ?? true,
-            'enable_breadcrumb_schema' => $settings['enable_breadcrumb_schema'] ?? true,
-            'output_format' => $settings['output_format'] ?? 'json-ld',
-        ];
-        $this->importOption('smg_general_settings', $general, $merge);
-
-        // Advanced settings
-        $advanced = [
-            'cache_enabled' => $settings['cache_enabled'] ?? true,
-            'cache_ttl' => $settings['cache_ttl'] ?? 3600,
-            'debug_mode' => $settings['debug_mode'] ?? false,
-        ];
-        $this->importOption('smg_advanced_settings', $advanced, $merge);
-
-        // Integrations settings
-        $integrationKeys = [
-            'rankmath_avoid_duplicates', 'rankmath_takeover_types',
-            'integration_rankmath_enabled', 'integration_acf_enabled',
-            'integration_woocommerce_enabled', 'integration_memberpress_courses_enabled',
-            'acf_auto_discover', 'acf_include_nested',
-            'mpcs_auto_parent_course', 'mpcs_include_curriculum',
-            'woo_auto_product', 'woo_include_reviews', 'woo_include_offers',
-        ];
-        $integrations = [];
-        foreach ($integrationKeys as $key) {
-            if (isset($settings[$key])) {
-                $integrations[$key] = $settings[$key];
-            }
-        }
-        if (!empty($integrations)) {
-            $this->importOption('smg_integrations_settings', $integrations, $merge);
-        }
-    }
-
-    /**
      * Import from file
      *
      * @param string $filePath The file path
@@ -176,9 +128,8 @@ class Importer
      */
     private function validateData(array $data): bool
     {
-        // Must have at least settings or mappings
-        return isset($data['settings']) ||
-               isset($data['general_settings']) ||
+        // Must have at least one settings section or mappings
+        return isset($data['general_settings']) ||
                isset($data['advanced_settings']) ||
                isset($data['integrations_settings']) ||
                isset($data['post_type_mappings']) ||
@@ -187,31 +138,14 @@ class Importer
     }
 
     /**
-     * Sanitize settings array
-     */
-    private function sanitizeSettings(array $settings): array
-    {
-        $sanitized = [];
-
-        $sanitized['enabled'] = !empty($settings['enabled']);
-        $sanitized['debug_mode'] = !empty($settings['debug_mode']);
-        $sanitized['cache_enabled'] = !empty($settings['cache_enabled']);
-        $sanitized['cache_ttl'] = absint($settings['cache_ttl'] ?? 3600);
-        $sanitized['enable_website_schema'] = !empty($settings['enable_website_schema']);
-        $sanitized['enable_breadcrumb_schema'] = !empty($settings['enable_breadcrumb_schema']);
-
-        return $sanitized;
-    }
-
-    /**
-     * Sanitize post type mappings
+     * Sanitize post type/page mappings
      */
     private function sanitizeMappings(array $mappings): array
     {
         $sanitized = [];
 
-        foreach ($mappings as $postType => $schemaType) {
-            $sanitized[sanitize_key($postType)] = sanitize_text_field($schemaType);
+        foreach ($mappings as $key => $value) {
+            $sanitized[sanitize_key($key)] = sanitize_text_field($value);
         }
 
         return $sanitized;
@@ -254,4 +188,3 @@ class Importer
         return $existing;
     }
 }
-

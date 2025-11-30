@@ -109,22 +109,6 @@ class SettingsPage
     }
 
     /**
-     * Get the settings group for a tab
-     */
-    public function getTabSettingsGroup(string $tabId): string
-    {
-        if (isset($this->tabs[$tabId])) {
-            $group = $this->tabs[$tabId]->getSettingsGroup();
-            if (!empty($group)) {
-                return $group;
-            }
-        }
-
-        // Fallback for tabs without a group (read-only tabs)
-        return 'smg_readonly';
-    }
-
-    /**
      * Render the settings page
      */
     public function renderPage(): void
@@ -140,8 +124,26 @@ class SettingsPage
             $currentTab = 'general';
         }
 
+        $bannerPath = SMG_PLUGIN_DIR . 'assets/images/banner-1544x500.png';
+        $bannerUrl = SMG_PLUGIN_URL . 'assets/images/banner-1544x500.png';
+        $hasBanner = file_exists($bannerPath);
+
         ?>
         <div class="wrap smg-settings-wrap">
+            <?php if ($hasBanner): ?>
+            <div class="smg-hero">
+                <img src="<?php echo esc_url($bannerUrl); ?>" alt="Schema Markup Generator" class="smg-hero-banner">
+                <div class="smg-hero-overlay">
+                    <h1 class="smg-hero-title">
+                        <?php esc_html_e('Schema Markup Generator', 'schema-markup-generator'); ?>
+                    </h1>
+                    <p class="smg-hero-description">
+                        <?php esc_html_e('Automatically generate schema.org structured data for your content, optimized for search engines and LLMs.', 'schema-markup-generator'); ?>
+                    </p>
+                    <span class="smg-hero-version">v<?php echo esc_html(SMG_VERSION); ?></span>
+                </div>
+            </div>
+            <?php else: ?>
             <h1 class="smg-page-title">
                 <span class="smg-logo">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -152,10 +154,10 @@ class SettingsPage
                 </span>
                 <?php esc_html_e('Schema Markup Generator', 'schema-markup-generator'); ?>
             </h1>
-
             <p class="smg-description">
                 <?php esc_html_e('Automatically generate schema.org structured data for your content, optimized for search engines and LLMs.', 'schema-markup-generator'); ?>
             </p>
+            <?php endif; ?>
 
             <nav class="smg-tabs-nav">
                 <?php foreach ($this->tabs as $tabId => $tab): ?>
@@ -169,11 +171,12 @@ class SettingsPage
 
             <div class="smg-tab-content">
                 <?php
-                // Get the settings group for the current tab
-                $settingsGroup = $this->getTabSettingsGroup($currentTab);
-                $hasSettings = !empty($this->tabs[$currentTab]->getSettingsGroup());
-                ?>
+                // Check if the current tab has settings to save
+                $settingsGroup = $this->tabs[$currentTab]->getSettingsGroup();
+                $hasSettings = !empty($settingsGroup);
 
+                if ($hasSettings):
+                ?>
                 <form method="post" action="options.php" id="smg-settings-form">
                     <?php
                     // Use the tab's specific settings group
@@ -183,12 +186,15 @@ class SettingsPage
                     $this->tabs[$currentTab]->render();
                     ?>
 
-                    <?php if ($hasSettings): ?>
                     <div class="smg-actions">
                         <?php submit_button(__('Save Changes', 'schema-markup-generator'), 'primary', 'submit', false); ?>
                     </div>
-                    <?php endif; ?>
                 </form>
+                <?php else: ?>
+                <div id="smg-settings-readonly">
+                    <?php $this->tabs[$currentTab]->render(); ?>
+                </div>
+                <?php endif; ?>
             </div>
 
             <div class="smg-footer">

@@ -265,7 +265,7 @@
   letter-spacing: 0.1em;
   margin-bottom: var(--smg-space-4);
   padding-bottom: var(--smg-space-3);
-  border-bottom: 1px solid var(--smg-border);
+  /* border-bottom: 1px solid var(--smg-border); */
 }
 
 .smg-schema-list {

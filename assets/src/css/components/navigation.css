@@ -4,12 +4,12 @@
 
 .smg-tabs-nav {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--smg-space-1);
   margin-bottom: var(--smg-space-6);
   padding: var(--smg-space-1);
   background: var(--smg-surface-100);
   border-radius: var(--smg-radius-lg);
-  overflow-x: auto;
 }
 
 .smg-tab-link {
