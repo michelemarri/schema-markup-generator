@@ -83,11 +83,15 @@ class GitHubUpdater
 
             // Add icons for the plugin update screen
             $icons = [];
-            if (file_exists($iconsPath . 'icon-128x128.png')) {
-                $icons['1x'] = $iconsUrl . 'icon-128x128.png';
-            }
             if (file_exists($iconsPath . 'icon-256x256.png')) {
                 $icons['2x'] = $iconsUrl . 'icon-256x256.png';
+                $icons['default'] = $iconsUrl . 'icon-256x256.png';
+            }
+            if (file_exists($iconsPath . 'icon-128x128.png')) {
+                $icons['1x'] = $iconsUrl . 'icon-128x128.png';
+                if (empty($icons['default'])) {
+                    $icons['default'] = $iconsUrl . 'icon-128x128.png';
+                }
             }
             if (!empty($icons)) {
                 $pluginInfo->icons = $icons;
