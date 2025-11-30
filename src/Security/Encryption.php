@@ -11,7 +11,7 @@ namespace Metodo\SchemaMarkupGenerator\Security;
  * Uses WordPress AUTH_KEY as the encryption key for site-specific security.
  *
  * @package Metodo\SchemaMarkupGenerator\Security
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class Encryption
 {

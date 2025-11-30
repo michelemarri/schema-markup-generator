@@ -14,7 +14,7 @@ use WP_Post;
  * Per-post schema configuration and preview.
  *
  * @package Metodo\SchemaMarkupGenerator\Admin
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class MetaBox
 {

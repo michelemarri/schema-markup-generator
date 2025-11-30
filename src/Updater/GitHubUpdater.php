@@ -17,7 +17,7 @@ use Metodo\SchemaMarkupGenerator\Security\Encryption;
  * define('SMG_GITHUB_TOKEN', 'your-github-token-here');
  *
  * @package Metodo\SchemaMarkupGenerator\Updater
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class GitHubUpdater
 {

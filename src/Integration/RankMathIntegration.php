@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Integration;
  * Prevents duplicate schemas when Rank Math is active.
  *
  * @package Metodo\SchemaMarkupGenerator\Integration
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class RankMathIntegration
 {

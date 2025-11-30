@@ -16,7 +16,7 @@ use WP_REST_Server;
  * REST API endpoints for schema data.
  *
  * @package Metodo\SchemaMarkupGenerator\Rest
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class SchemaEndpoint
 {

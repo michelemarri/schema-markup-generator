@@ -12,7 +12,7 @@ use WP_Post;
  * Provides common functionality for all schema implementations.
  *
  * @package Metodo\SchemaMarkupGenerator\Schema
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 abstract class AbstractSchema implements SchemaInterface
 {

@@ -11,7 +11,7 @@ namespace Metodo\SchemaMarkupGenerator\Discovery;
  * including support for ACF, native meta, and other popular field plugins.
  *
  * @package Metodo\SchemaMarkupGenerator\Discovery
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class CustomFieldDiscovery
 {

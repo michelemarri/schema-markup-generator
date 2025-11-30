@@ -29,7 +29,7 @@ use Metodo\SchemaMarkupGenerator\Updater\GitHubUpdater;
  * Bootstraps all plugin components and manages initialization.
  *
  * @package Metodo\SchemaMarkupGenerator
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class Plugin
 {

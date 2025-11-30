@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Tools;
  * Imports plugin settings from JSON.
  *
  * @package Metodo\SchemaMarkupGenerator\Tools
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class Importer
 {

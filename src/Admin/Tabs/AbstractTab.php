@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
  * Base class for settings page tabs.
  *
  * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 abstract class AbstractTab
 {

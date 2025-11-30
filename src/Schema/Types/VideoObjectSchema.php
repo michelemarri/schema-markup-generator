@@ -13,7 +13,7 @@ use WP_Post;
  * For video content.
  *
  * @package Metodo\SchemaMarkupGenerator\Schema\Types
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class VideoObjectSchema extends AbstractSchema
 {

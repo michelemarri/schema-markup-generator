@@ -23,7 +23,7 @@ use Metodo\SchemaMarkupGenerator\Admin\Tabs\UpdateTab;
  * Main plugin settings page with tabbed interface.
  *
  * @package Metodo\SchemaMarkupGenerator\Admin
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class SettingsPage
 {

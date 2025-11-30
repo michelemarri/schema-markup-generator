@@ -12,7 +12,7 @@ use Metodo\SchemaMarkupGenerator\Schema\SchemaFactory;
  * Overview and configuration of available schema types.
  *
  * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class SchemaTypesTab extends AbstractTab
 {

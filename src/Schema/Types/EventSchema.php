@@ -13,7 +13,7 @@ use WP_Post;
  * For events, conferences, and gatherings.
  *
  * @package Metodo\SchemaMarkupGenerator\Schema\Types
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class EventSchema extends AbstractSchema
 {

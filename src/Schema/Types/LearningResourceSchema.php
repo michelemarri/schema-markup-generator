@@ -14,7 +14,7 @@ use WP_Post;
  * Optimized for LLM understanding and SEO.
  *
  * @package Metodo\SchemaMarkupGenerator\Schema\Types
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class LearningResourceSchema extends AbstractSchema
 {

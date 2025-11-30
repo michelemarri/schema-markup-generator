@@ -8,7 +8,7 @@ declare(strict_types=1);
  * Fired when the plugin is uninstalled.
  *
  * @package Metodo\SchemaMarkupGenerator
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  * @license GPL-3.0-or-later
  */
 

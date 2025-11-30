@@ -13,7 +13,7 @@ use Metodo\SchemaMarkupGenerator\Security\Encryption;
  * Settings for plugin updates and GitHub integration.
  *
  * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class UpdateTab extends AbstractTab
 {

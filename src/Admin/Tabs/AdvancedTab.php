@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
  * Advanced settings including cache, logging, and debug options.
  *
  * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class AdvancedTab extends AbstractTab
 {

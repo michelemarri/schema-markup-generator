@@ -14,7 +14,7 @@ use WP_Post;
  * Renders schema.org JSON-LD to the page head.
  *
  * @package Metodo\SchemaMarkupGenerator\Schema
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class SchemaRenderer
 {

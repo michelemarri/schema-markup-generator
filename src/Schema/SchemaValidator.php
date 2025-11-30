@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Schema;
  * Validates schema.org structured data.
  *
  * @package Metodo\SchemaMarkupGenerator\Schema
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class SchemaValidator
 {

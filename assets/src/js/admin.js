@@ -4,7 +4,7 @@
  * Modern ES6+ implementation with smooth animations and better UX.
  *
  * @package Metodo\SchemaMarkupGenerator
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 
 (function() {

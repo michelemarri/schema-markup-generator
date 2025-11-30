@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Integration;
  * Integration with Advanced Custom Fields for field mapping.
  *
  * @package Metodo\SchemaMarkupGenerator\Integration
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class ACFIntegration
 {

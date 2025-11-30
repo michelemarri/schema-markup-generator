@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Cache;
  * Uses WordPress object cache (Redis/Memcached if available).
  *
  * @package Metodo\SchemaMarkupGenerator\Cache
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class ObjectCache implements CacheInterface
 {

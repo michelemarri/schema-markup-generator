@@ -13,7 +13,7 @@ use WP_Post;
  * For author pages, team members, and personal profiles.
  *
  * @package Metodo\SchemaMarkupGenerator\Schema\Types
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class PersonSchema extends AbstractSchema
 {

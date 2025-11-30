@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Cache;
  * Uses WordPress transients as fallback when object cache is not available.
  *
  * @package Metodo\SchemaMarkupGenerator\Cache
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class TransientCache implements CacheInterface
 {

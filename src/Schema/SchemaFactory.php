@@ -27,7 +27,7 @@ use Metodo\SchemaMarkupGenerator\Schema\Types\SoftwareAppSchema;
  * Creates schema instances based on type identifier.
  *
  * @package Metodo\SchemaMarkupGenerator\Schema
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class SchemaFactory
 {

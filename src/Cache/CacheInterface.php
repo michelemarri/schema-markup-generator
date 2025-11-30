@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Cache;
  * Contract for cache implementations.
  *
  * @package Metodo\SchemaMarkupGenerator\Cache
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 interface CacheInterface
 {

@@ -14,7 +14,7 @@ use WP_Post;
  * Maps WordPress fields to schema.org properties.
  *
  * @package Metodo\SchemaMarkupGenerator\Mapper
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class FieldMapper
 {

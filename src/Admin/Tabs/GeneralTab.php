@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
  * General plugin settings.
  *
  * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class GeneralTab extends AbstractTab
 {

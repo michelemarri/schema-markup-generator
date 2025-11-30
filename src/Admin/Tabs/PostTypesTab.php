@@ -16,7 +16,7 @@ use Metodo\SchemaMarkupGenerator\Schema\SchemaFactory;
  * Configure schema mappings for post types.
  *
  * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class PostTypesTab extends AbstractTab
 {

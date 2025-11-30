@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Tools;
  * Exports plugin settings to JSON.
  *
  * @package Metodo\SchemaMarkupGenerator\Tools
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class Exporter
 {

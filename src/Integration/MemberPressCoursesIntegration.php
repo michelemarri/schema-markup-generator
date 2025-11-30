@@ -13,7 +13,7 @@ use WP_Post;
  * Provides parent course detection for LearningResource schema.
  *
  * @package Metodo\SchemaMarkupGenerator\Integration
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class MemberPressCoursesIntegration
 {

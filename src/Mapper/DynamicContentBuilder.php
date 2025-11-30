@@ -13,7 +13,7 @@ use WP_Post;
  * Builds dynamic content for schema properties from post data.
  *
  * @package Metodo\SchemaMarkupGenerator\Mapper
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class DynamicContentBuilder
 {

@@ -13,7 +13,7 @@ use WP_Post;
  * For software applications, mobile apps, and web apps.
  *
  * @package Metodo\SchemaMarkupGenerator\Schema\Types
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class SoftwareAppSchema extends AbstractSchema
 {

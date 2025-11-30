@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Discovery;
  * Discovers all registered taxonomies and their associations with post types.
  *
  * @package Metodo\SchemaMarkupGenerator\Discovery
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class TaxonomyDiscovery
 {

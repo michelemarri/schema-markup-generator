@@ -13,7 +13,7 @@ use WP_Post;
  * For reviews and ratings of products, services, or other items.
  *
  * @package Metodo\SchemaMarkupGenerator\Schema\Types
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class ReviewSchema extends AbstractSchema
 {

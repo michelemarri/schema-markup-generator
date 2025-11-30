@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Logger;
  * Simple file-based logger for debugging.
  *
  * @package Metodo\SchemaMarkupGenerator\Logger
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class Logger
 {

@@ -13,7 +13,7 @@ use WP_Query;
  * Configure schema mappings for individual pages.
  *
  * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class PagesTab extends AbstractTab
 {

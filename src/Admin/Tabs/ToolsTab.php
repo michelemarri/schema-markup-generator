@@ -13,7 +13,7 @@ use Metodo\SchemaMarkupGenerator\Tools\Importer;
  * Import/export and validation tools.
  *
  * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class ToolsTab extends AbstractTab
 {

@@ -13,7 +13,7 @@ use Metodo\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
  * Handles AJAX requests for loading schema properties dynamically.
  *
  * @package Metodo\SchemaMarkupGenerator\Admin
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class SchemaPropertiesHandler
 {

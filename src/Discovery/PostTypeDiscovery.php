@@ -10,7 +10,7 @@ namespace Metodo\SchemaMarkupGenerator\Discovery;
  * Discovers all registered public post types in WordPress.
  *
  * @package Metodo\SchemaMarkupGenerator\Discovery
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class PostTypeDiscovery
 {

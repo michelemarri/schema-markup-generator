@@ -12,7 +12,7 @@ use WP_Post;
  * Contract for all schema type implementations.
  *
  * @package Metodo\SchemaMarkupGenerator\Schema
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 interface SchemaInterface
 {

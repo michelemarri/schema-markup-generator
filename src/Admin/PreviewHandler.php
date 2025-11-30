@@ -13,7 +13,7 @@ use Metodo\SchemaMarkupGenerator\Schema\SchemaValidator;
  * Handles AJAX requests for schema preview and validation.
  *
  * @package Metodo\SchemaMarkupGenerator\Admin
- * @author  Michele Marri <info@metodo.dev>
+ * @author  Michele Marri <plugins@metodo.dev>
  */
 class PreviewHandler
 {
