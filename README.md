@@ -231,6 +231,11 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.6.0
+- **Changed**: Namespace updated from `flavor\SchemaMarkupGenerator` to `Metodo\SchemaMarkupGenerator`
+- **Changed**: Contact email updated to plugins@metodo.dev
+- **Note**: If you have custom code extending this plugin, update your `use` statements accordingly
+
 ### 1.4.1
 - **Added**: Visual indicator (green border) for post types with schema configured
 - **Improved**: Mapped state updates dynamically when changing schema type
