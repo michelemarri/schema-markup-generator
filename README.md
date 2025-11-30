@@ -231,6 +231,10 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.4.1
+- **Added**: Visual indicator (green border) for post types with schema configured
+- **Improved**: Mapped state updates dynamically when changing schema type
+
 ### 1.4.0
 - **New**: Dynamic field mapping - schema properties now load instantly when changing schema type (no save required)
 - **New**: Auto-expand field mapping panel when selecting a schema type
