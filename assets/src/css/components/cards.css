@@ -63,12 +63,12 @@
 
 /* Mapped state - schema is selected */
 .smg-post-type-card.smg-mapped {
-  border-color: var(--smg-success-300);
+  border-color: var(--smg-success);
   border-left-width: 3px;
 }
 
 .smg-post-type-card.smg-mapped:hover {
-  border-color: var(--smg-success-400);
+  border-color: var(--smg-success-500);
 }
 
 .smg-post-types-list {
