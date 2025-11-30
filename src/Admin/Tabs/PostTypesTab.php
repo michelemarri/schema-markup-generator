@@ -96,8 +96,8 @@ class PostTypesTab extends AbstractTab
                             </div>
                             <button type="button" class="smg-toggle-fields button button-secondary"
                                     aria-expanded="false">
-                                <span class="dashicons dashicons-arrow-down-alt2"></span>
                                 <?php esc_html_e('Field Mapping', 'schema-markup-generator'); ?>
+                                <span class="dashicons dashicons-arrow-down-alt2"></span>
                             </button>
                         </div>
 

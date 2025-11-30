@@ -244,6 +244,7 @@
   font-size: var(--smg-text-sm);
   font-weight: 600;
   color: var(--smg-text);
+  word-break: break-word;
 }
 
 /* Footer */
