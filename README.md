@@ -231,6 +231,11 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.3.1
+- **Fixed**: Update checker showing cryptic 404 errors for private repositories without token
+- **Improved**: Clear admin notice on plugins page when GitHub token is missing for private repos
+- **Added**: Direct link to configure token in the missing token notice
+
 ### 1.3.0
 - **Major refactoring**: Complete redesign of settings architecture
 - **New**: Each tab now has its own WordPress settings group (smg_general, smg_post_types, smg_pages, etc.)

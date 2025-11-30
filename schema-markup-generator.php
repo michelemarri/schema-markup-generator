@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Plugin Name:       Schema Markup Generator
  * Plugin URI:        https://github.com/michelemarri/schema-markup-generator
  * Description:       Automatic schema markup generation optimized for LLMs. Auto-discovers post types, custom fields, and taxonomies.
- * Version:           1.3.0
+ * Version:           1.3.1
  * Requires at least: 6.0
  * Tested up to:      6.8
  * Requires PHP:      8.2
@@ -28,7 +28,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('SMG_VERSION', '1.3.0');
+define('SMG_VERSION', '1.3.1');
 define('SMG_PLUGIN_FILE', __FILE__);
 define('SMG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SMG_PLUGIN_URL', plugin_dir_url(__FILE__));
