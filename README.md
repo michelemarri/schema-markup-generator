@@ -229,6 +229,19 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - [GitHub Issues](https://github.com/michelemarri/schema-markup-generator/issues)
 - [Metodo.dev](https://metodo.dev)
 
+## Changelog
+
+### 1.2.1
+- **Fixed**: Settings from different tabs being reset when saving another tab
+- **Improved**: Each settings tab now saves independently, preserving settings from other tabs
+
+### 1.2.0
+- Initial stable release with full feature set
+- 16 schema types supported
+- ACF, Rank Math, WooCommerce, and MemberPress Courses integrations
+- REST API for programmatic access
+- Modern admin UI with tabbed interface
+
 ## License
 
 This project is licensed under the GPL v3 License - see the [LICENSE](LICENSE) file for details.

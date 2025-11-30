@@ -128,21 +128,115 @@ class SettingsPage
 
     /**
      * Sanitize settings
+     *
+     * Each tab only updates its own settings, preserving other tabs' values.
      */
     public function sanitizeSettings(?array $input): array
     {
         $input = $input ?? [];
-        $sanitized = [];
 
-        $sanitized['enabled'] = !empty($input['enabled']);
-        $sanitized['debug_mode'] = !empty($input['debug_mode']);
-        $sanitized['cache_enabled'] = !empty($input['cache_enabled']);
-        $sanitized['cache_ttl'] = absint($input['cache_ttl'] ?? 3600);
-        $sanitized['enable_website_schema'] = !empty($input['enable_website_schema']);
-        $sanitized['enable_breadcrumb_schema'] = !empty($input['enable_breadcrumb_schema']);
-        $sanitized['output_format'] = sanitize_text_field($input['output_format'] ?? 'json-ld');
+        // Get existing settings to preserve values from other tabs
+        $existing = get_option('smg_settings', []);
+        if (!is_array($existing)) {
+            $existing = [];
+        }
+
+        // Start with existing values
+        $sanitized = $existing;
+
+        // Get which tab is being saved
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified by settings_fields()
+        $currentTab = isset($_POST['smg_current_tab']) ? sanitize_key($_POST['smg_current_tab']) : '';
+
+        // Define which settings belong to which tab
+        $tabSettings = $this->getTabSettingsMap();
+
+        // If we know which tab is saving, only update those settings
+        if ($currentTab && isset($tabSettings[$currentTab])) {
+            foreach ($tabSettings[$currentTab] as $key => $config) {
+                $sanitized[$key] = $this->sanitizeSettingValue($key, $input, $config);
+            }
+        } else {
+            // Fallback: sanitize all settings (for backward compatibility)
+            foreach ($tabSettings as $settings) {
+                foreach ($settings as $key => $config) {
+                    $sanitized[$key] = $this->sanitizeSettingValue($key, $input, $config);
+                }
+            }
+        }
 
         return $sanitized;
+    }
+
+    /**
+     * Get map of settings per tab
+     *
+     * @return array<string, array<string, array{type: string, default: mixed}>>
+     */
+    private function getTabSettingsMap(): array
+    {
+        return [
+            'general' => [
+                'enabled' => ['type' => 'bool', 'default' => true],
+                'enable_website_schema' => ['type' => 'bool', 'default' => true],
+                'enable_breadcrumb_schema' => ['type' => 'bool', 'default' => true],
+                'output_format' => ['type' => 'string', 'default' => 'json-ld'],
+            ],
+            'advanced' => [
+                'cache_enabled' => ['type' => 'bool', 'default' => true],
+                'cache_ttl' => ['type' => 'int', 'default' => 3600],
+                'debug_mode' => ['type' => 'bool', 'default' => false],
+            ],
+            'integrations' => [
+                'rankmath_avoid_duplicates' => ['type' => 'bool', 'default' => true],
+                'rankmath_takeover_types' => ['type' => 'array', 'default' => []],
+                'integration_rankmath_enabled' => ['type' => 'bool', 'default' => true],
+                'integration_acf_enabled' => ['type' => 'bool', 'default' => true],
+                'integration_woocommerce_enabled' => ['type' => 'bool', 'default' => true],
+                'integration_memberpress_courses_enabled' => ['type' => 'bool', 'default' => true],
+                'acf_auto_discover' => ['type' => 'bool', 'default' => true],
+                'acf_include_nested' => ['type' => 'bool', 'default' => true],
+                'mpcs_auto_parent_course' => ['type' => 'bool', 'default' => true],
+                'mpcs_include_curriculum' => ['type' => 'bool', 'default' => false],
+                'woo_auto_product' => ['type' => 'bool', 'default' => true],
+                'woo_include_reviews' => ['type' => 'bool', 'default' => true],
+                'woo_include_offers' => ['type' => 'bool', 'default' => true],
+            ],
+        ];
+    }
+
+    /**
+     * Sanitize a single setting value based on its type
+     *
+     * @param string $key Setting key
+     * @param array $input Input data
+     * @param array $config Setting configuration
+     * @return mixed Sanitized value
+     */
+    private function sanitizeSettingValue(string $key, array $input, array $config): mixed
+    {
+        $type = $config['type'];
+        $default = $config['default'];
+
+        switch ($type) {
+            case 'bool':
+                return !empty($input[$key]);
+
+            case 'int':
+                return absint($input[$key] ?? $default);
+
+            case 'string':
+                return sanitize_text_field($input[$key] ?? $default);
+
+            case 'array':
+                if (!isset($input[$key]) || !is_array($input[$key])) {
+                    return [];
+                }
+                return array_map('sanitize_text_field', $input[$key]);
+
+            default:
+                return $default;
+        }
     }
 
     /**
@@ -268,6 +362,11 @@ class SettingsPage
                 <form method="post" action="options.php" id="smg-settings-form">
                     <?php
                     settings_fields('smg_settings');
+
+                    // Add hidden field to identify which tab is being saved
+                    ?>
+                    <input type="hidden" name="smg_current_tab" value="<?php echo esc_attr($currentTab); ?>">
+                    <?php
 
                     // Render current tab
                     $this->tabs[$currentTab]->render();
