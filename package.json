@@ -1,6 +1,6 @@
 {
   "name": "schema-markup-generator",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "WordPress plugin for automatic Schema.org structured data generation",
   "private": true,
   "scripts": {
@@ -10,6 +10,9 @@
     "build:js": "esbuild assets/src/js/admin.js --bundle --minify --target=es2020 --outfile=assets/js/admin.js",
     "watch": "concurrently \"npm run build:css -- --watch\" \"npm run watch:js\"",
     "watch:js": "esbuild assets/src/js/admin.js --bundle --target=es2020 --outfile=assets/js/admin.js --watch"
+  },
+  "dependencies": {
+    "metodo-design-system": "file:/Users/michelemarri/Sites/metodo-design-system"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.16",

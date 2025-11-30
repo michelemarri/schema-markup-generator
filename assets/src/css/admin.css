@@ -1,105 +1,11 @@
 /**
  * Schema Markup Generator - Admin Styles
  * 
- * Modern design system with Tailwind CSS utilities.
+ * Uses Metodo Design System for all components.
  * 
  * @package flavor\SchemaMarkupGenerator
  * @author  Michele Marri <info@metodo.dev>
  */
 
-/* ========================================
-   Design Tokens (CSS Custom Properties)
-   Synced with Tailwind config
-   ======================================== */
-@import './components/tokens.css';
-
-/* ========================================
-   Base & Reset (WordPress Admin compatible)
-   ======================================== */
-@import './components/base.css';
-
-/* ========================================
-   Layout Components
-   ======================================== */
-@import './components/layout.css';
-
-/* ========================================
-   Navigation (Tabs)
-   ======================================== */
-@import './components/navigation.css';
-
-/* ========================================
-   Cards & Panels
-   ======================================== */
-@import './components/cards.css';
-
-/* ========================================
-   Form Elements
-   ======================================== */
-@import './components/forms.css';
-
-/* ========================================
-   Buttons
-   ======================================== */
-@import './components/buttons.css';
-
-/* ========================================
-   Toggle Switch
-   ======================================== */
-@import './components/toggle.css';
-
-/* ========================================
-   Badges & Tags
-   ======================================== */
-@import './components/badges.css';
-
-/* ========================================
-   Tables
-   ======================================== */
-@import './components/tables.css';
-
-/* ========================================
-   Alerts & Notices
-   ======================================== */
-@import './components/alerts.css';
-
-/* ========================================
-   Code Preview
-   ======================================== */
-@import './components/code.css';
-
-/* ========================================
-   Schema-specific Components
-   ======================================== */
-@import './components/schema.css';
-
-/* ========================================
-   Pages Tab
-   ======================================== */
-@import './components/pages.css';
-
-/* ========================================
-   Update Tab
-   ======================================== */
-@import './components/update.css';
-
-/* ========================================
-   Meta Box
-   ======================================== */
-@import './components/metabox.css';
-
-/* ========================================
-   Utilities & Helpers
-   ======================================== */
-@import './components/utilities.css';
-
-/* ========================================
-   Animations
-   ======================================== */
-@import './components/animations.css';
-
-/* ========================================
-   Responsive
-   ======================================== */
-@import './components/responsive.css';
-
+/* Import the complete Metodo Design System */
+@import 'metodo-design-system/src/index.css';

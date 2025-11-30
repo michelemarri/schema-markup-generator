@@ -41,7 +41,7 @@ class Logger
     {
         $this->logDir = $logDir;
         $this->debugMode = $debugMode;
-        $this->logFile = $logDir . '/smg-' . date('Y-m-d') . '.log';
+        $this->logFile = $logDir . '/mds-' . date('Y-m-d') . '.log';
 
         // Ensure log directory exists
         if (!is_dir($this->logDir)) {
@@ -113,7 +113,7 @@ class Logger
     private function rotateIfNeeded(): void
     {
         // Keep only last 7 days of logs
-        $files = glob($this->logDir . '/smg-*.log');
+        $files = glob($this->logDir . '/mds-*.log');
 
         if ($files && count($files) > 7) {
             usort($files, function ($a, $b) {

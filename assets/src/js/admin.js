@@ -43,11 +43,11 @@
          */
         cacheElements() {
             this.elements = {
-                settingsForm: document.getElementById('smg-settings-form'),
-                tabsNav: document.querySelector('.smg-tabs-nav'),
-                tabContent: document.querySelector('.smg-tab-content'),
-                schemaPreview: document.getElementById('smg-schema-preview'),
-                validationStatus: document.getElementById('smg-validation-status'),
+                settingsForm: document.getElementById('mds-settings-form'),
+                tabsNav: document.querySelector('.mds-tabs-nav'),
+                tabContent: document.querySelector('.mds-tab-content'),
+                schemaPreview: document.getElementById('mds-schema-preview'),
+                validationStatus: document.getElementById('mds-validation-status'),
             };
         },
 
@@ -57,42 +57,42 @@
         bindEvents() {
             // Toggle field mappings
             document.addEventListener('click', (e) => {
-                if (e.target.closest('.smg-toggle-fields')) {
+                if (e.target.closest('.mds-toggle-fields')) {
                     this.handleToggleFields(e);
                 }
             });
 
             // Schema type change
             document.addEventListener('change', (e) => {
-                if (e.target.classList.contains('smg-schema-select')) {
+                if (e.target.classList.contains('mds-schema-select')) {
                     this.handleSchemaTypeChange(e);
                 }
             });
 
             // Refresh preview
             document.addEventListener('click', (e) => {
-                if (e.target.closest('.smg-refresh-preview')) {
+                if (e.target.closest('.mds-refresh-preview')) {
                     this.handleRefreshPreview(e);
                 }
             });
 
             // Copy schema
             document.addEventListener('click', (e) => {
-                if (e.target.closest('.smg-copy-schema')) {
+                if (e.target.closest('.mds-copy-schema')) {
                     this.handleCopySchema(e);
                 }
             });
 
             // Google test
             document.addEventListener('click', (e) => {
-                if (e.target.id === 'smg-test-google' || e.target.closest('#smg-test-google')) {
+                if (e.target.id === 'mds-test-google' || e.target.closest('#mds-test-google')) {
                     this.handleGoogleTest(e);
                 }
             });
 
             // Schema validator
             document.addEventListener('click', (e) => {
-                if (e.target.id === 'smg-validate-schema' || e.target.closest('#smg-validate-schema')) {
+                if (e.target.id === 'mds-validate-schema' || e.target.closest('#mds-validate-schema')) {
                     this.handleSchemaValidator(e);
                 }
             });
@@ -106,49 +106,49 @@
 
             // Toggle switch animation
             document.addEventListener('change', (e) => {
-                if (e.target.closest('.smg-toggle input')) {
+                if (e.target.closest('.mds-toggle input')) {
                     this.animateToggle(e.target);
                 }
             });
 
             // Pages tab: Apply suggestion
             document.addEventListener('click', (e) => {
-                if (e.target.closest('.smg-apply-suggestion')) {
+                if (e.target.closest('.mds-apply-suggestion')) {
                     this.handleApplySuggestion(e);
                 }
             });
 
             // Pages tab: Pagination input
             document.addEventListener('keypress', (e) => {
-                if (e.target.classList.contains('smg-pagination-input') && e.key === 'Enter') {
+                if (e.target.classList.contains('mds-pagination-input') && e.key === 'Enter') {
                     this.handlePaginationInput(e);
                 }
             });
 
             // Pages tab: Pagination input blur
             document.addEventListener('change', (e) => {
-                if (e.target.classList.contains('smg-pagination-input')) {
+                if (e.target.classList.contains('mds-pagination-input')) {
                     this.handlePaginationInput(e);
                 }
             });
 
             // Update tab: Toggle password visibility
             document.addEventListener('click', (e) => {
-                if (e.target.closest('.smg-toggle-password')) {
+                if (e.target.closest('.mds-toggle-password')) {
                     this.handleTogglePassword(e);
                 }
             });
 
             // Update tab: Remove token
             document.addEventListener('click', (e) => {
-                if (e.target.closest('#smg-remove-token')) {
+                if (e.target.closest('#mds-remove-token')) {
                     this.handleRemoveToken(e);
                 }
             });
 
             // Update tab: Check for updates
             document.addEventListener('click', (e) => {
-                if (e.target.closest('#smg-check-updates')) {
+                if (e.target.closest('#mds-check-updates')) {
                     this.handleCheckUpdates(e);
                 }
             });
@@ -168,7 +168,7 @@
          */
         initAnimations() {
             // Animate cards on page load
-            const cards = document.querySelectorAll('.smg-card, .smg-post-type-card, .smg-integration-card, .smg-step');
+            const cards = document.querySelectorAll('.mds-card, .mds-post-type-card, .mds-integration-card, .mds-step');
             cards.forEach((card, index) => {
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(10px)';
@@ -181,7 +181,7 @@
             });
 
             // Animate schema items
-            const schemaItems = document.querySelectorAll('.smg-schema-item');
+            const schemaItems = document.querySelectorAll('.mds-schema-item');
             schemaItems.forEach((item, index) => {
                 item.style.opacity = '0';
                 
@@ -192,7 +192,7 @@
             });
 
             // Animate page rows in Pages tab
-            const pageRows = document.querySelectorAll('.smg-page-row');
+            const pageRows = document.querySelectorAll('.mds-page-row');
             pageRows.forEach((row, index) => {
                 row.style.opacity = '0';
                 row.style.transform = 'translateX(-10px)';
@@ -210,9 +210,9 @@
          */
         handleToggleFields(e) {
             e.preventDefault();
-            const button = e.target.closest('.smg-toggle-fields');
-            const card = button.closest('.smg-post-type-card');
-            const fields = card.querySelector('.smg-post-type-fields');
+            const button = e.target.closest('.mds-toggle-fields');
+            const card = button.closest('.mds-post-type-card');
+            const fields = card.querySelector('.mds-post-type-fields');
             const isExpanded = button.getAttribute('aria-expanded') === 'true';
 
             button.setAttribute('aria-expanded', !isExpanded);
@@ -233,23 +233,23 @@
             const select = e.target;
             const postType = select.dataset.postType;
             const schemaType = select.value;
-            const card = select.closest('.smg-post-type-card');
-            const fieldsContainer = card.querySelector('.smg-field-mappings');
+            const card = select.closest('.mds-post-type-card');
+            const fieldsContainer = card.querySelector('.mds-field-mappings');
             
             if (!fieldsContainer) return;
 
             // Update mapped state
             if (schemaType) {
-                card.classList.add('smg-mapped');
+                card.classList.add('mds-mapped');
             } else {
-                card.classList.remove('smg-mapped');
+                card.classList.remove('mds-mapped');
             }
 
             // Show loading state
             fieldsContainer.style.opacity = '0.5';
             fieldsContainer.innerHTML = `
-                <div class="smg-loading-fields">
-                    <span class="dashicons dashicons-update smg-spin"></span>
+                <div class="mds-loading-fields">
+                    <span class="dashicons dashicons-update mds-spin"></span>
                     ${typeof smgAdmin !== 'undefined' && smgAdmin.strings?.loading ? smgAdmin.strings.loading : 'Loading...'}
                 </div>
             `;
@@ -263,7 +263,7 @@
                     fieldsContainer.style.opacity = '1';
                     
                     // Animate the new rows
-                    const rows = fieldsContainer.querySelectorAll('.smg-mapping-row');
+                    const rows = fieldsContainer.querySelectorAll('.mds-mapping-row');
                     rows.forEach((row, index) => {
                         row.style.opacity = '0';
                         row.style.transform = 'translateY(10px)';
@@ -276,8 +276,8 @@
                     });
 
                     // Auto-expand fields section if collapsed
-                    const fieldsSection = card.querySelector('.smg-post-type-fields');
-                    const toggleButton = card.querySelector('.smg-toggle-fields');
+                    const fieldsSection = card.querySelector('.mds-post-type-fields');
+                    const toggleButton = card.querySelector('.mds-toggle-fields');
                     
                     if (fieldsSection && fieldsSection.style.display === 'none' && schemaType) {
                         this.slideDown(fieldsSection);
@@ -287,7 +287,7 @@
                     }
                 } else {
                     fieldsContainer.innerHTML = `
-                        <p class="smg-notice">
+                        <p class="mds-notice">
                             <span class="dashicons dashicons-warning"></span>
                             ${response.data?.message || 'Failed to load schema properties'}
                         </p>
@@ -297,7 +297,7 @@
             } catch (error) {
                 console.error('Failed to load schema properties:', error);
                 fieldsContainer.innerHTML = `
-                    <p class="smg-notice">
+                    <p class="mds-notice">
                         <span class="dashicons dashicons-warning"></span>
                         Failed to load schema properties. Please try again.
                     </p>
@@ -342,7 +342,7 @@
          */
         async handleRefreshPreview(e) {
             e.preventDefault();
-            const button = e.target.closest('.smg-refresh-preview');
+            const button = e.target.closest('.mds-refresh-preview');
             const postIdInput = document.querySelector('input[name="smg_post_id"]');
             
             if (!postIdInput) return;
@@ -424,14 +424,14 @@
 
             if (validation.valid) {
                 html = `
-                    <div class="smg-validation-status valid smg-animate-fade-in">
+                    <div class="mds-validation-status valid mds-animate-fade-in">
                         <span class="dashicons dashicons-yes-alt"></span>
                         ${smgAdmin.strings.valid}
                     </div>
                 `;
             } else {
                 html = `
-                    <div class="smg-validation-status invalid smg-animate-fade-in">
+                    <div class="mds-validation-status invalid mds-animate-fade-in">
                         <span class="dashicons dashicons-warning"></span>
                         ${smgAdmin.strings.invalid}
                         ${validation.errors && validation.errors.length ? `
@@ -445,7 +445,7 @@
 
             if (validation.warnings && validation.warnings.length) {
                 html += `
-                    <div class="smg-validation-warnings smg-animate-fade-in">
+                    <div class="mds-validation-warnings mds-animate-fade-in">
                         <strong>Warnings:</strong>
                         <ul>
                             ${validation.warnings.map(warning => `<li>${warning}</li>`).join('')}
@@ -462,7 +462,7 @@
          */
         async handleCopySchema(e) {
             e.preventDefault();
-            const button = e.target.closest('.smg-copy-schema');
+            const button = e.target.closest('.mds-copy-schema');
             const schema = this.elements.schemaPreview?.textContent;
 
             if (!schema) return;
@@ -473,11 +473,11 @@
                 // Visual feedback
                 const originalHtml = button.innerHTML;
                 button.innerHTML = '<span class="dashicons dashicons-yes"></span> ' + smgAdmin.strings.copied;
-                button.classList.add('smg-btn-success');
+                button.classList.add('mds-btn-success');
 
                 setTimeout(() => {
                     button.innerHTML = originalHtml;
-                    button.classList.remove('smg-btn-success');
+                    button.classList.remove('mds-btn-success');
                 }, 2000);
 
                 this.showToast(smgAdmin.strings.copied, 'success');
@@ -492,7 +492,7 @@
          */
         handleGoogleTest(e) {
             e.preventDefault();
-            const urlInput = document.getElementById('smg-test-url');
+            const urlInput = document.getElementById('mds-test-url');
             const url = urlInput?.value || window.location.origin;
             const testUrl = `https://search.google.com/test/rich-results?url=${encodeURIComponent(url)}`;
             window.open(testUrl, '_blank', 'noopener,noreferrer');
@@ -503,7 +503,7 @@
          */
         handleSchemaValidator(e) {
             e.preventDefault();
-            const urlInput = document.getElementById('smg-validate-url');
+            const urlInput = document.getElementById('mds-validate-url');
             const url = urlInput?.value || window.location.origin;
             const testUrl = `https://validator.schema.org/?url=${encodeURIComponent(url)}`;
             window.open(testUrl, '_blank', 'noopener,noreferrer');
@@ -524,7 +524,7 @@
          */
         handleApplySuggestion(e) {
             e.preventDefault();
-            const button = e.target.closest('.smg-apply-suggestion');
+            const button = e.target.closest('.mds-apply-suggestion');
             const pageId = button.dataset.pageId;
             const schema = button.dataset.schema;
             const select = document.querySelector(`select[name="smg_page_mappings[${pageId}]"]`);
@@ -533,18 +533,18 @@
                 select.value = schema;
                 
                 // Visual feedback
-                const row = button.closest('.smg-page-row');
+                const row = button.closest('.mds-page-row');
                 row.style.transition = 'background-color 0.3s ease';
-                row.style.backgroundColor = 'var(--smg-success-50)';
+                row.style.backgroundColor = 'var(--mds-success-50)';
                 
                 setTimeout(() => {
                     row.style.backgroundColor = '';
                 }, 1000);
                 
                 // Replace button with check mark
-                const cell = button.closest('.smg-col-suggestion');
+                const cell = button.closest('.mds-col-suggestion');
                 cell.innerHTML = `
-                    <span class="smg-suggestion-applied">
+                    <span class="mds-suggestion-applied">
                         <span class="dashicons dashicons-yes-alt"></span>
                     </span>
                 `;
@@ -574,7 +574,7 @@
          */
         handleTogglePassword(e) {
             e.preventDefault();
-            const button = e.target.closest('.smg-toggle-password');
+            const button = e.target.closest('.mds-toggle-password');
             const targetId = button.dataset.target;
             const input = document.getElementById(targetId);
             const icon = button.querySelector('.dashicons');
@@ -607,13 +607,13 @@
                 tokenInput.value = '';
                 
                 // Update status
-                const statusElement = document.querySelector('.smg-token-status');
+                const statusElement = document.querySelector('.mds-token-status');
                 if (statusElement) {
                     statusElement.remove();
                 }
                 
                 // Hide remove button
-                const removeButton = document.getElementById('smg-remove-token');
+                const removeButton = document.getElementById('mds-remove-token');
                 if (removeButton) {
                     removeButton.style.display = 'none';
                 }
@@ -627,13 +627,13 @@
          */
         async handleCheckUpdates(e) {
             e.preventDefault();
-            const button = e.target.closest('#smg-check-updates');
-            const resultDiv = document.getElementById('smg-update-result');
+            const button = e.target.closest('#mds-check-updates');
+            const resultDiv = document.getElementById('mds-update-result');
             
             // Add loading state
             button.disabled = true;
             const originalHtml = button.innerHTML;
-            button.innerHTML = '<span class="dashicons dashicons-update smg-spin"></span> Checking...';
+            button.innerHTML = '<span class="dashicons dashicons-update mds-spin"></span> Checking...';
             
             if (resultDiv) {
                 resultDiv.style.display = 'none';
@@ -658,21 +658,21 @@
                     
                     if (data.success) {
                         if (data.data.update_available) {
-                            resultDiv.className = 'smg-update-result smg-result-success';
+                            resultDiv.className = 'mds-update-result mds-result-success';
                             resultDiv.innerHTML = `
                                 <span class="dashicons dashicons-yes-alt"></span>
                                 New version available: <strong>${data.data.new_version}</strong>
-                                <a href="${data.data.update_url}" class="smg-btn smg-btn-sm smg-btn-primary" style="margin-left: 10px;">Update Now</a>
+                                <a href="${data.data.update_url}" class="mds-btn mds-btn-sm mds-btn-primary" style="margin-left: 10px;">Update Now</a>
                             `;
                         } else {
-                            resultDiv.className = 'smg-update-result smg-result-info';
+                            resultDiv.className = 'mds-update-result mds-result-info';
                             resultDiv.innerHTML = `
                                 <span class="dashicons dashicons-yes"></span>
                                 You have the latest version installed.
                             `;
                         }
                     } else {
-                        resultDiv.className = 'smg-update-result smg-result-error';
+                        resultDiv.className = 'mds-update-result mds-result-error';
                         resultDiv.innerHTML = `
                             <span class="dashicons dashicons-warning"></span>
                             ${data.data?.message || 'Could not check for updates.'}
@@ -683,7 +683,7 @@
                 console.error('Update check failed:', error);
                 if (resultDiv) {
                     resultDiv.style.display = 'block';
-                    resultDiv.className = 'smg-update-result smg-result-error';
+                    resultDiv.className = 'mds-update-result mds-result-error';
                     resultDiv.innerHTML = `
                         <span class="dashicons dashicons-warning"></span>
                         Failed to check for updates. Please try again.
@@ -699,7 +699,7 @@
          * Animate toggle switch
          */
         animateToggle(input) {
-            const toggle = input.closest('.smg-toggle');
+            const toggle = input.closest('.mds-toggle');
             if (toggle) {
                 toggle.style.transform = 'scale(0.95)';
                 setTimeout(() => {
@@ -719,9 +719,9 @@
          * Initialize collapsible panels
          */
         initCollapsibles() {
-            document.querySelectorAll('.smg-meta-box-panel-header').forEach(header => {
+            document.querySelectorAll('.mds-meta-box-panel-header').forEach(header => {
                 header.addEventListener('click', () => {
-                    const panel = header.closest('.smg-meta-box-panel');
+                    const panel = header.closest('.mds-meta-box-panel');
                     panel.classList.toggle('collapsed');
                 });
             });
@@ -770,17 +770,17 @@
          */
         showToast(message, type = 'info') {
             const toast = document.createElement('div');
-            toast.className = `smg-toast smg-toast-${type} smg-animate-slide-in-right`;
+            toast.className = `mds-toast mds-toast-${type} mds-animate-slide-in-right`;
             toast.innerHTML = `
                 <span class="dashicons dashicons-${type === 'success' ? 'yes-alt' : type === 'error' ? 'warning' : 'info'}"></span>
                 ${message}
             `;
 
             // Create container if doesn't exist
-            let container = document.querySelector('.smg-toast-container');
+            let container = document.querySelector('.mds-toast-container');
             if (!container) {
                 container = document.createElement('div');
-                container.className = 'smg-toast-container';
+                container.className = 'mds-toast-container';
                 container.style.cssText = 'position: fixed; top: 50px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;';
                 document.body.appendChild(container);
             }

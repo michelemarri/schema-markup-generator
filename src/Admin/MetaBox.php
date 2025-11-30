@@ -66,9 +66,9 @@ class MetaBox
         $schemaTypes = $this->schemaFactory->getTypes();
 
         ?>
-        <div class="smg-meta-box">
-            <div class="smg-meta-box-section">
-                <label class="smg-checkbox-label">
+        <div class="mds-meta-box">
+            <div class="mds-meta-box-section">
+                <label class="mds-checkbox-label">
                     <input type="checkbox"
                            name="smg_disable_schema"
                            value="1"
@@ -77,7 +77,7 @@ class MetaBox
                 </label>
             </div>
 
-            <div class="smg-meta-box-section">
+            <div class="mds-meta-box-section">
                 <label for="smg_schema_type">
                     <?php esc_html_e('Schema Type', 'schema-markup-generator'); ?>
                 </label>
@@ -106,39 +106,39 @@ class MetaBox
                 </p>
             </div>
 
-            <div class="smg-meta-box-section smg-preview-section">
-                <div class="smg-preview-header">
+            <div class="mds-meta-box-section mds-preview-section">
+                <div class="mds-preview-header">
                     <h4><?php esc_html_e('Schema Preview', 'schema-markup-generator'); ?></h4>
-                    <div class="smg-preview-actions">
-                        <button type="button" class="button smg-refresh-preview">
+                    <div class="mds-preview-actions">
+                        <button type="button" class="button mds-refresh-preview">
                             <span class="dashicons dashicons-update"></span>
                             <?php esc_html_e('Refresh', 'schema-markup-generator'); ?>
                         </button>
-                        <button type="button" class="button smg-copy-schema">
+                        <button type="button" class="button mds-copy-schema">
                             <span class="dashicons dashicons-admin-page"></span>
                             <?php esc_html_e('Copy', 'schema-markup-generator'); ?>
                         </button>
                     </div>
                 </div>
 
-                <div class="smg-preview-content">
+                <div class="mds-preview-content">
                     <?php if ($post->post_status === 'publish'): ?>
-                        <pre class="smg-schema-preview" id="smg-schema-preview"><?php
+                        <pre class="mds-schema-preview" id="mds-schema-preview"><?php
                         echo esc_html($this->schemaRenderer->getJsonForPost($post->ID));
                         ?></pre>
                     <?php else: ?>
-                        <p class="smg-preview-notice">
+                        <p class="mds-preview-notice">
                             <span class="dashicons dashicons-info"></span>
                             <?php esc_html_e('Publish this post to see the schema preview.', 'schema-markup-generator'); ?>
                         </p>
                     <?php endif; ?>
                 </div>
 
-                <div class="smg-validation-status" id="smg-validation-status">
+                <div class="mds-validation-status" id="mds-validation-status">
                     <!-- Populated via AJAX -->
                 </div>
 
-                <div class="smg-test-links">
+                <div class="mds-test-links">
                     <a href="<?php echo esc_url('https://search.google.com/test/rich-results?url=' . urlencode(get_permalink($post))); ?>"
                        target="_blank"
                        rel="noopener"

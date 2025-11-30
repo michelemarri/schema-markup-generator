@@ -129,23 +129,23 @@ class SettingsPage
         $hasBanner = file_exists($bannerPath);
 
         ?>
-        <div class="wrap smg-settings-wrap">
+        <div class="wrap mds-wrap">
             <?php if ($hasBanner): ?>
-            <div class="smg-hero">
-                <img src="<?php echo esc_url($bannerUrl); ?>" alt="Schema Markup Generator" class="smg-hero-banner">
-                <div class="smg-hero-overlay">
-                    <h1 class="smg-hero-title">
+            <div class="mds-hero">
+                <img src="<?php echo esc_url($bannerUrl); ?>" alt="Schema Markup Generator" class="mds-hero-banner">
+                <div class="mds-hero-overlay">
+                    <h1 class="mds-hero-title">
                         <?php esc_html_e('Schema Markup Generator', 'schema-markup-generator'); ?>
                     </h1>
-                    <p class="smg-hero-description">
+                    <p class="mds-hero-description">
                         <?php esc_html_e('Automatically generate schema.org structured data for your content, optimized for search engines and LLMs.', 'schema-markup-generator'); ?>
                     </p>
-                    <span class="smg-hero-version">v<?php echo esc_html(SMG_VERSION); ?></span>
+                    <span class="mds-hero-version">v<?php echo esc_html(SMG_VERSION); ?></span>
                 </div>
             </div>
             <?php else: ?>
-            <h1 class="smg-page-title">
-                <span class="smg-logo">
+            <h1 class="mds-page-title">
+                <span class="mds-logo">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -154,22 +154,22 @@ class SettingsPage
                 </span>
                 <?php esc_html_e('Schema Markup Generator', 'schema-markup-generator'); ?>
             </h1>
-            <p class="smg-description">
+            <p class="mds-description">
                 <?php esc_html_e('Automatically generate schema.org structured data for your content, optimized for search engines and LLMs.', 'schema-markup-generator'); ?>
             </p>
             <?php endif; ?>
 
-            <nav class="smg-tabs-nav">
+            <nav class="mds-tabs-nav">
                 <?php foreach ($this->tabs as $tabId => $tab): ?>
                     <a href="<?php echo esc_url(admin_url('options-general.php?page=schema-markup-generator&tab=' . $tabId)); ?>"
-                       class="smg-tab-link <?php echo $currentTab === $tabId ? 'active' : ''; ?>">
+                       class="mds-tab-link <?php echo $currentTab === $tabId ? 'active' : ''; ?>">
                         <span class="dashicons <?php echo esc_attr($tab->getIcon()); ?>"></span>
                         <?php echo esc_html($tab->getTitle()); ?>
                     </a>
                 <?php endforeach; ?>
             </nav>
 
-            <div class="smg-tab-content">
+            <div class="mds-tab-content">
                 <?php
                 // Check if the current tab has settings to save
                 $settingsGroup = $this->tabs[$currentTab]->getSettingsGroup();
@@ -177,7 +177,7 @@ class SettingsPage
 
                 if ($hasSettings):
                 ?>
-                <form method="post" action="options.php" id="smg-settings-form">
+                <form method="post" action="options.php" id="mds-settings-form">
                     <?php
                     // Use the tab's specific settings group
                     settings_fields($settingsGroup);
@@ -186,18 +186,18 @@ class SettingsPage
                     $this->tabs[$currentTab]->render();
                     ?>
 
-                    <div class="smg-actions">
+                    <div class="mds-actions">
                         <?php submit_button(__('Save Changes', 'schema-markup-generator'), 'primary', 'submit', false); ?>
                     </div>
                 </form>
                 <?php else: ?>
-                <div id="smg-settings-readonly">
+                <div id="mds-settings-readonly">
                     <?php $this->tabs[$currentTab]->render(); ?>
                 </div>
                 <?php endif; ?>
             </div>
 
-            <div class="smg-footer">
+            <div class="mds-footer">
                 <p>
                     <?php
                     printf(

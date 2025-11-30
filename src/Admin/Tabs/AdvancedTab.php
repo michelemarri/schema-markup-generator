@@ -63,13 +63,13 @@ class AdvancedTab extends AbstractTab
         $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('advanced');
 
         ?>
-        <div class="smg-tab-panel" id="tab-advanced">
+        <div class="mds-tab-panel" id="tab-advanced">
             <?php $this->renderSection(
                 __('Cache Settings', 'schema-markup-generator'),
                 __('Configure how schema data is cached for better performance.', 'schema-markup-generator')
             ); ?>
 
-            <div class="smg-cards-grid">
+            <div class="mds-cards-grid">
                 <?php
                 $this->renderCard(__('Cache Configuration', 'schema-markup-generator'), function () use ($settings) {
                     $this->renderToggle(
@@ -93,9 +93,9 @@ class AdvancedTab extends AbstractTab
                         ? __('Object Cache (Redis/Memcached)', 'schema-markup-generator')
                         : __('WordPress Transients', 'schema-markup-generator');
                     ?>
-                    <div class="smg-cache-info">
-                        <span class="smg-info-label"><?php esc_html_e('Cache Type:', 'schema-markup-generator'); ?></span>
-                        <span class="smg-info-value"><?php echo esc_html($cacheType); ?></span>
+                    <div class="mds-cache-info">
+                        <span class="mds-info-label"><?php esc_html_e('Cache Type:', 'schema-markup-generator'); ?></span>
+                        <span class="mds-info-value"><?php echo esc_html($cacheType); ?></span>
                     </div>
                     <?php
                 }, 'dashicons-performance');
@@ -107,7 +107,7 @@ class AdvancedTab extends AbstractTab
                 __('Enable debug mode and logging for troubleshooting.', 'schema-markup-generator')
             ); ?>
 
-            <div class="smg-cards-grid">
+            <div class="mds-cards-grid">
                 <?php
                 $this->renderCard(__('Debug Mode', 'schema-markup-generator'), function () use ($settings) {
                     $this->renderToggle(
@@ -119,15 +119,15 @@ class AdvancedTab extends AbstractTab
 
                     // Show log file location
                     $logDir = SMG_PLUGIN_DIR . 'logs';
-                    $logFile = $logDir . '/smg-' . date('Y-m-d') . '.log';
+                    $logFile = $logDir . '/mds-' . date('Y-m-d') . '.log';
                     ?>
-                    <div class="smg-log-info">
-                        <span class="smg-info-label"><?php esc_html_e('Log Location:', 'schema-markup-generator'); ?></span>
+                    <div class="mds-log-info">
+                        <span class="mds-info-label"><?php esc_html_e('Log Location:', 'schema-markup-generator'); ?></span>
                         <code><?php echo esc_html($logDir); ?></code>
                     </div>
 
                     <?php if (file_exists($logFile)): ?>
-                        <div class="smg-log-preview">
+                        <div class="mds-log-preview">
                             <h4><?php esc_html_e('Recent Log Entries', 'schema-markup-generator'); ?></h4>
                             <pre><?php
                             $lines = file($logFile);
@@ -146,8 +146,8 @@ class AdvancedTab extends AbstractTab
                 __('Technical details about your installation.', 'schema-markup-generator')
             ); ?>
 
-            <div class="smg-system-info">
-                <table class="smg-info-table">
+            <div class="mds-system-info">
+                <table class="mds-info-table">
                     <tr>
                         <th><?php esc_html_e('Plugin Version', 'schema-markup-generator'); ?></th>
                         <td><?php echo esc_html(SMG_VERSION); ?></td>
@@ -165,11 +165,11 @@ class AdvancedTab extends AbstractTab
                         <td>
                             <?php
                             if (wp_using_ext_object_cache()) {
-                                echo '<span class="smg-status-ok">';
+                                echo '<span class="mds-status-ok">';
                                 esc_html_e('Enabled', 'schema-markup-generator');
                                 echo '</span>';
                             } else {
-                                echo '<span class="smg-status-warning">';
+                                echo '<span class="mds-status-warning">';
                                 esc_html_e('Not Available', 'schema-markup-generator');
                                 echo '</span>';
                             }

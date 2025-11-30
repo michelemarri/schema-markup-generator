@@ -76,13 +76,13 @@ class IntegrationsTab extends AbstractTab
         $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('integrations');
 
         ?>
-        <div class="smg-tab-panel" id="tab-integrations">
+        <div class="mds-tab-panel" id="tab-integrations">
             <?php $this->renderSection(
                 __('Plugin Integrations', 'schema-markup-generator'),
                 __('Configure how Schema Markup Generator works with other plugins.', 'schema-markup-generator')
             ); ?>
 
-            <div class="smg-integrations-grid">
+            <div class="mds-integrations-grid">
                 <?php
                 $this->renderIntegrationCard(
                     'Rank Math SEO',
@@ -124,7 +124,7 @@ class IntegrationsTab extends AbstractTab
                     __('Configure how Schema Markup Generator interacts with Rank Math.', 'schema-markup-generator')
                 ); ?>
 
-                <div class="smg-cards-grid">
+                <div class="mds-cards-grid">
                     <?php
                     $this->renderCard(__('Duplicate Prevention', 'schema-markup-generator'), function () use ($settings) {
                         $this->renderToggle(
@@ -149,12 +149,12 @@ class IntegrationsTab extends AbstractTab
                             'VideoObject' => __('Video', 'schema-markup-generator'),
                         ];
                         ?>
-                        <p class="smg-field-description" style="margin-bottom: 15px;">
+                        <p class="mds-field-description" style="margin-bottom: 15px;">
                             <?php esc_html_e('Select schema types that SMG should handle instead of Rank Math.', 'schema-markup-generator'); ?>
                         </p>
-                        <div class="smg-checkboxes-grid">
+                        <div class="mds-checkboxes-grid">
                             <?php foreach ($schemaTypes as $type => $label): ?>
-                                <label class="smg-checkbox-label">
+                                <label class="mds-checkbox-label">
                                     <input type="checkbox"
                                            name="smg_integrations_settings[rankmath_takeover_types][]"
                                            value="<?php echo esc_attr($type); ?>"
@@ -175,7 +175,7 @@ class IntegrationsTab extends AbstractTab
                     __('Configure Advanced Custom Fields integration.', 'schema-markup-generator')
                 ); ?>
 
-                <div class="smg-cards-grid">
+                <div class="mds-cards-grid">
                     <?php
                     $this->renderCard(__('Field Discovery', 'schema-markup-generator'), function () use ($settings) {
                         $this->renderToggle(
@@ -196,15 +196,15 @@ class IntegrationsTab extends AbstractTab
                     $isAcfPro = class_exists('ACF') && defined('ACF_PRO');
                     $this->renderCard(__('ACF Version', 'schema-markup-generator'), function () use ($isAcfPro) {
                         ?>
-                        <div class="smg-acf-version-info">
+                        <div class="mds-acf-version-info">
                             <?php if ($isAcfPro): ?>
-                                <div class="smg-version-badge pro">
+                                <div class="mds-version-badge pro">
                                     <span class="dashicons dashicons-star-filled"></span>
                                     <?php esc_html_e('ACF Pro', 'schema-markup-generator'); ?>
                                 </div>
                                 <p><?php esc_html_e('Full support for all field types including repeaters, flexible content, and galleries.', 'schema-markup-generator'); ?></p>
                             <?php else: ?>
-                                <div class="smg-version-badge free">
+                                <div class="mds-version-badge free">
                                     <span class="dashicons dashicons-yes"></span>
                                     <?php esc_html_e('ACF Free', 'schema-markup-generator'); ?>
                                 </div>
@@ -223,7 +223,7 @@ class IntegrationsTab extends AbstractTab
                     __('Configure MemberPress Courses integration for educational content.', 'schema-markup-generator')
                 ); ?>
 
-                <div class="smg-cards-grid">
+                <div class="mds-cards-grid">
                     <?php
                     $this->renderCard(__('Course Hierarchy', 'schema-markup-generator'), function () use ($settings) {
                         $this->renderToggle(
@@ -249,26 +249,26 @@ class IntegrationsTab extends AbstractTab
                         $courseCount = wp_count_posts('mpcs-course');
                         $lessonCount = wp_count_posts('mpcs-lesson');
                         ?>
-                        <div class="smg-integration-status-info">
-                            <div class="smg-status-item">
-                                <span class="dashicons dashicons-yes-alt" style="color: var(--smg-success);"></span>
+                        <div class="mds-integration-status-info">
+                            <div class="mds-status-item">
+                                <span class="dashicons dashicons-yes-alt" style="color: var(--mds-success);"></span>
                                 <span><?php printf(__('%d Courses detected', 'schema-markup-generator'), $courseCount->publish ?? 0); ?></span>
                             </div>
-                            <div class="smg-status-item">
-                                <span class="dashicons dashicons-yes-alt" style="color: var(--smg-success);"></span>
+                            <div class="mds-status-item">
+                                <span class="dashicons dashicons-yes-alt" style="color: var(--mds-success);"></span>
                                 <span><?php printf(__('%d Lessons detected', 'schema-markup-generator'), $lessonCount->publish ?? 0); ?></span>
                             </div>
-                            <div class="smg-status-item">
+                            <div class="mds-status-item">
                                 <?php if ($sectionsExist): ?>
-                                    <span class="dashicons dashicons-yes-alt" style="color: var(--smg-success);"></span>
+                                    <span class="dashicons dashicons-yes-alt" style="color: var(--mds-success);"></span>
                                     <span><?php esc_html_e('Sections table found', 'schema-markup-generator'); ?></span>
                                 <?php else: ?>
-                                    <span class="dashicons dashicons-warning" style="color: var(--smg-warning);"></span>
+                                    <span class="dashicons dashicons-warning" style="color: var(--mds-warning);"></span>
                                     <span><?php esc_html_e('Sections table not found', 'schema-markup-generator'); ?></span>
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <p class="smg-field-description" style="margin-top: 12px;">
+                        <p class="mds-field-description" style="margin-top: 12px;">
                             <?php esc_html_e('Schema types: Course (mpcs-course) → LearningResource (mpcs-lesson)', 'schema-markup-generator'); ?>
                         </p>
                         <?php
@@ -283,7 +283,7 @@ class IntegrationsTab extends AbstractTab
                     __('Configure WooCommerce product schema generation.', 'schema-markup-generator')
                 ); ?>
 
-                <div class="smg-cards-grid">
+                <div class="mds-cards-grid">
                     <?php
                     $this->renderCard(__('Product Schema', 'schema-markup-generator'), function () use ($settings) {
                         $this->renderToggle(
@@ -321,34 +321,34 @@ class IntegrationsTab extends AbstractTab
     private function renderIntegrationCard(string $name, bool $active, string $slug, string $description, array $settings): void
     {
         ?>
-        <div class="smg-integration-card <?php echo $active ? 'active' : 'inactive'; ?>">
-            <div class="smg-integration-header">
-                <div class="smg-integration-status">
+        <div class="mds-integration-card <?php echo $active ? 'active' : 'inactive'; ?>">
+            <div class="mds-integration-header">
+                <div class="mds-integration-status">
                     <?php if ($active): ?>
-                        <span class="smg-status-badge active">
+                        <span class="mds-status-badge active">
                             <span class="dashicons dashicons-yes-alt"></span>
                             <?php esc_html_e('Active', 'schema-markup-generator'); ?>
                         </span>
                     <?php else: ?>
-                        <span class="smg-status-badge inactive">
+                        <span class="mds-status-badge inactive">
                             <span class="dashicons dashicons-marker"></span>
                             <?php esc_html_e('Not Detected', 'schema-markup-generator'); ?>
                         </span>
                     <?php endif; ?>
                 </div>
-                <h3 class="smg-integration-title"><?php echo esc_html($name); ?></h3>
+                <h3 class="mds-integration-title"><?php echo esc_html($name); ?></h3>
             </div>
-            <div class="smg-integration-body">
+            <div class="mds-integration-body">
                 <p><?php echo esc_html($description); ?></p>
             </div>
             <?php if ($active): ?>
-                <div class="smg-integration-footer">
-                    <label class="smg-toggle-inline">
+                <div class="mds-integration-footer">
+                    <label class="mds-toggle-inline">
                         <input type="checkbox"
                                name="smg_integrations_settings[integration_<?php echo esc_attr($slug); ?>_enabled]"
                                value="1"
                                <?php checked($settings['integration_' . $slug . '_enabled'] ?? true); ?>>
-                        <span class="smg-toggle-slider-small"></span>
+                        <span class="mds-toggle-slider-small"></span>
                         <?php esc_html_e('Enabled', 'schema-markup-generator'); ?>
                     </label>
                 </div>

@@ -122,29 +122,29 @@ class PostTypesTab extends AbstractTab
         $schemaTypes = $this->schemaFactory->getTypesGrouped();
 
         ?>
-        <div class="smg-tab-panel" id="tab-post-types">
+        <div class="mds-tab-panel" id="tab-post-types">
             <?php $this->renderSection(
                 __('Post Type Schema Mapping', 'schema-markup-generator'),
                 __('Assign a schema type to each post type. The schema will be automatically generated based on your content.', 'schema-markup-generator')
             ); ?>
 
-            <div class="smg-post-types-list">
+            <div class="mds-post-types-list">
                 <?php foreach ($postTypes as $postType => $postTypeObj): ?>
                     <?php
                     $currentSchema = $mappings[$postType] ?? '';
                     $postTypeFields = $this->customFieldDiscovery->getFieldsForPostType($postType);
                     $currentFieldMapping = $fieldMappings[$postType] ?? [];
                     ?>
-                    <div class="smg-post-type-card<?php echo $currentSchema ? ' smg-mapped' : ''; ?>" data-post-type="<?php echo esc_attr($postType); ?>">
-                        <div class="smg-post-type-header">
-                            <div class="smg-post-type-info">
+                    <div class="mds-post-type-card<?php echo $currentSchema ? ' mds-mapped' : ''; ?>" data-post-type="<?php echo esc_attr($postType); ?>">
+                        <div class="mds-post-type-header">
+                            <div class="mds-post-type-info">
                                 <span class="dashicons <?php echo esc_attr($postTypeObj->menu_icon ?? 'dashicons-admin-post'); ?>"></span>
                                 <h3><?php echo esc_html($postTypeObj->labels->singular_name); ?></h3>
                                 <code><?php echo esc_html($postType); ?></code>
                             </div>
-                            <div class="smg-post-type-schema">
+                            <div class="mds-post-type-schema">
                                 <select name="smg_post_type_mappings[<?php echo esc_attr($postType); ?>]"
-                                        class="smg-schema-select"
+                                        class="mds-schema-select"
                                         data-post-type="<?php echo esc_attr($postType); ?>">
                                     <option value=""><?php esc_html_e('— No Schema —', 'schema-markup-generator'); ?></option>
                                     <?php foreach ($schemaTypes as $group => $types): ?>
@@ -159,15 +159,15 @@ class PostTypesTab extends AbstractTab
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <button type="button" class="smg-toggle-fields button button-secondary"
+                            <button type="button" class="mds-toggle-fields button button-secondary"
                                     aria-expanded="false">
                                 <?php esc_html_e('Field Mapping', 'schema-markup-generator'); ?>
                                 <span class="dashicons dashicons-arrow-down-alt2"></span>
                             </button>
                         </div>
 
-                        <div class="smg-post-type-fields" style="display: none;">
-                            <div class="smg-field-mappings">
+                        <div class="mds-post-type-fields" style="display: none;">
+                            <div class="mds-field-mappings">
                                 <?php
                                 // Get schema properties for current type
                                 $schemaProps = [];
@@ -180,11 +180,11 @@ class PostTypesTab extends AbstractTab
                                 ?>
 
                                 <?php if (!empty($schemaProps)): ?>
-                                    <p class="smg-fields-description">
+                                    <p class="mds-fields-description">
                                         <?php esc_html_e('Map your custom fields to schema properties for richer structured data.', 'schema-markup-generator'); ?>
                                     </p>
 
-                                    <table class="smg-mapping-table">
+                                    <table class="mds-mapping-table">
                                         <thead>
                                             <tr>
                                                 <th><?php esc_html_e('Schema Property', 'schema-markup-generator'); ?></th>
@@ -194,7 +194,7 @@ class PostTypesTab extends AbstractTab
                                         </thead>
                                         <tbody>
                                             <?php foreach ($schemaProps as $propName => $propDef): ?>
-                                                <tr class="smg-mapping-row">
+                                                <tr class="mds-mapping-row">
                                                     <td>
                                                         <strong><?php echo esc_html($propName); ?></strong>
                                                         <br>
@@ -202,7 +202,7 @@ class PostTypesTab extends AbstractTab
                                                     </td>
                                                     <td>
                                                         <select name="smg_field_mappings[<?php echo esc_attr($postType); ?>][<?php echo esc_attr($propName); ?>]"
-                                                                class="smg-field-select">
+                                                                class="mds-field-select">
                                                             <option value=""><?php esc_html_e('— Select Field —', 'schema-markup-generator'); ?></option>
                                                             <optgroup label="<?php esc_attr_e('WordPress Fields', 'schema-markup-generator'); ?>">
                                                                 <option value="post_title" <?php selected($currentFieldMapping[$propName] ?? '', 'post_title'); ?>>
@@ -246,12 +246,12 @@ class PostTypesTab extends AbstractTab
                                                                 $autoLabel = __('Auto', 'schema-markup-generator');
                                                             }
                                                             ?>
-                                                            <span class="smg-auto-badge" title="<?php echo esc_attr($autoTitle); ?>">
+                                                            <span class="mds-auto-badge" title="<?php echo esc_attr($autoTitle); ?>">
                                                                 <span class="dashicons dashicons-yes-alt"></span>
                                                                 <?php echo esc_html($autoLabel); ?>
                                                             </span>
                                                         <?php else: ?>
-                                                            <span class="smg-manual-badge">
+                                                            <span class="mds-manual-badge">
                                                                 <?php esc_html_e('Manual', 'schema-markup-generator'); ?>
                                                             </span>
                                                         <?php endif; ?>
@@ -261,7 +261,7 @@ class PostTypesTab extends AbstractTab
                                         </tbody>
                                     </table>
                                 <?php else: ?>
-                                    <p class="smg-notice">
+                                    <p class="mds-notice">
                                         <span class="dashicons dashicons-info"></span>
                                         <?php esc_html_e('Select a schema type above to configure field mappings.', 'schema-markup-generator'); ?>
                                     </p>
@@ -273,7 +273,7 @@ class PostTypesTab extends AbstractTab
             </div>
 
             <?php if ($this->acfIntegration->isAvailable()): ?>
-                <div class="smg-acf-notice">
+                <div class="mds-acf-notice">
                     <span class="dashicons dashicons-yes-alt"></span>
                     <?php esc_html_e('Advanced Custom Fields detected. ACF fields are available for mapping.', 'schema-markup-generator'); ?>
                 </div>

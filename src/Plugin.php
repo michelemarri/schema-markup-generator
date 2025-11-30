@@ -213,28 +213,28 @@ class Plugin
 
         // Enqueue Inter font for modern typography
         wp_enqueue_style(
-            'smg-fonts',
+            'mds-fonts',
             'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap',
             [],
             null
         );
 
         wp_enqueue_style(
-            'smg-admin',
+            'mds-admin',
             SMG_PLUGIN_URL . 'assets/css/admin.css',
-            ['smg-fonts'],
+            ['mds-fonts'],
             SMG_VERSION
         );
 
         wp_enqueue_script(
-            'smg-admin',
+            'mds-admin',
             SMG_PLUGIN_URL . 'assets/js/admin.js',
             [], // No jQuery dependency - pure ES6
             SMG_VERSION,
             true
         );
 
-        wp_localize_script('smg-admin', 'smgAdmin', [
+        wp_localize_script('mds-admin', 'smgAdmin', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('smg_admin_nonce'),
             'isSettingsPage' => $isSettingsPage,

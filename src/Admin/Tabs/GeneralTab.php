@@ -65,13 +65,13 @@ class GeneralTab extends AbstractTab
         $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('general');
 
         ?>
-        <div class="smg-tab-panel" id="tab-general">
+        <div class="mds-tab-panel" id="tab-general">
             <?php $this->renderSection(
                 __('General Settings', 'schema-markup-generator'),
                 __('Configure the main plugin settings.', 'schema-markup-generator')
             ); ?>
 
-            <div class="smg-cards-grid">
+            <div class="mds-cards-grid">
                 <?php
                 $this->renderCard(__('Schema Output', 'schema-markup-generator'), function () use ($settings) {
                     $this->renderToggle(
@@ -100,22 +100,22 @@ class GeneralTab extends AbstractTab
                 <?php
                 $this->renderCard(__('Organization Info', 'schema-markup-generator'), function () use ($settings) {
                     ?>
-                    <p class="smg-info">
+                    <p class="mds-info">
                         <?php esc_html_e('Organization info is automatically pulled from WordPress settings.', 'schema-markup-generator'); ?>
                     </p>
 
-                    <div class="smg-info-grid">
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('Site Name', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value"><?php echo esc_html(get_bloginfo('name')); ?></span>
+                    <div class="mds-info-grid">
+                        <div class="mds-info-item">
+                            <span class="mds-info-label"><?php esc_html_e('Site Name', 'schema-markup-generator'); ?></span>
+                            <span class="mds-info-value"><?php echo esc_html(get_bloginfo('name')); ?></span>
                         </div>
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('Site URL', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value"><?php echo esc_html(home_url('/')); ?></span>
+                        <div class="mds-info-item">
+                            <span class="mds-info-label"><?php esc_html_e('Site URL', 'schema-markup-generator'); ?></span>
+                            <span class="mds-info-value"><?php echo esc_html(home_url('/')); ?></span>
                         </div>
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('Logo', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value">
+                        <div class="mds-info-item">
+                            <span class="mds-info-label"><?php esc_html_e('Logo', 'schema-markup-generator'); ?></span>
+                            <span class="mds-info-value">
                                 <?php
                                 $logoId = get_theme_mod('custom_logo');
                                 if ($logoId) {
@@ -128,7 +128,7 @@ class GeneralTab extends AbstractTab
                         </div>
                     </div>
 
-                    <p class="smg-note">
+                    <p class="mds-note">
                         <span class="dashicons dashicons-info"></span>
                         <?php
                         printf(
@@ -148,24 +148,24 @@ class GeneralTab extends AbstractTab
                 __('Get started with schema markup in a few simple steps.', 'schema-markup-generator')
             ); ?>
 
-            <div class="smg-quick-start">
-                <div class="smg-step">
-                    <div class="smg-step-number">1</div>
-                    <div class="smg-step-content">
+            <div class="mds-quick-start">
+                <div class="mds-step">
+                    <div class="mds-step-number">1</div>
+                    <div class="mds-step-content">
                         <h4><?php esc_html_e('Configure Post Types', 'schema-markup-generator'); ?></h4>
                         <p><?php esc_html_e('Assign schema types to your post types in the Post Types tab.', 'schema-markup-generator'); ?></p>
                     </div>
                 </div>
-                <div class="smg-step">
-                    <div class="smg-step-number">2</div>
-                    <div class="smg-step-content">
+                <div class="mds-step">
+                    <div class="mds-step-number">2</div>
+                    <div class="mds-step-content">
                         <h4><?php esc_html_e('Map Custom Fields', 'schema-markup-generator'); ?></h4>
                         <p><?php esc_html_e('Connect your custom fields to schema properties for richer data.', 'schema-markup-generator'); ?></p>
                     </div>
                 </div>
-                <div class="smg-step">
-                    <div class="smg-step-number">3</div>
-                    <div class="smg-step-content">
+                <div class="mds-step">
+                    <div class="mds-step-number">3</div>
+                    <div class="mds-step-content">
                         <h4><?php esc_html_e('Test & Validate', 'schema-markup-generator'); ?></h4>
                         <p><?php esc_html_e('Use the preview and validation tools to ensure your schema is correct.', 'schema-markup-generator'); ?></p>
                     </div>
