@@ -226,14 +226,19 @@
 
         /**
          * Handle schema type change
+         * 
+         * Dynamically loads field mappings when schema type changes
          */
-        handleSchemaTypeChange(e) {
+        async handleSchemaTypeChange(e) {
             const select = e.target;
             const postType = select.dataset.postType;
             const schemaType = select.value;
             const card = select.closest('.smg-post-type-card');
+            const fieldsContainer = card.querySelector('.smg-field-mappings');
             
-            // Add visual feedback
+            if (!fieldsContainer) return;
+
+            // Add visual feedback to card
             card.style.transition = 'border-color 0.3s ease';
             card.style.borderColor = 'var(--smg-primary-300)';
             
@@ -241,8 +246,87 @@
                 card.style.borderColor = '';
             }, 1000);
 
-            // Could trigger AJAX update here for field mappings
-            console.log(`Schema type changed for ${postType}: ${schemaType}`);
+            // Show loading state
+            fieldsContainer.style.opacity = '0.5';
+            fieldsContainer.innerHTML = `
+                <div class="smg-loading-fields">
+                    <span class="dashicons dashicons-update smg-spin"></span>
+                    ${typeof smgAdmin !== 'undefined' && smgAdmin.strings?.loading ? smgAdmin.strings.loading : 'Loading...'}
+                </div>
+            `;
+
+            try {
+                const response = await this.fetchSchemaProperties(postType, schemaType);
+                
+                if (response.success && response.data.html) {
+                    // Update the fields container with new HTML
+                    fieldsContainer.innerHTML = response.data.html;
+                    fieldsContainer.style.opacity = '1';
+                    
+                    // Animate the new rows
+                    const rows = fieldsContainer.querySelectorAll('.smg-mapping-row');
+                    rows.forEach((row, index) => {
+                        row.style.opacity = '0';
+                        row.style.transform = 'translateY(10px)';
+                        
+                        setTimeout(() => {
+                            row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                            row.style.opacity = '1';
+                            row.style.transform = 'translateY(0)';
+                        }, 50 * index);
+                    });
+
+                    // Auto-expand fields section if collapsed
+                    const fieldsSection = card.querySelector('.smg-post-type-fields');
+                    const toggleButton = card.querySelector('.smg-toggle-fields');
+                    
+                    if (fieldsSection && fieldsSection.style.display === 'none' && schemaType) {
+                        this.slideDown(fieldsSection);
+                        if (toggleButton) {
+                            toggleButton.setAttribute('aria-expanded', 'true');
+                        }
+                    }
+                } else {
+                    fieldsContainer.innerHTML = `
+                        <p class="smg-notice">
+                            <span class="dashicons dashicons-warning"></span>
+                            ${response.data?.message || 'Failed to load schema properties'}
+                        </p>
+                    `;
+                    fieldsContainer.style.opacity = '1';
+                }
+            } catch (error) {
+                console.error('Failed to load schema properties:', error);
+                fieldsContainer.innerHTML = `
+                    <p class="smg-notice">
+                        <span class="dashicons dashicons-warning"></span>
+                        Failed to load schema properties. Please try again.
+                    </p>
+                `;
+                fieldsContainer.style.opacity = '1';
+            }
+        },
+
+        /**
+         * Fetch schema properties via AJAX
+         */
+        fetchSchemaProperties(postType, schemaType) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('action', 'smg_get_schema_properties');
+                formData.append('nonce', typeof smgAdmin !== 'undefined' ? smgAdmin.nonce : '');
+                formData.append('post_type', postType);
+                formData.append('schema_type', schemaType);
+
+                fetch(typeof smgAdmin !== 'undefined' ? smgAdmin.ajaxUrl : ajaxurl, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                })
+                .then(response => response.json())
+                .then(data => resolve(data))
+                .catch(error => reject(error));
+            });
         },
 
         /**

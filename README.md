@@ -231,7 +231,10 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
-### 1.3.3
+### 1.4.0
+- **New**: Dynamic field mapping - schema properties now load instantly when changing schema type (no save required)
+- **New**: Auto-expand field mapping panel when selecting a schema type
+- **Improved**: Better UX with loading animation during field mapping updates
 - **Fixed**: HowTo schema step extraction now works with any H2/H3/H4 heading sequence (no numbering required)
 - **Fixed**: HowTo supply and tool fields now properly validate data, filtering out invalid values (ACF field names, IDs, HTML content, etc.)
 - **Improved**: Step text extraction with better HTML parsing and whitespace normalization

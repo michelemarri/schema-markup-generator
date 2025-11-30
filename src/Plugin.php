@@ -7,6 +7,7 @@ namespace flavor\SchemaMarkupGenerator;
 use flavor\SchemaMarkupGenerator\Admin\SettingsPage;
 use flavor\SchemaMarkupGenerator\Admin\MetaBox;
 use flavor\SchemaMarkupGenerator\Admin\PreviewHandler;
+use flavor\SchemaMarkupGenerator\Admin\SchemaPropertiesHandler;
 use flavor\SchemaMarkupGenerator\Discovery\PostTypeDiscovery;
 use flavor\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
 use flavor\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
@@ -119,6 +120,10 @@ class Plugin
             $this->services['preview_handler'] = new PreviewHandler(
                 $this->services['schema_renderer']
             );
+            $this->services['schema_properties_handler'] = new SchemaPropertiesHandler(
+                $this->services['schema_factory'],
+                $this->services['custom_field_discovery']
+            );
         }
     }
 
@@ -177,6 +182,7 @@ class Plugin
             add_action('save_post', [$this->services['metabox'], 'save'], 10, 2);
             add_action('wp_ajax_smg_preview_schema', [$this->services['preview_handler'], 'handle']);
             add_action('wp_ajax_smg_check_updates', [$this, 'handleCheckUpdates']);
+            add_action('wp_ajax_smg_get_schema_properties', [$this->services['schema_properties_handler'], 'handle']);
         }
 
         // Plugin action links

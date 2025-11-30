@@ -118,7 +118,7 @@
 
 /* Toggle Fields Button */
 .smg-toggle-fields {
-  display: inline-flex;
+  display: inline-flex!important;
   align-items: center;
   gap: var(--smg-space-2);
   padding: var(--smg-space-2) var(--smg-space-4);
@@ -146,7 +146,6 @@
 }
 
 .smg-toggle-fields .dashicons {
-  line-height: 30px;
   font-size: 16px;
   width: 16px;
   height: 16px;

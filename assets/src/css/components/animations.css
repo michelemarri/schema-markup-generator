@@ -207,6 +207,23 @@
   box-shadow: var(--smg-shadow-glow);
 }
 
+/* Loading States */
+.smg-loading-fields {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--smg-space-2);
+  padding: var(--smg-space-6);
+  color: var(--smg-text-secondary);
+  font-size: var(--smg-text-sm);
+}
+
+.smg-loading-fields .dashicons {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   *,
