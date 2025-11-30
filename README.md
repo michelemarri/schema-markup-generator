@@ -9,9 +9,10 @@ Automatic schema.org structured data generation for WordPress, optimized for sea
 ## Features
 
 - **Auto-Discovery** - Automatically detects all post types, custom fields, and taxonomies
-- **15+ Schema Types** - Article, Product, Organization, Person, FAQ, HowTo, Event, Recipe, Review, and more
+- **16 Schema Types** - Article, Product, Organization, Person, FAQ, HowTo, Event, Recipe, Review, Course, LearningResource and more
 - **ACF Integration** - Full support for Advanced Custom Fields with visual field mapping
 - **Rank Math Compatibility** - Prevents duplicate schemas when Rank Math is active
+- **MemberPress Courses Integration** - Automatic Course/Lesson hierarchy for LearningResource schemas
 - **Modern Admin UI** - Clean, tabbed interface for easy configuration
 - **Schema Preview** - Real-time preview with validation in the post editor
 - **REST API** - Full REST API for programmatic access
@@ -54,9 +55,9 @@ composer install
 |----------|-------|
 | Content | Article, BlogPosting, NewsArticle, WebPage |
 | Business | Organization, LocalBusiness, Product |
-| People | Person, Review |
-| Instructional | FAQPage, HowTo, Recipe, Course |
-| Media | Event, VideoObject |
+| People & Reviews | Person, Review |
+| Instructional | FAQPage, HowTo, Recipe, Course, LearningResource |
+| Media & Events | Event, VideoObject |
 | Technical | SoftwareApplication, WebSite, BreadcrumbList |
 
 ## Configuration
@@ -92,7 +93,8 @@ add_filter('smg_register_schema_types', function($types) {
 ### Modify Schema Data
 
 ```php
-add_filter('smg_schema_data', function($data, $post, $type) {
+// Type-specific filter (recommended)
+add_filter('smg_article_schema_data', function($data, $post, $mapping) {
     $data['customProperty'] = 'value';
     return $data;
 }, 10, 3);

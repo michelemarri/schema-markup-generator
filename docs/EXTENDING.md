@@ -10,7 +10,6 @@ Learn how to extend the Schema Markup Generator plugin with custom functionality
 2. [Custom Field Sources](#custom-field-sources)
 3. [Custom Admin Tabs](#custom-admin-tabs)
 4. [Integration with Other Plugins](#integration-with-other-plugins)
-5. [Custom Caching](#custom-caching)
 
 ---
 
@@ -385,110 +384,25 @@ add_action('plugins_loaded', function() {
 });
 ```
 
----
+### MemberPress Courses (Built-in Example)
 
-## Custom Caching
-
-### Implement Custom Cache Driver
+The plugin includes built-in integration with MemberPress Courses. Here's how it works:
 
 ```php
-<?php
+// The integration hooks into smg_learning_resource_parent_course
+add_filter('smg_learning_resource_parent_course', [$this, 'getParentCourse'], 10, 3);
 
-namespace MyPlugin\Cache;
-
-use flavor\SchemaMarkupGenerator\Cache\CacheInterface;
-
-class RedisCache implements CacheInterface
-{
-    private \Redis $redis;
-    private int $defaultTtl;
-    private string $prefix = 'smg:';
-
-    public function __construct(\Redis $redis, int $defaultTtl = 3600)
-    {
-        $this->redis = $redis;
-        $this->defaultTtl = $defaultTtl;
-    }
-
-    public function get(string $key): mixed
-    {
-        $value = $this->redis->get($this->prefix . $key);
-        return $value !== false ? unserialize($value) : null;
-    }
-
-    public function set(string $key, mixed $value, int $ttl = 0): bool
-    {
-        $ttl = $ttl > 0 ? $ttl : $this->defaultTtl;
-        return $this->redis->setex(
-            $this->prefix . $key,
-            $ttl,
-            serialize($value)
-        );
-    }
-
-    public function delete(string $key): bool
-    {
-        return $this->redis->del($this->prefix . $key) > 0;
-    }
-
-    public function has(string $key): bool
-    {
-        return $this->redis->exists($this->prefix . $key) > 0;
-    }
-
-    public function flush(): bool
-    {
-        $keys = $this->redis->keys($this->prefix . '*');
-        if (!empty($keys)) {
-            return $this->redis->del($keys) > 0;
-        }
-        return true;
-    }
-
-    public function getMultiple(array $keys): array
-    {
-        $prefixedKeys = array_map(fn($k) => $this->prefix . $k, $keys);
-        $values = $this->redis->mget($prefixedKeys);
-        
-        $result = [];
-        foreach ($keys as $i => $key) {
-            $result[$key] = $values[$i] !== false ? unserialize($values[$i]) : null;
-        }
-        return $result;
-    }
-
-    public function setMultiple(array $values, int $ttl = 0): bool
-    {
-        $ttl = $ttl > 0 ? $ttl : $this->defaultTtl;
-        $success = true;
-        
-        foreach ($values as $key => $value) {
-            if (!$this->set($key, $value, $ttl)) {
-                $success = false;
-            }
-        }
-        
-        return $success;
-    }
-}
+// And enhances Course schema data
+add_filter('smg_course_schema_data', [$this, 'enhanceCourseSchema'], 10, 3);
 ```
 
-### Override Default Cache
+Key features of the MemberPress Courses integration:
+- Automatic parent course detection for lessons
+- Course curriculum with sections and lessons
+- Lesson count calculation
+- No configuration required
 
-```php
-add_filter('smg_cache_driver', function($cache) {
-    if (class_exists('Redis')) {
-        try {
-            $redis = new Redis();
-            $redis->connect('127.0.0.1', 6379);
-            return new \MyPlugin\Cache\RedisCache($redis);
-        } catch (Exception $e) {
-            // Fall back to default
-        }
-    }
-    return $cache;
-});
-```
+See `src/Integration/MemberPressCoursesIntegration.php` for the full implementation.
 
 ---
 

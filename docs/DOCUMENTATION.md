@@ -9,9 +9,10 @@ Complete documentation for the Schema Markup Generator WordPress plugin.
 3. [Schema Types](#schema-types)
 4. [Field Mapping](#field-mapping)
 5. [ACF Integration](#acf-integration)
-6. [Caching](#caching)
-7. [REST API](#rest-api)
-8. [Troubleshooting](#troubleshooting)
+6. [MemberPress Courses Integration](#memberpress-courses-integration)
+7. [Caching](#caching)
+8. [REST API](#rest-api)
+9. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -167,6 +168,29 @@ For cooking recipes.
 - `recipeYield`
 - `nutrition`
 
+### Education Schemas
+
+#### Course
+
+For online courses and educational content.
+
+**Properties:**
+- `name` - Course title
+- `description` - Course description
+- `provider` - Organization offering the course
+- `hasCourseInstance` - Course sections/modules
+- `numberOfLessons` - Total lesson count
+
+#### LearningResource
+
+For individual lessons or educational materials.
+
+**Properties:**
+- `name` - Resource title
+- `description` - Resource description
+- `learningResourceType` - Type (lesson, tutorial, etc.)
+- `isPartOf` - Parent course (auto-detected with MemberPress Courses)
+
 ---
 
 ## Field Mapping
@@ -244,6 +268,68 @@ Configure the repeater sub-fields to match schema property names.
 ACF image fields are automatically resolved:
 - Returns URL if return format is URL
 - Extracts URL from array if return format is Array
+
+---
+
+## MemberPress Courses Integration
+
+When MemberPress Courses is active, the plugin automatically enhances schema generation for courses and lessons.
+
+### Automatic Features
+
+1. **Parent Course Detection**
+   - Lessons (`mpcs-lesson`) automatically include their parent course in the `isPartOf` property
+   - The course hierarchy (Lesson → Section → Course) is traversed automatically
+
+2. **Course Enhancement**
+   - Courses (`mpcs-course`) include curriculum structure with sections and lessons
+   - Lesson count is automatically calculated
+
+### Supported Post Types
+
+| Post Type | Schema Type | Features |
+|-----------|-------------|----------|
+| `mpcs-course` | Course | Curriculum, lesson count, sections |
+| `mpcs-lesson` | LearningResource | Parent course auto-detection |
+
+### Example Output
+
+**Lesson (LearningResource):**
+```json
+{
+  "@type": "LearningResource",
+  "name": "Introduction to SEO",
+  "learningResourceType": "Lesson",
+  "isPartOf": {
+    "@type": "Course",
+    "name": "Digital Marketing Fundamentals",
+    "url": "https://example.com/courses/digital-marketing/"
+  }
+}
+```
+
+**Course with Curriculum:**
+```json
+{
+  "@type": "Course",
+  "name": "Digital Marketing Fundamentals",
+  "numberOfLessons": 12,
+  "hasCourseInstance": [
+    {
+      "@type": "CourseInstance",
+      "name": "Module 1: SEO Basics",
+      "hasPart": [
+        { "@type": "LearningResource", "name": "What is SEO?" },
+        { "@type": "LearningResource", "name": "Keywords Research" }
+      ]
+    }
+  ]
+}
+```
+
+### No Configuration Required
+
+The integration works automatically when MemberPress Courses is detected. No additional configuration is needed.
 
 ---
 

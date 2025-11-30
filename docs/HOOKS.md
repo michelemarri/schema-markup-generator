@@ -89,10 +89,35 @@ add_filter('smg_article_schema_data', function(array $data, WP_Post $post, array
 #### `smg_review_schema_data`
 #### `smg_video_schema_data`
 #### `smg_course_schema_data`
+#### `smg_learning_resource_schema_data`
 #### `smg_software_schema_data`
 #### `smg_breadcrumb_schema_data`
 #### `smg_website_schema_data`
 #### `smg_webpage_schema_data`
+
+---
+
+### MemberPress Courses Filters
+
+#### `smg_learning_resource_parent_course`
+
+Filter the parent course data for LearningResource schemas.
+
+```php
+add_filter('smg_learning_resource_parent_course', function(?array $parentCourse, WP_Post $post, array $mapping): ?array {
+    // Return custom parent course data
+    return [
+        '@type' => 'Course',
+        'name' => 'My Custom Course',
+        'url' => 'https://example.com/course/',
+    ];
+}, 10, 3);
+```
+
+**Parameters:**
+- `$parentCourse` (array|null) - Current parent course data
+- `$post` (WP_Post) - The lesson post
+- `$mapping` (array) - Field mapping configuration
 
 ---
 
@@ -167,22 +192,6 @@ add_filter('smg_mapped_fields', function(array $data, WP_Post $post, array $mapp
     // Transform mapped values
     return $data;
 }, 10, 3);
-```
-
----
-
-#### `smg_acf_field_mapping`
-
-Add custom ACF field mappings.
-
-```php
-add_filter('smg_acf_field_mapping', function(array $mapping, string $postType): array {
-    if ($postType === 'product') {
-        $mapping['price'] = 'product_price';
-        $mapping['sku'] = 'product_sku';
-    }
-    return $mapping;
-}, 10, 2);
 ```
 
 ---
@@ -302,32 +311,6 @@ add_action('smg_after_import', function(array $data) {
     // Clear caches or trigger other actions
     wp_cache_flush();
 });
-```
-
----
-
-### Rendering Actions
-
-#### `smg_before_render`
-
-Fired before schema is rendered.
-
-```php
-add_action('smg_before_render', function(WP_Post $post) {
-    // Pre-render logic
-});
-```
-
----
-
-#### `smg_after_render`
-
-Fired after schema is rendered.
-
-```php
-add_action('smg_after_render', function(WP_Post $post, array $schemas) {
-    // Post-render logic
-}, 10, 2);
 ```
 
 ---
