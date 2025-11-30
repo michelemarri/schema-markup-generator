@@ -231,6 +231,10 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.3.2
+- **Fixed**: Plugin icons not showing in WordPress updates screen
+- **Improved**: Added 'default' icon key for better WordPress compatibility
+
 ### 1.3.1
 - **Fixed**: Update checker showing cryptic 404 errors for private repositories without token
 - **Improved**: Clear admin notice on plugins page when GitHub token is missing for private repos
