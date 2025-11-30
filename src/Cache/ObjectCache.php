@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Cache;
+namespace Metodo\SchemaMarkupGenerator\Cache;
 
 /**
  * Object Cache Implementation
  *
  * Uses WordPress object cache (Redis/Memcached if available).
  *
- * @package flavor\SchemaMarkupGenerator\Cache
+ * @package Metodo\SchemaMarkupGenerator\Cache
  * @author  Michele Marri <info@metodo.dev>
  */
 class ObjectCache implements CacheInterface

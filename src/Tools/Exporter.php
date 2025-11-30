@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Tools;
+namespace Metodo\SchemaMarkupGenerator\Tools;
 
 /**
  * Exporter
  *
  * Exports plugin settings to JSON.
  *
- * @package flavor\SchemaMarkupGenerator\Tools
+ * @package Metodo\SchemaMarkupGenerator\Tools
  * @author  Michele Marri <info@metodo.dev>
  */
 class Exporter

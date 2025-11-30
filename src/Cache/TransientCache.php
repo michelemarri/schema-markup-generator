@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Cache;
+namespace Metodo\SchemaMarkupGenerator\Cache;
 
 /**
  * Transient Cache Implementation
  *
  * Uses WordPress transients as fallback when object cache is not available.
  *
- * @package flavor\SchemaMarkupGenerator\Cache
+ * @package Metodo\SchemaMarkupGenerator\Cache
  * @author  Michele Marri <info@metodo.dev>
  */
 class TransientCache implements CacheInterface

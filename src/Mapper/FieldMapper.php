@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Mapper;
+namespace Metodo\SchemaMarkupGenerator\Mapper;
 
-use flavor\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
-use flavor\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
+use Metodo\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
+use Metodo\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
 use WP_Post;
 
 /**
@@ -13,7 +13,7 @@ use WP_Post;
  *
  * Maps WordPress fields to schema.org properties.
  *
- * @package flavor\SchemaMarkupGenerator\Mapper
+ * @package Metodo\SchemaMarkupGenerator\Mapper
  * @author  Michele Marri <info@metodo.dev>
  */
 class FieldMapper

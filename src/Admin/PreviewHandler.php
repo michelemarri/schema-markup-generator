@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Admin;
+namespace Metodo\SchemaMarkupGenerator\Admin;
 
-use flavor\SchemaMarkupGenerator\Schema\SchemaRenderer;
-use flavor\SchemaMarkupGenerator\Schema\SchemaValidator;
+use Metodo\SchemaMarkupGenerator\Schema\SchemaRenderer;
+use Metodo\SchemaMarkupGenerator\Schema\SchemaValidator;
 
 /**
  * Preview Handler
  *
  * Handles AJAX requests for schema preview and validation.
  *
- * @package flavor\SchemaMarkupGenerator\Admin
+ * @package Metodo\SchemaMarkupGenerator\Admin
  * @author  Michele Marri <info@metodo.dev>
  */
 class PreviewHandler

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Integration;
+namespace Metodo\SchemaMarkupGenerator\Integration;
 
 /**
  * Rank Math Integration
  *
  * Prevents duplicate schemas when Rank Math is active.
  *
- * @package flavor\SchemaMarkupGenerator\Integration
+ * @package Metodo\SchemaMarkupGenerator\Integration
  * @author  Michele Marri <info@metodo.dev>
  */
 class RankMathIntegration
@@ -88,7 +88,7 @@ class RankMathIntegration
             return $schemas;
         }
 
-        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('integrations');
+        $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('integrations');
         $avoidDuplicates = $settings['rankmath_avoid_duplicates'] ?? true;
 
         if (!$avoidDuplicates) {
@@ -150,7 +150,7 @@ class RankMathIntegration
      */
     public function filterRankMathSchema(array $data, $jsonld): array
     {
-        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('integrations');
+        $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('integrations');
         $takeOver = $settings['rankmath_takeover_types'] ?? [];
 
         if (empty($takeOver)) {

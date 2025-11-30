@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Admin\Tabs;
+namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
 
-use flavor\SchemaMarkupGenerator\Updater\GitHubUpdater;
-use flavor\SchemaMarkupGenerator\Security\Encryption;
+use Metodo\SchemaMarkupGenerator\Updater\GitHubUpdater;
+use Metodo\SchemaMarkupGenerator\Security\Encryption;
 
 /**
  * Update Tab
  *
  * Settings for plugin updates and GitHub integration.
  *
- * @package flavor\SchemaMarkupGenerator\Admin\Tabs
+ * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
  * @author  Michele Marri <info@metodo.dev>
  */
 class UpdateTab extends AbstractTab

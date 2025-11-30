@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "npm run build:css -- --watch",
+    "prebuild": "npm update metodo-design-system",
     "build": "npm run build:css && npm run build:js",
     "build:css": "postcss assets/src/css/admin.css -o assets/css/admin.css --env production",
     "build:js": "esbuild assets/src/js/admin.js --bundle --minify --target=es2020 --outfile=assets/js/admin.js",
@@ -12,7 +13,7 @@
     "watch:js": "esbuild assets/src/js/admin.js --bundle --target=es2020 --outfile=assets/js/admin.js --watch"
   },
   "dependencies": {
-    "metodo-design-system": "file:/Users/michelemarri/Sites/metodo-design-system"
+    "metodo-design-system": "github:michelemarri/metodo-design-system#main"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.16",

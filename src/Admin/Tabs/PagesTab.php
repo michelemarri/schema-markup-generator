@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Admin\Tabs;
+namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
 
-use flavor\SchemaMarkupGenerator\Schema\SchemaFactory;
+use Metodo\SchemaMarkupGenerator\Schema\SchemaFactory;
 use WP_Query;
 
 /**
@@ -12,7 +12,7 @@ use WP_Query;
  *
  * Configure schema mappings for individual pages.
  *
- * @package flavor\SchemaMarkupGenerator\Admin\Tabs
+ * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
  * @author  Michele Marri <info@metodo.dev>
  */
 class PagesTab extends AbstractTab

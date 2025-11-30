@@ -2,31 +2,31 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Schema;
+namespace Metodo\SchemaMarkupGenerator\Schema;
 
-use flavor\SchemaMarkupGenerator\Schema\Types\ArticleSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\ProductSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\OrganizationSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\PersonSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\FAQSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\HowToSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\EventSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\RecipeSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\ReviewSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\BreadcrumbSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\WebSiteSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\WebPageSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\VideoObjectSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\CourseSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\LearningResourceSchema;
-use flavor\SchemaMarkupGenerator\Schema\Types\SoftwareAppSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\ArticleSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\ProductSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\OrganizationSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\PersonSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\FAQSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\HowToSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\EventSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\RecipeSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\ReviewSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\BreadcrumbSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\WebSiteSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\WebPageSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\VideoObjectSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\CourseSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\LearningResourceSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\SoftwareAppSchema;
 
 /**
  * Schema Factory
  *
  * Creates schema instances based on type identifier.
  *
- * @package flavor\SchemaMarkupGenerator\Schema
+ * @package Metodo\SchemaMarkupGenerator\Schema
  * @author  Michele Marri <info@metodo.dev>
  */
 class SchemaFactory

@@ -17,10 +17,10 @@ declare(strict_types=1);
  * Text Domain:       schema-markup-generator
  * Domain Path:       /languages
  *
- * @package flavor\SchemaMarkupGenerator
+ * @package Metodo\SchemaMarkupGenerator
  */
 
-namespace flavor\SchemaMarkupGenerator;
+namespace Metodo\SchemaMarkupGenerator;
 
 // Prevent direct access
 if (!defined('ABSPATH')) {

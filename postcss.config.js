@@ -1,7 +1,7 @@
 /**
  * Schema Markup Generator - PostCSS Configuration
  * 
- * @package flavor\SchemaMarkupGenerator
+ * @package Metodo\SchemaMarkupGenerator
  */
 
 const path = require('path');

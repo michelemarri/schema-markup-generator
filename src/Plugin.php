@@ -2,33 +2,33 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator;
+namespace Metodo\SchemaMarkupGenerator;
 
-use flavor\SchemaMarkupGenerator\Admin\SettingsPage;
-use flavor\SchemaMarkupGenerator\Admin\MetaBox;
-use flavor\SchemaMarkupGenerator\Admin\PreviewHandler;
-use flavor\SchemaMarkupGenerator\Admin\SchemaPropertiesHandler;
-use flavor\SchemaMarkupGenerator\Discovery\PostTypeDiscovery;
-use flavor\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
-use flavor\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
-use flavor\SchemaMarkupGenerator\Schema\SchemaRenderer;
-use flavor\SchemaMarkupGenerator\Schema\SchemaFactory;
-use flavor\SchemaMarkupGenerator\Cache\CacheInterface;
-use flavor\SchemaMarkupGenerator\Cache\ObjectCache;
-use flavor\SchemaMarkupGenerator\Cache\TransientCache;
-use flavor\SchemaMarkupGenerator\Integration\RankMathIntegration;
-use flavor\SchemaMarkupGenerator\Integration\ACFIntegration;
-use flavor\SchemaMarkupGenerator\Integration\MemberPressCoursesIntegration;
-use flavor\SchemaMarkupGenerator\Rest\SchemaEndpoint;
-use flavor\SchemaMarkupGenerator\Logger\Logger;
-use flavor\SchemaMarkupGenerator\Updater\GitHubUpdater;
+use Metodo\SchemaMarkupGenerator\Admin\SettingsPage;
+use Metodo\SchemaMarkupGenerator\Admin\MetaBox;
+use Metodo\SchemaMarkupGenerator\Admin\PreviewHandler;
+use Metodo\SchemaMarkupGenerator\Admin\SchemaPropertiesHandler;
+use Metodo\SchemaMarkupGenerator\Discovery\PostTypeDiscovery;
+use Metodo\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
+use Metodo\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
+use Metodo\SchemaMarkupGenerator\Schema\SchemaRenderer;
+use Metodo\SchemaMarkupGenerator\Schema\SchemaFactory;
+use Metodo\SchemaMarkupGenerator\Cache\CacheInterface;
+use Metodo\SchemaMarkupGenerator\Cache\ObjectCache;
+use Metodo\SchemaMarkupGenerator\Cache\TransientCache;
+use Metodo\SchemaMarkupGenerator\Integration\RankMathIntegration;
+use Metodo\SchemaMarkupGenerator\Integration\ACFIntegration;
+use Metodo\SchemaMarkupGenerator\Integration\MemberPressCoursesIntegration;
+use Metodo\SchemaMarkupGenerator\Rest\SchemaEndpoint;
+use Metodo\SchemaMarkupGenerator\Logger\Logger;
+use Metodo\SchemaMarkupGenerator\Updater\GitHubUpdater;
 
 /**
  * Main Plugin Class
  *
  * Bootstraps all plugin components and manages initialization.
  *
- * @package flavor\SchemaMarkupGenerator
+ * @package Metodo\SchemaMarkupGenerator
  * @author  Michele Marri <info@metodo.dev>
  */
 class Plugin
@@ -59,8 +59,8 @@ class Plugin
     private function loadSettings(): void
     {
         // Merge settings from all sections
-        $general = \flavor\SchemaMarkupGenerator\smg_get_settings('general');
-        $advanced = \flavor\SchemaMarkupGenerator\smg_get_settings('advanced');
+        $general = \Metodo\SchemaMarkupGenerator\smg_get_settings('general');
+        $advanced = \Metodo\SchemaMarkupGenerator\smg_get_settings('advanced');
 
         $this->settings = array_merge($general, $advanced);
     }

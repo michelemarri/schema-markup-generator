@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Schema\Types;
+namespace Metodo\SchemaMarkupGenerator\Schema\Types;
 
-use flavor\SchemaMarkupGenerator\Schema\AbstractSchema;
+use Metodo\SchemaMarkupGenerator\Schema\AbstractSchema;
 use WP_Post;
 
 /**
@@ -12,7 +12,7 @@ use WP_Post;
  *
  * For software applications, mobile apps, and web apps.
  *
- * @package flavor\SchemaMarkupGenerator\Schema\Types
+ * @package Metodo\SchemaMarkupGenerator\Schema\Types
  * @author  Michele Marri <info@metodo.dev>
  */
 class SoftwareAppSchema extends AbstractSchema

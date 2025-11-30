@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Schema;
+namespace Metodo\SchemaMarkupGenerator\Schema;
 
-use flavor\SchemaMarkupGenerator\Cache\CacheInterface;
-use flavor\SchemaMarkupGenerator\Logger\Logger;
+use Metodo\SchemaMarkupGenerator\Cache\CacheInterface;
+use Metodo\SchemaMarkupGenerator\Logger\Logger;
 use WP_Post;
 
 /**
@@ -13,7 +13,7 @@ use WP_Post;
  *
  * Renders schema.org JSON-LD to the page head.
  *
- * @package flavor\SchemaMarkupGenerator\Schema
+ * @package Metodo\SchemaMarkupGenerator\Schema
  * @author  Michele Marri <info@metodo.dev>
  */
 class SchemaRenderer
@@ -146,7 +146,7 @@ class SchemaRenderer
     private function buildGlobalSchemas(WP_Post $post): array
     {
         $schemas = [];
-        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('general');
+        $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('general');
 
         // WebSite schema (only on home or if enabled globally)
         if (is_front_page() || ($settings['enable_website_schema'] ?? true)) {
@@ -172,7 +172,7 @@ class SchemaRenderer
      */
     private function renderGlobalSchemas(): void
     {
-        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('general');
+        $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('general');
         $schemas = [];
 
         // WebSite schema on home page

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Admin\Tabs;
+namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
 
 /**
  * Integrations Tab
  *
  * Third-party plugin integrations and settings.
  *
- * @package flavor\SchemaMarkupGenerator\Admin\Tabs
+ * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
  * @author  Michele Marri <info@metodo.dev>
  */
 class IntegrationsTab extends AbstractTab
@@ -73,7 +73,7 @@ class IntegrationsTab extends AbstractTab
 
     public function render(): void
     {
-        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('integrations');
+        $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('integrations');
 
         ?>
         <div class="mds-tab-panel" id="tab-integrations">

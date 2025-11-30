@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Discovery;
+namespace Metodo\SchemaMarkupGenerator\Discovery;
 
 /**
  * Taxonomy Discovery Service
  *
  * Discovers all registered taxonomies and their associations with post types.
  *
- * @package flavor\SchemaMarkupGenerator\Discovery
+ * @package Metodo\SchemaMarkupGenerator\Discovery
  * @author  Michele Marri <info@metodo.dev>
  */
 class TaxonomyDiscovery

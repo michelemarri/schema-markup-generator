@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Cache;
+namespace Metodo\SchemaMarkupGenerator\Cache;
 
 /**
  * Cache Interface
  *
  * Contract for cache implementations.
  *
- * @package flavor\SchemaMarkupGenerator\Cache
+ * @package Metodo\SchemaMarkupGenerator\Cache
  * @author  Michele Marri <info@metodo.dev>
  */
 interface CacheInterface

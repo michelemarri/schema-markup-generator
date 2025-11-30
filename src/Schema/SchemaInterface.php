@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Schema;
+namespace Metodo\SchemaMarkupGenerator\Schema;
 
 use WP_Post;
 
@@ -11,7 +11,7 @@ use WP_Post;
  *
  * Contract for all schema type implementations.
  *
- * @package flavor\SchemaMarkupGenerator\Schema
+ * @package Metodo\SchemaMarkupGenerator\Schema
  * @author  Michele Marri <info@metodo.dev>
  */
 interface SchemaInterface

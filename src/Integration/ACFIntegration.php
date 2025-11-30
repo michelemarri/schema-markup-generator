@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Integration;
+namespace Metodo\SchemaMarkupGenerator\Integration;
 
 /**
  * ACF Integration
  *
  * Integration with Advanced Custom Fields for field mapping.
  *
- * @package flavor\SchemaMarkupGenerator\Integration
+ * @package Metodo\SchemaMarkupGenerator\Integration
  * @author  Michele Marri <info@metodo.dev>
  */
 class ACFIntegration

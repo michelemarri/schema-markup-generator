@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Admin;
+namespace Metodo\SchemaMarkupGenerator\Admin;
 
-use flavor\SchemaMarkupGenerator\Schema\SchemaFactory;
-use flavor\SchemaMarkupGenerator\Schema\SchemaRenderer;
+use Metodo\SchemaMarkupGenerator\Schema\SchemaFactory;
+use Metodo\SchemaMarkupGenerator\Schema\SchemaRenderer;
 use WP_Post;
 
 /**
@@ -13,7 +13,7 @@ use WP_Post;
  *
  * Per-post schema configuration and preview.
  *
- * @package flavor\SchemaMarkupGenerator\Admin
+ * @package Metodo\SchemaMarkupGenerator\Admin
  * @author  Michele Marri <info@metodo.dev>
  */
 class MetaBox

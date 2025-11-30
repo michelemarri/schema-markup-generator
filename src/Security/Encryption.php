@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Security;
+namespace Metodo\SchemaMarkupGenerator\Security;
 
 /**
  * Encryption
@@ -10,7 +10,7 @@ namespace flavor\SchemaMarkupGenerator\Security;
  * Handles encryption and decryption of sensitive data using AES-256-CBC.
  * Uses WordPress AUTH_KEY as the encryption key for site-specific security.
  *
- * @package flavor\SchemaMarkupGenerator\Security
+ * @package Metodo\SchemaMarkupGenerator\Security
  * @author  Michele Marri <info@metodo.dev>
  */
 class Encryption

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Discovery;
+namespace Metodo\SchemaMarkupGenerator\Discovery;
 
 /**
  * Post Type Discovery Service
  *
  * Discovers all registered public post types in WordPress.
  *
- * @package flavor\SchemaMarkupGenerator\Discovery
+ * @package Metodo\SchemaMarkupGenerator\Discovery
  * @author  Michele Marri <info@metodo.dev>
  */
 class PostTypeDiscovery

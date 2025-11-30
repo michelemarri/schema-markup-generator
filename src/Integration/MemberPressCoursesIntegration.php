@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Integration;
+namespace Metodo\SchemaMarkupGenerator\Integration;
 
 use WP_Post;
 
@@ -12,7 +12,7 @@ use WP_Post;
  * Integration with MemberPress Courses for lesson/course hierarchy.
  * Provides parent course detection for LearningResource schema.
  *
- * @package flavor\SchemaMarkupGenerator\Integration
+ * @package Metodo\SchemaMarkupGenerator\Integration
  * @author  Michele Marri <info@metodo.dev>
  */
 class MemberPressCoursesIntegration

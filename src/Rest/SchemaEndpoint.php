@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Rest;
+namespace Metodo\SchemaMarkupGenerator\Rest;
 
-use flavor\SchemaMarkupGenerator\Schema\SchemaRenderer;
-use flavor\SchemaMarkupGenerator\Schema\SchemaValidator;
+use Metodo\SchemaMarkupGenerator\Schema\SchemaRenderer;
+use Metodo\SchemaMarkupGenerator\Schema\SchemaValidator;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -15,7 +15,7 @@ use WP_REST_Server;
  *
  * REST API endpoints for schema data.
  *
- * @package flavor\SchemaMarkupGenerator\Rest
+ * @package Metodo\SchemaMarkupGenerator\Rest
  * @author  Michele Marri <info@metodo.dev>
  */
 class SchemaEndpoint

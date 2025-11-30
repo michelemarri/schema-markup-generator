@@ -24,8 +24,8 @@ Create a class that extends `AbstractSchema`:
 
 namespace MyPlugin\Schema;
 
-use flavor\SchemaMarkupGenerator\Schema\AbstractSchema;
-use flavor\SchemaMarkupGenerator\Schema\SchemaInterface;
+use Metodo\SchemaMarkupGenerator\Schema\AbstractSchema;
+use Metodo\SchemaMarkupGenerator\Schema\SchemaInterface;
 use WP_Post;
 
 class PodcastEpisodeSchema extends AbstractSchema implements SchemaInterface
@@ -203,7 +203,7 @@ add_filter('smg_resolve_field_value', function($value, int $postId, string $fiel
 
 namespace MyPlugin\Admin;
 
-use flavor\SchemaMarkupGenerator\Admin\Tabs\AbstractTab;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\AbstractTab;
 
 class PodcastTab extends AbstractTab
 {
@@ -421,7 +421,7 @@ namespace MyPlugin\SchemaExtensions;
 Verify required plugins/classes exist:
 
 ```php
-if (!class_exists('flavor\SchemaMarkupGenerator\Plugin')) {
+if (!class_exists('Metodo\SchemaMarkupGenerator\Plugin')) {
     return;
 }
 ```

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Admin\Tabs;
+namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
 
-use flavor\SchemaMarkupGenerator\Schema\SchemaFactory;
+use Metodo\SchemaMarkupGenerator\Schema\SchemaFactory;
 
 /**
  * Schema Types Tab
  *
  * Overview and configuration of available schema types.
  *
- * @package flavor\SchemaMarkupGenerator\Admin\Tabs
+ * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
  * @author  Michele Marri <info@metodo.dev>
  */
 class SchemaTypesTab extends AbstractTab

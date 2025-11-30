@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Admin\Tabs;
+namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
 
-use flavor\SchemaMarkupGenerator\Discovery\PostTypeDiscovery;
-use flavor\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
-use flavor\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
-use flavor\SchemaMarkupGenerator\Integration\ACFIntegration;
-use flavor\SchemaMarkupGenerator\Schema\SchemaFactory;
+use Metodo\SchemaMarkupGenerator\Discovery\PostTypeDiscovery;
+use Metodo\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
+use Metodo\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
+use Metodo\SchemaMarkupGenerator\Integration\ACFIntegration;
+use Metodo\SchemaMarkupGenerator\Schema\SchemaFactory;
 
 /**
  * Post Types Tab
  *
  * Configure schema mappings for post types.
  *
- * @package flavor\SchemaMarkupGenerator\Admin\Tabs
+ * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
  * @author  Michele Marri <info@metodo.dev>
  */
 class PostTypesTab extends AbstractTab

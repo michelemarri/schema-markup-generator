@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Updater;
+namespace Metodo\SchemaMarkupGenerator\Updater;
 
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
-use flavor\SchemaMarkupGenerator\Security\Encryption;
+use Metodo\SchemaMarkupGenerator\Security\Encryption;
 
 /**
  * GitHub Updater
@@ -16,7 +16,7 @@ use flavor\SchemaMarkupGenerator\Security\Encryption;
  * For private repositories, define the GitHub token in wp-config.php:
  * define('SMG_GITHUB_TOKEN', 'your-github-token-here');
  *
- * @package flavor\SchemaMarkupGenerator\Updater
+ * @package Metodo\SchemaMarkupGenerator\Updater
  * @author  Michele Marri <info@metodo.dev>
  */
 class GitHubUpdater
@@ -231,10 +231,10 @@ class GitHubUpdater
         
         printf(
             '<div class="notice notice-warning is-dismissible"><p><strong>%s:</strong> %s <a href="%s">%s</a></p></div>',
-            esc_html__('Schema Markup Generator', 'flavor-schema-markup'),
-            esc_html__('Cannot check for updates. This plugin uses a private GitHub repository. Please configure a GitHub Personal Access Token to enable automatic updates.', 'flavor-schema-markup'),
+            esc_html__('Schema Markup Generator', 'schema-markup-generator'),
+            esc_html__('Cannot check for updates. This plugin uses a private GitHub repository. Please configure a GitHub Personal Access Token to enable automatic updates.', 'schema-markup-generator'),
             esc_url($settings_url),
-            esc_html__('Configure token →', 'flavor-schema-markup')
+            esc_html__('Configure token →', 'schema-markup-generator')
         );
     }
 }

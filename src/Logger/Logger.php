@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Logger;
+namespace Metodo\SchemaMarkupGenerator\Logger;
 
 /**
  * Logger
  *
  * Simple file-based logger for debugging.
  *
- * @package flavor\SchemaMarkupGenerator\Logger
+ * @package Metodo\SchemaMarkupGenerator\Logger
  * @author  Michele Marri <info@metodo.dev>
  */
 class Logger

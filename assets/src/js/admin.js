@@ -3,7 +3,7 @@
  *
  * Modern ES6+ implementation with smooth animations and better UX.
  *
- * @package flavor\SchemaMarkupGenerator
+ * @package Metodo\SchemaMarkupGenerator
  * @author  Michele Marri <info@metodo.dev>
  */
 

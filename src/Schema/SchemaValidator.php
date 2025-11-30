@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Schema;
+namespace Metodo\SchemaMarkupGenerator\Schema;
 
 /**
  * Schema Validator
  *
  * Validates schema.org structured data.
  *
- * @package flavor\SchemaMarkupGenerator\Schema
+ * @package Metodo\SchemaMarkupGenerator\Schema
  * @author  Michele Marri <info@metodo.dev>
  */
 class SchemaValidator

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Admin\Tabs;
+namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
 
 /**
  * General Tab
  *
  * General plugin settings.
  *
- * @package flavor\SchemaMarkupGenerator\Admin\Tabs
+ * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
  * @author  Michele Marri <info@metodo.dev>
  */
 class GeneralTab extends AbstractTab
@@ -62,7 +62,7 @@ class GeneralTab extends AbstractTab
 
     public function render(): void
     {
-        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('general');
+        $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('general');
 
         ?>
         <div class="mds-tab-panel" id="tab-general">

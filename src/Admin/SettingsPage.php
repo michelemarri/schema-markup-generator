@@ -2,27 +2,27 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Admin;
+namespace Metodo\SchemaMarkupGenerator\Admin;
 
-use flavor\SchemaMarkupGenerator\Discovery\PostTypeDiscovery;
-use flavor\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
-use flavor\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
-use flavor\SchemaMarkupGenerator\Integration\ACFIntegration;
-use flavor\SchemaMarkupGenerator\Admin\Tabs\GeneralTab;
-use flavor\SchemaMarkupGenerator\Admin\Tabs\PostTypesTab;
-use flavor\SchemaMarkupGenerator\Admin\Tabs\PagesTab;
-use flavor\SchemaMarkupGenerator\Admin\Tabs\SchemaTypesTab;
-use flavor\SchemaMarkupGenerator\Admin\Tabs\IntegrationsTab;
-use flavor\SchemaMarkupGenerator\Admin\Tabs\ToolsTab;
-use flavor\SchemaMarkupGenerator\Admin\Tabs\AdvancedTab;
-use flavor\SchemaMarkupGenerator\Admin\Tabs\UpdateTab;
+use Metodo\SchemaMarkupGenerator\Discovery\PostTypeDiscovery;
+use Metodo\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
+use Metodo\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
+use Metodo\SchemaMarkupGenerator\Integration\ACFIntegration;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\GeneralTab;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\PostTypesTab;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\PagesTab;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\SchemaTypesTab;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\IntegrationsTab;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\ToolsTab;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\AdvancedTab;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\UpdateTab;
 
 /**
  * Settings Page
  *
  * Main plugin settings page with tabbed interface.
  *
- * @package flavor\SchemaMarkupGenerator\Admin
+ * @package Metodo\SchemaMarkupGenerator\Admin
  * @author  Michele Marri <info@metodo.dev>
  */
 class SettingsPage

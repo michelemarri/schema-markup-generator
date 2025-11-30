@@ -352,7 +352,7 @@ add_action('smg_after_import', function(array $data) {
 
 namespace MyPlugin\Schema;
 
-use flavor\SchemaMarkupGenerator\Schema\AbstractSchema;
+use Metodo\SchemaMarkupGenerator\Schema\AbstractSchema;
 use WP_Post;
 
 class CustomSchema extends AbstractSchema

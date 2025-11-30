@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Admin\Tabs;
+namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
 
 /**
  * Advanced Tab
  *
  * Advanced settings including cache, logging, and debug options.
  *
- * @package flavor\SchemaMarkupGenerator\Admin\Tabs
+ * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
  * @author  Michele Marri <info@metodo.dev>
  */
 class AdvancedTab extends AbstractTab
@@ -60,7 +60,7 @@ class AdvancedTab extends AbstractTab
 
     public function render(): void
     {
-        $settings = \flavor\SchemaMarkupGenerator\smg_get_settings('advanced');
+        $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('advanced');
 
         ?>
         <div class="mds-tab-panel" id="tab-advanced">

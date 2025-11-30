@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Admin\Tabs;
+namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
 
-use flavor\SchemaMarkupGenerator\Tools\Exporter;
-use flavor\SchemaMarkupGenerator\Tools\Importer;
+use Metodo\SchemaMarkupGenerator\Tools\Exporter;
+use Metodo\SchemaMarkupGenerator\Tools\Importer;
 
 /**
  * Tools Tab
  *
  * Import/export and validation tools.
  *
- * @package flavor\SchemaMarkupGenerator\Admin\Tabs
+ * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
  * @author  Michele Marri <info@metodo.dev>
  */
 class ToolsTab extends AbstractTab

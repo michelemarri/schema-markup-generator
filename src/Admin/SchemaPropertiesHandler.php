@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Admin;
+namespace Metodo\SchemaMarkupGenerator\Admin;
 
-use flavor\SchemaMarkupGenerator\Schema\SchemaFactory;
-use flavor\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
+use Metodo\SchemaMarkupGenerator\Schema\SchemaFactory;
+use Metodo\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
 
 /**
  * Schema Properties Handler
  *
  * Handles AJAX requests for loading schema properties dynamically.
  *
- * @package flavor\SchemaMarkupGenerator\Admin
+ * @package Metodo\SchemaMarkupGenerator\Admin
  * @author  Michele Marri <info@metodo.dev>
  */
 class SchemaPropertiesHandler

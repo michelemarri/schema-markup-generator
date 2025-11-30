@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace flavor\SchemaMarkupGenerator\Discovery;
+namespace Metodo\SchemaMarkupGenerator\Discovery;
 
 /**
  * Custom Field Discovery Service
@@ -10,7 +10,7 @@ namespace flavor\SchemaMarkupGenerator\Discovery;
  * Discovers custom fields (meta) registered for posts,
  * including support for ACF, native meta, and other popular field plugins.
  *
- * @package flavor\SchemaMarkupGenerator\Discovery
+ * @package Metodo\SchemaMarkupGenerator\Discovery
  * @author  Michele Marri <info@metodo.dev>
  */
 class CustomFieldDiscovery
