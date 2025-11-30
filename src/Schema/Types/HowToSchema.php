@@ -68,16 +68,22 @@ class HowToSchema extends AbstractSchema
             ];
         }
 
-        // Supplies
+        // Supplies - only include if explicitly mapped with valid data
         $supplies = $this->getMappedValue($post, $mapping, 'supply');
         if (is_array($supplies) && !empty($supplies)) {
-            $data['supply'] = $this->buildSupplies($supplies);
+            $validSupplies = $this->filterValidItems($supplies);
+            if (!empty($validSupplies)) {
+                $data['supply'] = $this->buildSupplies($validSupplies);
+            }
         }
 
-        // Tools
+        // Tools - only include if explicitly mapped with valid data
         $tools = $this->getMappedValue($post, $mapping, 'tool');
         if (is_array($tools) && !empty($tools)) {
-            $data['tool'] = $this->buildTools($tools);
+            $validTools = $this->filterValidItems($tools);
+            if (!empty($validTools)) {
+                $data['tool'] = $this->buildTools($validTools);
+            }
         }
 
         // Steps
@@ -252,6 +258,80 @@ class HowToSchema extends AbstractSchema
         }
 
         return $items;
+    }
+
+    /**
+     * Filter and validate items for supply/tool arrays
+     * 
+     * Removes invalid values like:
+     * - Pure numbers or IDs
+     * - ACF field names (field_*)
+     * - HTML content
+     * - Default/empty values
+     * - Values that are too short or too long
+     */
+    private function filterValidItems(array $items): array
+    {
+        $validItems = [];
+
+        foreach ($items as $item) {
+            $name = is_array($item) ? ($item['name'] ?? $item[0] ?? '') : $item;
+            
+            if (!is_string($name)) {
+                continue;
+            }
+
+            $name = trim($name);
+
+            // Skip empty values
+            if (empty($name)) {
+                continue;
+            }
+
+            // Skip pure numeric values (likely IDs)
+            if (is_numeric($name)) {
+                continue;
+            }
+
+            // Skip values that look like timestamps or IDs (e.g., "1761735360:2")
+            if (preg_match('/^\d+:\d+$/', $name)) {
+                continue;
+            }
+
+            // Skip ACF field names (field_*)
+            if (preg_match('/^field_[a-f0-9]+$/i', $name)) {
+                continue;
+            }
+
+            // Skip values that are just "default"
+            if (strtolower($name) === 'default') {
+                continue;
+            }
+
+            // Skip values containing HTML tags (likely content, not item names)
+            if (preg_match('/<[^>]+>/', $name)) {
+                continue;
+            }
+
+            // Skip values that are too short (< 2 chars) - likely garbage
+            if (mb_strlen($name) < 2) {
+                continue;
+            }
+
+            // Skip values that are too long (> 200 chars) - likely content, not item names
+            if (mb_strlen($name) > 200) {
+                continue;
+            }
+
+            // Skip values that look like descriptions (contain multiple sentences)
+            if (substr_count($name, '.') > 2 || substr_count($name, ',') > 3) {
+                continue;
+            }
+
+            $validItems[] = is_array($item) ? $item : $name;
+        }
+
+        return $validItems;
     }
 
     /**
@@ -544,44 +624,95 @@ class HowToSchema extends AbstractSchema
 
     /**
      * Extract steps from any H2/H3/H4 heading sections (fallback)
+     * 
+     * Treats each heading as a step in sequence, regardless of numbering.
+     * This is useful for educational content where headings represent logical sections.
      */
     private function extractFromHeadingSections(string $content): array
     {
         $steps = [];
         $position = 1;
 
-        // Match any heading followed by content until the next heading
-        if (preg_match_all('/<h([2-4])[^>]*>(.*?)<\/h\1>\s*(.*?)(?=<h[2-4]|$)/is', $content, $matches, PREG_SET_ORDER)) {
-            foreach ($matches as $match) {
-                $name = wp_strip_all_tags($match[2]);
-                $name = trim($name);
-                $text = wp_strip_all_tags($match[3]);
-                $text = trim($text);
+        // First, try to render blocks if it's Gutenberg content
+        if (has_blocks($content)) {
+            $content = do_blocks($content);
+        }
 
-                // Skip if name looks like a generic section (Introduction, Conclusion, etc.)
-                if ($this->isGenericHeading($name)) {
+        // Apply content filters to ensure shortcodes are processed
+        $content = apply_filters('the_content', $content);
+
+        // Match any heading followed by content until the next heading of same or higher level
+        // Using a more robust pattern that handles nested content
+        $pattern = '/<h([2-4])[^>]*>(.*?)<\/h\1>(.*?)(?=<h[2-4][^>]*>|$)/is';
+        
+        if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $headingLevel = (int) $match[1];
+                $name = wp_strip_all_tags($match[2]);
+                $name = html_entity_decode(trim($name), ENT_QUOTES, 'UTF-8');
+                
+                // Get the content following this heading
+                $sectionContent = $match[3];
+                $text = $this->extractStepText($sectionContent);
+
+                // Skip if name is empty or looks like a generic section
+                if (empty($name) || $this->isGenericHeading($name)) {
                     continue;
                 }
 
-                if (!empty($name) && !empty($text)) {
-                    $stepData = [
-                        '@type' => 'HowToStep',
-                        'position' => $position++,
-                        'name' => $name,
-                        'text' => $text,
-                    ];
-
-                    // Check for images in the section
-                    if (preg_match('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', $match[3], $imgMatch)) {
-                        $stepData['image'] = $imgMatch[1];
-                    }
-
-                    $steps[] = $stepData;
+                // Skip very short headings (likely navigation or UI elements)
+                if (mb_strlen($name) < 3) {
+                    continue;
                 }
+
+                $stepData = [
+                    '@type' => 'HowToStep',
+                    'position' => $position++,
+                    'name' => $name,
+                ];
+
+                // Add text if available, otherwise use the name as text (required by schema.org)
+                if (!empty($text)) {
+                    // Limit text to reasonable length (500 chars)
+                    $stepData['text'] = mb_strlen($text) > 500 
+                        ? mb_substr($text, 0, 497) . '...' 
+                        : $text;
+                } else {
+                    $stepData['text'] = $name;
+                }
+
+                // Check for images in the section
+                if (preg_match('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', $sectionContent, $imgMatch)) {
+                    $stepData['image'] = $imgMatch[1];
+                }
+
+                $steps[] = $stepData;
             }
         }
 
         return $steps;
+    }
+
+    /**
+     * Extract clean text from step section content
+     */
+    private function extractStepText(string $html): string
+    {
+        // Remove script and style tags completely
+        $html = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $html);
+        $html = preg_replace('/<style[^>]*>.*?<\/style>/is', '', $html);
+        
+        // Strip all HTML tags
+        $text = wp_strip_all_tags($html);
+        
+        // Decode HTML entities
+        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        
+        // Normalize whitespace
+        $text = preg_replace('/\s+/', ' ', $text);
+        $text = trim($text);
+        
+        return $text;
     }
 
     /**

@@ -186,14 +186,33 @@ Map a repeater field with `question` and `answer` sub-fields.
 
 #### HowTo
 
-For step-by-step guides.
+For step-by-step guides and tutorials.
 
 **Properties:**
 - `name` - Guide title
-- `step` - Steps (auto-extracted from lists or headings)
-- `totalTime` - Duration
-- `supply` - Materials needed
-- `tool` - Tools required
+- `step` - Steps (auto-extracted from content - see below)
+- `totalTime` - Duration (auto-extracted or mapped)
+- `supply` - Materials needed (optional, requires explicit mapping)
+- `tool` - Tools required (optional, requires explicit mapping)
+
+**Auto-extraction of Steps:**
+
+The plugin intelligently extracts steps from content in this priority:
+
+1. **Ordered lists** (`<ol>`) - Each list item becomes a step
+2. **Numbered headings** - Headings like "Step 1:", "Passo 1:", "#1" etc.
+3. **Any H2/H3/H4 sequence** - Each heading becomes a step with following content as description
+
+The heading-based extraction treats the natural sequence of headings as steps, regardless of numbering. This works well for educational content where sections represent logical steps.
+
+**Supply & Tool Validation:**
+
+Supply and tool fields require explicit field mapping and include validation to filter out:
+- Numeric IDs and timestamps
+- ACF field names (field_*)
+- HTML content
+- Default placeholder values
+- Values that are too short or too long
 
 #### Recipe
 

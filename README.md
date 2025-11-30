@@ -231,6 +231,12 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.3.3
+- **Fixed**: HowTo schema step extraction now works with any H2/H3/H4 heading sequence (no numbering required)
+- **Fixed**: HowTo supply and tool fields now properly validate data, filtering out invalid values (ACF field names, IDs, HTML content, etc.)
+- **Improved**: Step text extraction with better HTML parsing and whitespace normalization
+- **Improved**: Gutenberg block support for step extraction
+
 ### 1.3.2
 - **Fixed**: Plugin icons not showing in WordPress updates screen
 - **Improved**: Added 'default' icon key for better WordPress compatibility
