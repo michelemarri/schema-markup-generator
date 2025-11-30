@@ -248,7 +248,14 @@ class LearningResourceSchema extends AbstractSchema
             }
         }
 
-        return null;
+        /**
+         * Filter to get parent course from integrations (e.g., MemberPress Courses, LearnDash)
+         *
+         * @param array|null $parentCourse Current parent course data
+         * @param WP_Post    $post         The lesson post
+         * @param array      $mapping      Field mapping configuration
+         */
+        return apply_filters('smg_learning_resource_parent_course', null, $post, $mapping);
     }
 
     /**

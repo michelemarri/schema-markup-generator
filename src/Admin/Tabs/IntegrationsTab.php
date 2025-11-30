@@ -60,6 +60,14 @@ class IntegrationsTab extends AbstractTab
                     __('Automatically generate Product schemas from WooCommerce products.', 'schema-markup-generator'),
                     $settings
                 );
+
+                $this->renderIntegrationCard(
+                    'MemberPress Courses',
+                    post_type_exists('mpcs-lesson'),
+                    'memberpress_courses',
+                    __('Link lessons to courses and generate LearningResource schemas with course hierarchy.', 'schema-markup-generator'),
+                    $settings
+                );
                 ?>
             </div>
 
@@ -162,6 +170,66 @@ class IntegrationsTab extends AbstractTab
                 </div>
             <?php endif; ?>
 
+            <?php if (post_type_exists('mpcs-lesson')): ?>
+                <?php $this->renderSection(
+                    __('MemberPress Courses Settings', 'schema-markup-generator'),
+                    __('Configure MemberPress Courses integration for educational content.', 'schema-markup-generator')
+                ); ?>
+
+                <div class="smg-cards-grid">
+                    <?php
+                    $this->renderCard(__('Course Hierarchy', 'schema-markup-generator'), function () use ($settings) {
+                        $this->renderToggle(
+                            'smg_settings[mpcs_auto_parent_course]',
+                            $settings['mpcs_auto_parent_course'] ?? true,
+                            __('Auto-detect Parent Course', 'schema-markup-generator'),
+                            __('Automatically link lessons to their parent course in the schema (isPartOf).', 'schema-markup-generator')
+                        );
+
+                        $this->renderToggle(
+                            'smg_settings[mpcs_include_curriculum]',
+                            $settings['mpcs_include_curriculum'] ?? false,
+                            __('Include Curriculum in Course Schema', 'schema-markup-generator'),
+                            __('Add sections and lessons list to Course schema (may increase page size).', 'schema-markup-generator')
+                        );
+                    }, 'dashicons-welcome-learn-more');
+
+                    $this->renderCard(__('Integration Status', 'schema-markup-generator'), function () {
+                        global $wpdb;
+                        $tableName = $wpdb->prefix . 'mpcs_sections';
+                        $sectionsExist = (bool) $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $tableName));
+                        
+                        $courseCount = wp_count_posts('mpcs-course');
+                        $lessonCount = wp_count_posts('mpcs-lesson');
+                        ?>
+                        <div class="smg-integration-status-info">
+                            <div class="smg-status-item">
+                                <span class="dashicons dashicons-yes-alt" style="color: var(--smg-success);"></span>
+                                <span><?php printf(__('%d Courses detected', 'schema-markup-generator'), $courseCount->publish ?? 0); ?></span>
+                            </div>
+                            <div class="smg-status-item">
+                                <span class="dashicons dashicons-yes-alt" style="color: var(--smg-success);"></span>
+                                <span><?php printf(__('%d Lessons detected', 'schema-markup-generator'), $lessonCount->publish ?? 0); ?></span>
+                            </div>
+                            <div class="smg-status-item">
+                                <?php if ($sectionsExist): ?>
+                                    <span class="dashicons dashicons-yes-alt" style="color: var(--smg-success);"></span>
+                                    <span><?php esc_html_e('Sections table found', 'schema-markup-generator'); ?></span>
+                                <?php else: ?>
+                                    <span class="dashicons dashicons-warning" style="color: var(--smg-warning);"></span>
+                                    <span><?php esc_html_e('Sections table not found', 'schema-markup-generator'); ?></span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <p class="smg-field-description" style="margin-top: 12px;">
+                            <?php esc_html_e('Schema types: Course (mpcs-course) → LearningResource (mpcs-lesson)', 'schema-markup-generator'); ?>
+                        </p>
+                        <?php
+                    }, 'dashicons-info');
+                    ?>
+                </div>
+            <?php endif; ?>
+
             <?php if (class_exists('WooCommerce')): ?>
                 <?php $this->renderSection(
                     __('WooCommerce Settings', 'schema-markup-generator'),
@@ -196,32 +264,6 @@ class IntegrationsTab extends AbstractTab
                 </div>
             <?php endif; ?>
 
-            <?php $this->renderSection(
-                __('Available Integrations', 'schema-markup-generator'),
-                __('Install these plugins to unlock additional schema features.', 'schema-markup-generator')
-            ); ?>
-
-            <div class="smg-suggested-integrations">
-                <?php
-                $this->renderSuggestedIntegration(
-                    'Yoast SEO',
-                    !class_exists('WPSEO_Options'),
-                    __('Read primary categories and canonical URLs from Yoast SEO.', 'schema-markup-generator')
-                );
-
-                $this->renderSuggestedIntegration(
-                    'The Events Calendar',
-                    !class_exists('Tribe__Events__Main'),
-                    __('Automatically generate Event schema from calendar events.', 'schema-markup-generator')
-                );
-
-                $this->renderSuggestedIntegration(
-                    'LearnDash',
-                    !class_exists('SFWD_LMS'),
-                    __('Generate Course schema from LearnDash courses and lessons.', 'schema-markup-generator')
-                );
-                ?>
-            </div>
         </div>
         <?php
     }
@@ -268,25 +310,5 @@ class IntegrationsTab extends AbstractTab
         <?php
     }
 
-    /**
-     * Render suggested integration
-     */
-    private function renderSuggestedIntegration(string $name, bool $notInstalled, string $description): void
-    {
-        if (!$notInstalled) {
-            return; // Already installed
-        }
-        ?>
-        <div class="smg-suggested-integration">
-            <div class="smg-suggested-icon">
-                <span class="dashicons dashicons-plus-alt2"></span>
-            </div>
-            <div class="smg-suggested-content">
-                <h4><?php echo esc_html($name); ?></h4>
-                <p><?php echo esc_html($description); ?></p>
-            </div>
-        </div>
-        <?php
-    }
 }
 

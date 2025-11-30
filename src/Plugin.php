@@ -17,6 +17,7 @@ use flavor\SchemaMarkupGenerator\Cache\ObjectCache;
 use flavor\SchemaMarkupGenerator\Cache\TransientCache;
 use flavor\SchemaMarkupGenerator\Integration\RankMathIntegration;
 use flavor\SchemaMarkupGenerator\Integration\ACFIntegration;
+use flavor\SchemaMarkupGenerator\Integration\MemberPressCoursesIntegration;
 use flavor\SchemaMarkupGenerator\Rest\SchemaEndpoint;
 use flavor\SchemaMarkupGenerator\Logger\Logger;
 use flavor\SchemaMarkupGenerator\Updater\GitHubUpdater;
@@ -95,6 +96,7 @@ class Plugin
         // Integrations
         $this->services['rankmath_integration'] = new RankMathIntegration();
         $this->services['acf_integration'] = new ACFIntegration();
+        $this->services['memberpress_courses_integration'] = new MemberPressCoursesIntegration();
 
         // REST API
         $this->services['rest_endpoint'] = new SchemaEndpoint(
@@ -163,6 +165,7 @@ class Plugin
         // Initialize integrations
         $this->services['rankmath_integration']->init();
         $this->services['acf_integration']->init();
+        $this->services['memberpress_courses_integration']->init();
 
         // Initialize updater
         $this->services['updater']->init();
