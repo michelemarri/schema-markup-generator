@@ -15,6 +15,7 @@ use flavor\SchemaMarkupGenerator\Admin\Tabs\SchemaTypesTab;
 use flavor\SchemaMarkupGenerator\Admin\Tabs\IntegrationsTab;
 use flavor\SchemaMarkupGenerator\Admin\Tabs\ToolsTab;
 use flavor\SchemaMarkupGenerator\Admin\Tabs\AdvancedTab;
+use flavor\SchemaMarkupGenerator\Admin\Tabs\UpdateTab;
 
 /**
  * Settings Page
@@ -68,6 +69,7 @@ class SettingsPage
             'integrations' => new IntegrationsTab(),
             'tools' => new ToolsTab(),
             'advanced' => new AdvancedTab(),
+            'update' => new UpdateTab(),
         ];
 
         /**

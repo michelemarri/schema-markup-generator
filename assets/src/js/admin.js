@@ -131,6 +131,27 @@
                     this.handlePaginationInput(e);
                 }
             });
+
+            // Update tab: Toggle password visibility
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.smg-toggle-password')) {
+                    this.handleTogglePassword(e);
+                }
+            });
+
+            // Update tab: Remove token
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('#smg-remove-token')) {
+                    this.handleRemoveToken(e);
+                }
+            });
+
+            // Update tab: Check for updates
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('#smg-check-updates')) {
+                    this.handleCheckUpdates(e);
+                }
+            });
         },
 
         /**
@@ -462,6 +483,132 @@
             
             if (page && page >= 1 && page <= max && baseUrl) {
                 window.location.href = `${baseUrl}&paged=${page}`;
+            }
+        },
+
+        /**
+         * Handle toggle password visibility (Update tab)
+         */
+        handleTogglePassword(e) {
+            e.preventDefault();
+            const button = e.target.closest('.smg-toggle-password');
+            const targetId = button.dataset.target;
+            const input = document.getElementById(targetId);
+            const icon = button.querySelector('.dashicons');
+            
+            if (!input) return;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('dashicons-visibility');
+                icon.classList.add('dashicons-hidden');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('dashicons-hidden');
+                icon.classList.add('dashicons-visibility');
+            }
+        },
+
+        /**
+         * Handle remove token (Update tab)
+         */
+        handleRemoveToken(e) {
+            e.preventDefault();
+            
+            if (!confirm('Are you sure you want to remove the GitHub token?')) {
+                return;
+            }
+            
+            const tokenInput = document.getElementById('smg_github_token');
+            if (tokenInput) {
+                tokenInput.value = '';
+                
+                // Update status
+                const statusElement = document.querySelector('.smg-token-status');
+                if (statusElement) {
+                    statusElement.remove();
+                }
+                
+                // Hide remove button
+                const removeButton = document.getElementById('smg-remove-token');
+                if (removeButton) {
+                    removeButton.style.display = 'none';
+                }
+                
+                this.showToast('Token will be removed when you save settings', 'info');
+            }
+        },
+
+        /**
+         * Handle check for updates (Update tab)
+         */
+        async handleCheckUpdates(e) {
+            e.preventDefault();
+            const button = e.target.closest('#smg-check-updates');
+            const resultDiv = document.getElementById('smg-update-result');
+            
+            // Add loading state
+            button.disabled = true;
+            const originalHtml = button.innerHTML;
+            button.innerHTML = '<span class="dashicons dashicons-update smg-spin"></span> Checking...';
+            
+            if (resultDiv) {
+                resultDiv.style.display = 'none';
+            }
+
+            try {
+                // Trigger WordPress update check
+                const formData = new FormData();
+                formData.append('action', 'smg_check_updates');
+                formData.append('nonce', typeof smgAdmin !== 'undefined' ? smgAdmin.nonce : '');
+
+                const response = await fetch(typeof smgAdmin !== 'undefined' ? smgAdmin.ajaxUrl : ajaxurl, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                });
+
+                const data = await response.json();
+
+                if (resultDiv) {
+                    resultDiv.style.display = 'block';
+                    
+                    if (data.success) {
+                        if (data.data.update_available) {
+                            resultDiv.className = 'smg-update-result smg-result-success';
+                            resultDiv.innerHTML = `
+                                <span class="dashicons dashicons-yes-alt"></span>
+                                New version available: <strong>${data.data.new_version}</strong>
+                                <a href="${data.data.update_url}" class="smg-btn smg-btn-sm smg-btn-primary" style="margin-left: 10px;">Update Now</a>
+                            `;
+                        } else {
+                            resultDiv.className = 'smg-update-result smg-result-info';
+                            resultDiv.innerHTML = `
+                                <span class="dashicons dashicons-yes"></span>
+                                You have the latest version installed.
+                            `;
+                        }
+                    } else {
+                        resultDiv.className = 'smg-update-result smg-result-error';
+                        resultDiv.innerHTML = `
+                            <span class="dashicons dashicons-warning"></span>
+                            ${data.data?.message || 'Could not check for updates.'}
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Update check failed:', error);
+                if (resultDiv) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.className = 'smg-update-result smg-result-error';
+                    resultDiv.innerHTML = `
+                        <span class="dashicons dashicons-warning"></span>
+                        Failed to check for updates. Please try again.
+                    `;
+                }
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalHtml;
             }
         },
 

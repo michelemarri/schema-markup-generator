@@ -178,6 +178,7 @@ class Plugin
             add_action('add_meta_boxes', [$this->services['metabox'], 'register']);
             add_action('save_post', [$this->services['metabox'], 'save'], 10, 2);
             add_action('wp_ajax_smg_preview_schema', [$this->services['preview_handler'], 'handle']);
+            add_action('wp_ajax_smg_check_updates', [$this, 'handleCheckUpdates']);
         }
 
         // Plugin action links
@@ -277,6 +278,45 @@ class Plugin
     {
         $this->services['cache']->delete('schema_' . $postId);
         $this->services['logger']->debug("Cache invalidated for post {$postId}");
+    }
+
+    /**
+     * Handle AJAX check for updates
+     */
+    public function handleCheckUpdates(): void
+    {
+        check_ajax_referer('smg_admin_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Unauthorized']);
+            return;
+        }
+
+        try {
+            // Force WordPress to check for plugin updates
+            delete_site_transient('update_plugins');
+            wp_update_plugins();
+
+            // Get update info
+            $updatePlugins = get_site_transient('update_plugins');
+            $pluginFile = SMG_PLUGIN_BASENAME;
+
+            if (isset($updatePlugins->response[$pluginFile])) {
+                $update = $updatePlugins->response[$pluginFile];
+                wp_send_json_success([
+                    'update_available' => true,
+                    'new_version' => $update->new_version ?? 'Unknown',
+                    'update_url' => admin_url('plugins.php'),
+                ]);
+            } else {
+                wp_send_json_success([
+                    'update_available' => false,
+                    'current_version' => SMG_VERSION,
+                ]);
+            }
+        } catch (\Exception $e) {
+            wp_send_json_error(['message' => $e->getMessage()]);
+        }
     }
 
     /**

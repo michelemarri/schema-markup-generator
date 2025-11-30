@@ -128,7 +128,8 @@
   animation: scaleIn 0.2s ease-out forwards;
 }
 
-.smg-animate-spin {
+.smg-animate-spin,
+.smg-spin {
   animation: spin 1s linear infinite;
 }
 

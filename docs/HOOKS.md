@@ -285,6 +285,34 @@ add_filter('smg_import_data', function(array $data): array {
 
 ---
 
+### Update Filters
+
+#### `smg_github_token`
+
+Provide GitHub token dynamically for private repository updates.
+
+```php
+add_filter('smg_github_token', function(): ?string {
+    // Return token from environment variable
+    return getenv('GITHUB_TOKEN') ?: null;
+});
+```
+
+**Parameters:**
+- Return: `string|null` - The GitHub Personal Access Token
+
+**Use cases:**
+- Retrieve token from environment variables
+- Use a secrets management service
+- Site-specific token configuration in mu-plugins
+
+**Priority:**
+1. `SMG_GITHUB_TOKEN` constant in wp-config.php (highest)
+2. `smg_github_token` filter
+3. Encrypted token from plugin settings (lowest)
+
+---
+
 ## Actions
 
 ### Lifecycle Actions
