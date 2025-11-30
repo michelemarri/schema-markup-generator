@@ -99,17 +99,17 @@ class WebSiteSchema extends AbstractSchema
         return [
             'name' => [
                 'type' => 'text',
-                'description' => __('Website name', 'schema-markup-generator'),
+                'description' => __('Site name. Shown in Google Knowledge Panel and search results.', 'schema-markup-generator'),
                 'auto' => 'site_name',
             ],
             'description' => [
                 'type' => 'text',
-                'description' => __('Website description', 'schema-markup-generator'),
+                'description' => __('Site tagline/description. Helps define brand identity in search.', 'schema-markup-generator'),
                 'auto' => 'site_description',
             ],
             'enableSearchAction' => [
                 'type' => 'boolean',
-                'description' => __('Enable sitelinks search box', 'schema-markup-generator'),
+                'description' => __('Enables sitelinks search box in Google results. Shows search field under your listing.', 'schema-markup-generator'),
             ],
         ];
     }

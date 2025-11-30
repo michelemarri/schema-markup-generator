@@ -171,41 +171,45 @@ class PersonSchema extends AbstractSchema
         return [
             'name' => [
                 'type' => 'text',
-                'description' => __('Full name', 'schema-markup-generator'),
+                'description' => __('Full name. Displayed in author knowledge panels and bylines.', 'schema-markup-generator'),
                 'auto' => 'post_title',
             ],
             'description' => [
                 'type' => 'text',
-                'description' => __('Bio/description', 'schema-markup-generator'),
+                'description' => __('Professional bio. Supports E-E-A-T signals for content credibility.', 'schema-markup-generator'),
                 'auto' => 'post_excerpt',
             ],
             'image' => [
                 'type' => 'image',
-                'description' => __('Profile photo', 'schema-markup-generator'),
+                'description' => __('Professional photo. Shown in author knowledge panels. Use clear headshot.', 'schema-markup-generator'),
             ],
             'jobTitle' => [
                 'type' => 'text',
-                'description' => __('Job title', 'schema-markup-generator'),
+                'description' => __('Professional title. Establishes expertise and authority.', 'schema-markup-generator'),
             ],
             'worksFor' => [
                 'type' => 'text',
-                'description' => __('Organization/company', 'schema-markup-generator'),
+                'description' => __('Employer/organization. Links person to institutional credibility.', 'schema-markup-generator'),
             ],
             'email' => [
                 'type' => 'email',
-                'description' => __('Email address', 'schema-markup-generator'),
+                'description' => __('Contact email. Enables direct contact from search results.', 'schema-markup-generator'),
             ],
             'telephone' => [
                 'type' => 'text',
-                'description' => __('Phone number', 'schema-markup-generator'),
+                'description' => __('Phone number. Shown in contact information panels.', 'schema-markup-generator'),
             ],
             'sameAs' => [
                 'type' => 'url',
-                'description' => __('Social profile URLs', 'schema-markup-generator'),
+                'description' => __('Social/professional profiles (LinkedIn, Twitter, etc.). Builds identity graph for knowledge panel.', 'schema-markup-generator'),
             ],
             'knowsAbout' => [
                 'type' => 'text',
-                'description' => __('Areas of expertise', 'schema-markup-generator'),
+                'description' => __('Expertise topics (comma-separated). Helps AI understand author authority areas.', 'schema-markup-generator'),
+            ],
+            'alumniOf' => [
+                'type' => 'text',
+                'description' => __('Educational institutions attended. Adds credibility for academic topics.', 'schema-markup-generator'),
             ],
         ];
     }

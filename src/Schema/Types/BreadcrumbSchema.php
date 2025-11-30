@@ -261,7 +261,7 @@ class BreadcrumbSchema extends AbstractSchema
         return [
             'itemListElement' => [
                 'type' => 'auto',
-                'description' => __('Automatically generated from post hierarchy', 'schema-markup-generator'),
+                'description' => __('Auto-generated navigation path. Shows clickable breadcrumb trail in Google search results.', 'schema-markup-generator'),
                 'auto' => 'hierarchy',
             ],
         ];

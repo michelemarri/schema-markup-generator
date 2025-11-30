@@ -184,17 +184,17 @@ class WebPageSchema extends AbstractSchema
         return [
             'name' => [
                 'type' => 'text',
-                'description' => __('Page title', 'schema-markup-generator'),
+                'description' => __('Page title. Establishes page identity in site hierarchy.', 'schema-markup-generator'),
                 'auto' => 'post_title',
             ],
             'description' => [
                 'type' => 'text',
-                'description' => __('Page description', 'schema-markup-generator'),
+                'description' => __('Page summary. Helps search engines understand page purpose.', 'schema-markup-generator'),
                 'auto' => 'post_excerpt',
             ],
             'pageType' => [
                 'type' => 'select',
-                'description' => __('Page type', 'schema-markup-generator'),
+                'description' => __('Specific page type. Auto-detected from URL/title, or override manually.', 'schema-markup-generator'),
                 'options' => [
                     'WebPage',
                     'AboutPage',

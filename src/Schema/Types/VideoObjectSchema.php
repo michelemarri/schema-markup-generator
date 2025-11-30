@@ -209,37 +209,41 @@ class VideoObjectSchema extends AbstractSchema
         return [
             'name' => [
                 'type' => 'text',
-                'description' => __('Video title', 'schema-markup-generator'),
+                'description' => __('Video title. Required for video rich results in Google Search.', 'schema-markup-generator'),
                 'auto' => 'post_title',
             ],
             'description' => [
                 'type' => 'text',
-                'description' => __('Video description', 'schema-markup-generator'),
+                'description' => __('Video summary. Required. Max 2048 characters for Google.', 'schema-markup-generator'),
                 'auto' => 'post_excerpt',
             ],
             'thumbnailUrl' => [
                 'type' => 'image',
-                'description' => __('Video thumbnail', 'schema-markup-generator'),
+                'description' => __('Required. Preview image shown in search results. Min 120x120px recommended.', 'schema-markup-generator'),
             ],
             'contentUrl' => [
                 'type' => 'url',
-                'description' => __('Direct video file URL', 'schema-markup-generator'),
+                'description' => __('Direct video file URL. Preferred if you host videos directly.', 'schema-markup-generator'),
             ],
             'embedUrl' => [
                 'type' => 'url',
-                'description' => __('Embed URL (YouTube, Vimeo, etc.)', 'schema-markup-generator'),
+                'description' => __('Player embed URL (YouTube, Vimeo). Auto-detected from content if embedded.', 'schema-markup-generator'),
             ],
             'duration' => [
                 'type' => 'text',
-                'description' => __('Duration (HH:MM:SS or seconds)', 'schema-markup-generator'),
+                'description' => __('Video length (HH:MM:SS or seconds). Shown in video rich results.', 'schema-markup-generator'),
             ],
             'interactionCount' => [
                 'type' => 'number',
-                'description' => __('View count', 'schema-markup-generator'),
+                'description' => __('View count. Social proof signal in video results.', 'schema-markup-generator'),
             ],
             'transcript' => [
                 'type' => 'textarea',
-                'description' => __('Video transcript', 'schema-markup-generator'),
+                'description' => __('Full video transcript. Improves accessibility and AI content understanding.', 'schema-markup-generator'),
+            ],
+            'isFamilyFriendly' => [
+                'type' => 'boolean',
+                'description' => __('Safe for all audiences. Affects content filtering in search.', 'schema-markup-generator'),
             ],
         ];
     }

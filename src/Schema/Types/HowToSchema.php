@@ -664,40 +664,40 @@ class HowToSchema extends AbstractSchema
         return [
             'name' => [
                 'type' => 'text',
-                'description' => __('Title of the guide', 'schema-markup-generator'),
+                'description' => __('Guide title. Displayed as the main heading in how-to rich results.', 'schema-markup-generator'),
                 'auto' => 'post_title',
             ],
             'description' => [
                 'type' => 'text',
-                'description' => __('Brief description', 'schema-markup-generator'),
+                'description' => __('What this guide helps you accomplish. Shown in search result snippets.', 'schema-markup-generator'),
                 'auto' => 'post_excerpt',
             ],
             'totalTime' => [
                 'type' => 'text',
-                'description' => __('Time to complete the task (not reading time), e.g. 30 or 90', 'schema-markup-generator'),
+                'description' => __('Total time to complete (in minutes). Shown in rich results to set user expectations.', 'schema-markup-generator'),
                 'auto' => 'post_content',
                 'auto_description' => __('Auto-extracted if content mentions duration (e.g. "takes 30 minutes", "tempo: 2 ore")', 'schema-markup-generator'),
             ],
             'estimatedCost' => [
                 'type' => 'number',
-                'description' => __('Estimated cost', 'schema-markup-generator'),
+                'description' => __('Approximate cost. Helps users decide before clicking through.', 'schema-markup-generator'),
             ],
             'supply' => [
                 'type' => 'repeater',
-                'description' => __('Materials/supplies needed', 'schema-markup-generator'),
+                'description' => __('Materials needed. Displayed as a list in how-to rich results.', 'schema-markup-generator'),
             ],
             'tool' => [
                 'type' => 'repeater',
-                'description' => __('Tools needed', 'schema-markup-generator'),
+                'description' => __('Tools/equipment required. Shown alongside supplies in rich results.', 'schema-markup-generator'),
             ],
             'steps' => [
                 'type' => 'repeater',
-                'description' => __('Step-by-step instructions', 'schema-markup-generator'),
+                'description' => __('Step-by-step instructions. Core content for how-to rich results display.', 'schema-markup-generator'),
                 'auto' => 'post_content',
                 'auto_description' => __('Auto-extracted from content (ordered lists, numbered headings, or H2/H3/H4 sections)', 'schema-markup-generator'),
                 'fields' => [
-                    'name' => ['type' => 'text', 'description' => __('Step title', 'schema-markup-generator')],
-                    'text' => ['type' => 'textarea', 'description' => __('Step description', 'schema-markup-generator')],
+                    'name' => ['type' => 'text', 'description' => __('Brief step title. Shown as step heading.', 'schema-markup-generator')],
+                    'text' => ['type' => 'textarea', 'description' => __('Detailed instructions for this step.', 'schema-markup-generator')],
                 ],
             ],
         ];

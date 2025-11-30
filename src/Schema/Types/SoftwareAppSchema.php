@@ -195,17 +195,17 @@ class SoftwareAppSchema extends AbstractSchema
         return [
             'name' => [
                 'type' => 'text',
-                'description' => __('Application name', 'schema-markup-generator'),
+                'description' => __('App/software name. Shown in software rich results.', 'schema-markup-generator'),
                 'auto' => 'post_title',
             ],
             'description' => [
                 'type' => 'text',
-                'description' => __('Application description', 'schema-markup-generator'),
+                'description' => __('What the app does. Displayed in search results and app listings.', 'schema-markup-generator'),
                 'auto' => 'post_excerpt',
             ],
             'applicationCategory' => [
                 'type' => 'select',
-                'description' => __('Application category', 'schema-markup-generator'),
+                'description' => __('App type. Required for proper categorization in app searches.', 'schema-markup-generator'),
                 'options' => [
                     'GameApplication',
                     'SocialNetworkingApplication',
@@ -229,31 +229,35 @@ class SoftwareAppSchema extends AbstractSchema
             ],
             'operatingSystem' => [
                 'type' => 'text',
-                'description' => __('Operating system(s)', 'schema-markup-generator'),
+                'description' => __('Supported platforms (Windows, macOS, iOS, Android, etc.). Filters search results.', 'schema-markup-generator'),
             ],
             'softwareVersion' => [
                 'type' => 'text',
-                'description' => __('Software version', 'schema-markup-generator'),
+                'description' => __('Current version number. Shows freshness of the software.', 'schema-markup-generator'),
             ],
             'downloadUrl' => [
                 'type' => 'url',
-                'description' => __('Download URL', 'schema-markup-generator'),
+                'description' => __('Direct download or app store link. Enables download button in results.', 'schema-markup-generator'),
             ],
             'price' => [
                 'type' => 'number',
-                'description' => __('Price (0 for free)', 'schema-markup-generator'),
+                'description' => __('Price in specified currency. Use 0 for free apps.', 'schema-markup-generator'),
             ],
             'priceCurrency' => [
                 'type' => 'text',
-                'description' => __('Currency code', 'schema-markup-generator'),
+                'description' => __('Currency code (EUR, USD). Required when price is set.', 'schema-markup-generator'),
             ],
             'ratingValue' => [
                 'type' => 'number',
-                'description' => __('Average rating', 'schema-markup-generator'),
+                'description' => __('Average user rating (1-5). Displays stars in app rich results.', 'schema-markup-generator'),
             ],
             'ratingCount' => [
                 'type' => 'number',
-                'description' => __('Number of ratings', 'schema-markup-generator'),
+                'description' => __('Total number of ratings. Social proof indicator.', 'schema-markup-generator'),
+            ],
+            'screenshot' => [
+                'type' => 'image',
+                'description' => __('App screenshot. Shown as preview image in search results.', 'schema-markup-generator'),
             ],
         ];
     }

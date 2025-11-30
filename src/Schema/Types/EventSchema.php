@@ -224,51 +224,59 @@ class EventSchema extends AbstractSchema
         return [
             'name' => [
                 'type' => 'text',
-                'description' => __('Event name', 'schema-markup-generator'),
+                'description' => __('Event title. Shown in Google Events rich results and calendar integration.', 'schema-markup-generator'),
                 'auto' => 'post_title',
             ],
             'description' => [
                 'type' => 'text',
-                'description' => __('Event description', 'schema-markup-generator'),
+                'description' => __('Event summary. Displayed in event listings and search results.', 'schema-markup-generator'),
                 'auto' => 'post_excerpt',
             ],
             'startDate' => [
                 'type' => 'datetime',
-                'description' => __('Start date and time', 'schema-markup-generator'),
+                'description' => __('Required. When the event begins. Enables event rich results display.', 'schema-markup-generator'),
             ],
             'endDate' => [
                 'type' => 'datetime',
-                'description' => __('End date and time', 'schema-markup-generator'),
+                'description' => __('When the event ends. Recommended for multi-day or timed events.', 'schema-markup-generator'),
             ],
             'eventStatus' => [
                 'type' => 'select',
-                'description' => __('Event status', 'schema-markup-generator'),
+                'description' => __('Current event state. Update if postponed/cancelled to maintain search accuracy.', 'schema-markup-generator'),
                 'options' => ['EventScheduled', 'EventCancelled', 'EventPostponed', 'EventRescheduled'],
             ],
             'eventAttendanceMode' => [
                 'type' => 'select',
-                'description' => __('Attendance mode', 'schema-markup-generator'),
+                'description' => __('In-person, virtual, or hybrid. Required for proper event categorization.', 'schema-markup-generator'),
                 'options' => ['OfflineEventAttendanceMode', 'OnlineEventAttendanceMode', 'MixedEventAttendanceMode'],
             ],
             'locationName' => [
                 'type' => 'text',
-                'description' => __('Venue name', 'schema-markup-generator'),
+                'description' => __('Venue or platform name. Required for in-person events.', 'schema-markup-generator'),
             ],
             'streetAddress' => [
                 'type' => 'text',
-                'description' => __('Street address', 'schema-markup-generator'),
+                'description' => __('Physical venue address. Enables map integration in search results.', 'schema-markup-generator'),
             ],
             'addressLocality' => [
                 'type' => 'text',
-                'description' => __('City', 'schema-markup-generator'),
+                'description' => __('City name. Important for local event discovery.', 'schema-markup-generator'),
             ],
             'price' => [
                 'type' => 'number',
-                'description' => __('Ticket price', 'schema-markup-generator'),
+                'description' => __('Ticket/entry price. Use 0 for free events. Enables price display in results.', 'schema-markup-generator'),
             ],
             'priceCurrency' => [
                 'type' => 'text',
-                'description' => __('Currency code', 'schema-markup-generator'),
+                'description' => __('Currency code (EUR, USD). Required when price is set.', 'schema-markup-generator'),
+            ],
+            'organizer' => [
+                'type' => 'text',
+                'description' => __('Organization or person hosting the event. Adds credibility.', 'schema-markup-generator'),
+            ],
+            'performer' => [
+                'type' => 'text',
+                'description' => __('Speaker, artist, or performer name. Improves discovery for known personalities.', 'schema-markup-generator'),
             ],
         ];
     }

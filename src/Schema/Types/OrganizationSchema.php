@@ -198,53 +198,65 @@ class OrganizationSchema extends AbstractSchema
         return [
             'name' => [
                 'type' => 'text',
-                'description' => __('Organization name', 'schema-markup-generator'),
+                'description' => __('Business/organization name. Shown in knowledge panels and local search.', 'schema-markup-generator'),
                 'auto' => 'post_title',
             ],
             'description' => [
                 'type' => 'text',
-                'description' => __('Description', 'schema-markup-generator'),
+                'description' => __('What the organization does. Helps search engines categorize your business.', 'schema-markup-generator'),
                 'auto' => 'post_excerpt',
             ],
             'logo' => [
                 'type' => 'image',
-                'description' => __('Logo image', 'schema-markup-generator'),
+                'description' => __('Official logo. Displayed in Google Knowledge Panel. Use high-res square image.', 'schema-markup-generator'),
             ],
             'telephone' => [
                 'type' => 'text',
-                'description' => __('Phone number', 'schema-markup-generator'),
+                'description' => __('Primary phone. Enables click-to-call in mobile search results.', 'schema-markup-generator'),
             ],
             'email' => [
                 'type' => 'email',
-                'description' => __('Email address', 'schema-markup-generator'),
+                'description' => __('Contact email. Shown in business information panels.', 'schema-markup-generator'),
             ],
             'streetAddress' => [
                 'type' => 'text',
-                'description' => __('Street address', 'schema-markup-generator'),
+                'description' => __('Physical location. Required for local business rich results.', 'schema-markup-generator'),
             ],
             'addressLocality' => [
                 'type' => 'text',
-                'description' => __('City', 'schema-markup-generator'),
+                'description' => __('City name. Critical for local search ranking.', 'schema-markup-generator'),
             ],
             'addressRegion' => [
                 'type' => 'text',
-                'description' => __('State/Province', 'schema-markup-generator'),
+                'description' => __('State/Province/Region. Helps with regional search queries.', 'schema-markup-generator'),
             ],
             'postalCode' => [
                 'type' => 'text',
-                'description' => __('Postal code', 'schema-markup-generator'),
+                'description' => __('ZIP/Postal code. Improves local search precision.', 'schema-markup-generator'),
             ],
             'addressCountry' => [
                 'type' => 'text',
-                'description' => __('Country', 'schema-markup-generator'),
+                'description' => __('Country code (e.g., IT, US). Required for international businesses.', 'schema-markup-generator'),
             ],
             'openingHours' => [
                 'type' => 'text',
-                'description' => __('Opening hours (e.g., Mo-Fr 09:00-17:00)', 'schema-markup-generator'),
+                'description' => __('Business hours (e.g., Mo-Fr 09:00-17:00). Shown in local pack results.', 'schema-markup-generator'),
             ],
             'priceRange' => [
                 'type' => 'text',
-                'description' => __('Price range (e.g., €€)', 'schema-markup-generator'),
+                'description' => __('Cost indicator (€, €€, €€€). Helps users gauge affordability.', 'schema-markup-generator'),
+            ],
+            'sameAs' => [
+                'type' => 'url',
+                'description' => __('Social profile URLs. Links your brand across platforms for knowledge panel.', 'schema-markup-generator'),
+            ],
+            'latitude' => [
+                'type' => 'text',
+                'description' => __('GPS latitude. Enables map pin placement in search results.', 'schema-markup-generator'),
+            ],
+            'longitude' => [
+                'type' => 'text',
+                'description' => __('GPS longitude. Required with latitude for map integration.', 'schema-markup-generator'),
             ],
         ];
     }

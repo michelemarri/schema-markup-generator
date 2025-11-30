@@ -369,73 +369,73 @@ class LearningResourceSchema extends AbstractSchema
         return [
             'name' => [
                 'type' => 'text',
-                'description' => __('Lesson/resource name', 'schema-markup-generator'),
+                'description' => __('Lesson/resource title. Displayed in educational content rich results.', 'schema-markup-generator'),
                 'auto' => 'post_title',
             ],
             'description' => [
                 'type' => 'text',
-                'description' => __('Lesson description', 'schema-markup-generator'),
+                'description' => __('What this lesson covers. Helps search engines and AI understand the content.', 'schema-markup-generator'),
                 'auto' => 'post_excerpt',
             ],
             'learningResourceType' => [
                 'type' => 'select',
-                'description' => __('Type of learning resource', 'schema-markup-generator'),
+                'description' => __('Content format. Helps categorize and match with user search intent.', 'schema-markup-generator'),
                 'options' => ['Lesson', 'Video', 'Quiz', 'Tutorial', 'Exercise', 'Lecture', 'Reading', 'Assignment'],
             ],
             'isPartOf' => [
                 'type' => 'post',
-                'description' => __('Parent course (post ID or course name)', 'schema-markup-generator'),
+                'description' => __('Parent course link. Critical for establishing content hierarchy for LLMs.', 'schema-markup-generator'),
             ],
             'teaches' => [
                 'type' => 'textarea',
-                'description' => __('What this lesson teaches (comma-separated or one per line)', 'schema-markup-generator'),
+                'description' => __('CRITICAL for AI: Skills/concepts taught (comma-separated). LLMs use this to match with user queries.', 'schema-markup-generator'),
             ],
             'assesses' => [
                 'type' => 'textarea',
-                'description' => __('Skills/competencies assessed (comma-separated)', 'schema-markup-generator'),
+                'description' => __('Competencies evaluated (for quizzes/tests). Helps match assessment-seeking users.', 'schema-markup-generator'),
             ],
             'timeRequired' => [
                 'type' => 'number',
-                'description' => __('Duration in minutes', 'schema-markup-generator'),
+                'description' => __('Completion time in minutes. Helps users plan their learning sessions.', 'schema-markup-generator'),
             ],
             'educationalLevel' => [
                 'type' => 'select',
-                'description' => __('Educational level', 'schema-markup-generator'),
+                'description' => __('Difficulty level. Helps match content to appropriate learners.', 'schema-markup-generator'),
                 'options' => ['Beginner', 'Intermediate', 'Advanced', 'Expert'],
             ],
             'educationalUse' => [
                 'type' => 'select',
-                'description' => __('Educational use', 'schema-markup-generator'),
+                'description' => __('How content is meant to be used. Improves educational content categorization.', 'schema-markup-generator'),
                 'options' => ['instruction', 'assessment', 'professional development', 'self-study'],
             ],
             'interactivityType' => [
                 'type' => 'select',
-                'description' => __('Type of interactivity', 'schema-markup-generator'),
+                'description' => __('Engagement style. Helps match user preferences for learning formats.', 'schema-markup-generator'),
                 'options' => ['active', 'expositive', 'mixed'],
             ],
             'author' => [
                 'type' => 'text',
-                'description' => __('Author/instructor name', 'schema-markup-generator'),
+                'description' => __('Content creator. Builds E-E-A-T signals for educational content.', 'schema-markup-generator'),
             ],
             'provider' => [
                 'type' => 'text',
-                'description' => __('Provider organization', 'schema-markup-generator'),
+                'description' => __('Organization offering the content. Adds institutional credibility.', 'schema-markup-generator'),
             ],
             'position' => [
                 'type' => 'number',
-                'description' => __('Position/order in course', 'schema-markup-generator'),
+                'description' => __('Order within course. Helps LLMs understand learning sequence.', 'schema-markup-generator'),
             ],
             'keywords' => [
                 'type' => 'text',
-                'description' => __('Keywords (comma-separated)', 'schema-markup-generator'),
+                'description' => __('Topic keywords (comma-separated). Used by search engines and AI for indexing.', 'schema-markup-generator'),
             ],
             'videoUrl' => [
                 'type' => 'url',
-                'description' => __('Video URL (if lesson contains video)', 'schema-markup-generator'),
+                'description' => __('Video content URL. Enables video rich results and better content matching.', 'schema-markup-generator'),
             ],
             'videoDuration' => [
                 'type' => 'number',
-                'description' => __('Video duration in minutes', 'schema-markup-generator'),
+                'description' => __('Video length in minutes. Shown in video rich results.', 'schema-markup-generator'),
             ],
         ];
     }

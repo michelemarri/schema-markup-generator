@@ -266,49 +266,61 @@ class RecipeSchema extends AbstractSchema
         return [
             'name' => [
                 'type' => 'text',
-                'description' => __('Recipe name', 'schema-markup-generator'),
+                'description' => __('Recipe title. Shown prominently in recipe rich results.', 'schema-markup-generator'),
                 'auto' => 'post_title',
             ],
             'description' => [
                 'type' => 'text',
-                'description' => __('Recipe description', 'schema-markup-generator'),
+                'description' => __('What makes this recipe special. Displayed in search results.', 'schema-markup-generator'),
                 'auto' => 'post_excerpt',
             ],
             'prepTime' => [
                 'type' => 'number',
-                'description' => __('Preparation time (minutes)', 'schema-markup-generator'),
+                'description' => __('Prep time in minutes. Displayed separately in recipe cards.', 'schema-markup-generator'),
             ],
             'cookTime' => [
                 'type' => 'number',
-                'description' => __('Cooking time (minutes)', 'schema-markup-generator'),
+                'description' => __('Cooking time in minutes. Shown in recipe rich results.', 'schema-markup-generator'),
             ],
             'totalTime' => [
                 'type' => 'number',
-                'description' => __('Total time (minutes)', 'schema-markup-generator'),
+                'description' => __('Total time in minutes. Primary time shown in search results.', 'schema-markup-generator'),
             ],
             'recipeYield' => [
                 'type' => 'text',
-                'description' => __('Servings (e.g., "4 servings")', 'schema-markup-generator'),
+                'description' => __('Number of servings (e.g., "4 portions"). Helps with meal planning searches.', 'schema-markup-generator'),
             ],
             'recipeCategory' => [
                 'type' => 'text',
-                'description' => __('Category (e.g., "Dessert")', 'schema-markup-generator'),
+                'description' => __('Meal type (Breakfast, Lunch, Dessert, etc.). Used for filtered searches.', 'schema-markup-generator'),
             ],
             'recipeCuisine' => [
                 'type' => 'text',
-                'description' => __('Cuisine (e.g., "Italian")', 'schema-markup-generator'),
+                'description' => __('Cuisine style (Italian, Mexican, etc.). Enables cuisine-specific discovery.', 'schema-markup-generator'),
             ],
             'recipeIngredient' => [
                 'type' => 'repeater',
-                'description' => __('List of ingredients', 'schema-markup-generator'),
+                'description' => __('Required. Complete ingredient list. Core content for recipe rich results.', 'schema-markup-generator'),
             ],
             'recipeInstructions' => [
                 'type' => 'repeater',
-                'description' => __('Step-by-step instructions', 'schema-markup-generator'),
+                'description' => __('Required. Step-by-step cooking instructions. Shown in recipe rich results.', 'schema-markup-generator'),
             ],
             'calories' => [
                 'type' => 'text',
-                'description' => __('Calories per serving', 'schema-markup-generator'),
+                'description' => __('Calories per serving (e.g., "250 calories"). Shown for nutrition-conscious users.', 'schema-markup-generator'),
+            ],
+            'ratingValue' => [
+                'type' => 'number',
+                'description' => __('Average rating (1-5). Star rating in search results significantly boosts CTR.', 'schema-markup-generator'),
+            ],
+            'ratingCount' => [
+                'type' => 'number',
+                'description' => __('Number of ratings. Adds social proof alongside star display.', 'schema-markup-generator'),
+            ],
+            'keywords' => [
+                'type' => 'text',
+                'description' => __('Recipe tags (comma-separated). Helps with dietary/style searches (vegan, quick, etc.).', 'schema-markup-generator'),
             ],
         ];
     }

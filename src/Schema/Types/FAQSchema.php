@@ -132,10 +132,10 @@ class FAQSchema extends AbstractSchema
         return [
             'faqItems' => [
                 'type' => 'repeater',
-                'description' => __('FAQ items (question and answer pairs)', 'schema-markup-generator'),
+                'description' => __('Question/Answer pairs. Enables expandable FAQ rich results in Google - major SERP real estate boost.', 'schema-markup-generator'),
                 'fields' => [
-                    'question' => ['type' => 'text', 'description' => __('Question', 'schema-markup-generator')],
-                    'answer' => ['type' => 'textarea', 'description' => __('Answer', 'schema-markup-generator')],
+                    'question' => ['type' => 'text', 'description' => __('The question text. Should match user search intent.', 'schema-markup-generator')],
+                    'answer' => ['type' => 'textarea', 'description' => __('Complete answer. Keep concise but informative (50-300 words ideal).', 'schema-markup-generator')],
                 ],
             ],
         ];

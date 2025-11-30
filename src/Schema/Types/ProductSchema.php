@@ -173,42 +173,50 @@ class ProductSchema extends AbstractSchema
         return [
             'name' => [
                 'type' => 'text',
-                'description' => __('Product name', 'schema-markup-generator'),
+                'description' => __('Product title. Shown in Google Shopping and product rich results.', 'schema-markup-generator'),
                 'auto' => 'post_title',
             ],
             'description' => [
                 'type' => 'text',
-                'description' => __('Product description', 'schema-markup-generator'),
+                'description' => __('Product summary. Displayed in search results and shopping feeds.', 'schema-markup-generator'),
                 'auto' => 'post_excerpt',
             ],
             'sku' => [
                 'type' => 'text',
-                'description' => __('Stock Keeping Unit', 'schema-markup-generator'),
+                'description' => __('Unique product identifier. Required for Google Merchant Center integration.', 'schema-markup-generator'),
             ],
             'brand' => [
                 'type' => 'text',
-                'description' => __('Brand name', 'schema-markup-generator'),
+                'description' => __('Brand/manufacturer name. Improves product discoverability in branded searches.', 'schema-markup-generator'),
             ],
             'price' => [
                 'type' => 'number',
-                'description' => __('Product price', 'schema-markup-generator'),
+                'description' => __('Product price. Required for price display in search results.', 'schema-markup-generator'),
             ],
             'priceCurrency' => [
                 'type' => 'text',
-                'description' => __('Currency code (EUR, USD, etc.)', 'schema-markup-generator'),
+                'description' => __('ISO 4217 currency code (EUR, USD, GBP). Required with price.', 'schema-markup-generator'),
             ],
             'availability' => [
                 'type' => 'select',
-                'description' => __('Product availability', 'schema-markup-generator'),
+                'description' => __('Stock status. Shown in search results and affects click-through rate.', 'schema-markup-generator'),
                 'options' => ['InStock', 'OutOfStock', 'PreOrder', 'Discontinued'],
             ],
             'gtin' => [
                 'type' => 'text',
-                'description' => __('GTIN/EAN/UPC code', 'schema-markup-generator'),
+                'description' => __('Global Trade Item Number (EAN/UPC). Helps Google match products across retailers.', 'schema-markup-generator'),
             ],
             'mpn' => [
                 'type' => 'text',
-                'description' => __('Manufacturer Part Number', 'schema-markup-generator'),
+                'description' => __('Manufacturer Part Number. Alternative identifier when GTIN is unavailable.', 'schema-markup-generator'),
+            ],
+            'ratingValue' => [
+                'type' => 'number',
+                'description' => __('Average rating (1-5). Shows star rating in search results - major CTR boost.', 'schema-markup-generator'),
+            ],
+            'ratingCount' => [
+                'type' => 'number',
+                'description' => __('Total reviews count. Displayed with star rating for social proof.', 'schema-markup-generator'),
             ],
         ];
     }

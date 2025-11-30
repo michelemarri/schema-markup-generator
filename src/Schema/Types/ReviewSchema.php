@@ -185,42 +185,42 @@ class ReviewSchema extends AbstractSchema
         return [
             'name' => [
                 'type' => 'text',
-                'description' => __('Review title', 'schema-markup-generator'),
+                'description' => __('Review headline. Displayed as the review title in search results.', 'schema-markup-generator'),
                 'auto' => 'post_title',
             ],
             'reviewBody' => [
                 'type' => 'text',
-                'description' => __('Review content', 'schema-markup-generator'),
+                'description' => __('Full review text. Snippet may appear in review rich results.', 'schema-markup-generator'),
                 'auto' => 'post_content',
             ],
             'ratingValue' => [
                 'type' => 'number',
-                'description' => __('Rating value', 'schema-markup-generator'),
+                'description' => __('Your rating score. Required for star display in search results.', 'schema-markup-generator'),
             ],
             'bestRating' => [
                 'type' => 'number',
-                'description' => __('Best possible rating', 'schema-markup-generator'),
+                'description' => __('Maximum possible score (usually 5 or 10). Needed to display rating correctly.', 'schema-markup-generator'),
             ],
             'worstRating' => [
                 'type' => 'number',
-                'description' => __('Worst possible rating', 'schema-markup-generator'),
+                'description' => __('Minimum possible score (usually 1). Defaults to 1 if not set.', 'schema-markup-generator'),
             ],
             'itemReviewedType' => [
                 'type' => 'select',
-                'description' => __('Type of item reviewed', 'schema-markup-generator'),
+                'description' => __('What you are reviewing. Affects which rich result type is shown.', 'schema-markup-generator'),
                 'options' => ['Product', 'LocalBusiness', 'Organization', 'Movie', 'Book', 'Restaurant', 'SoftwareApplication'],
             ],
             'itemReviewedName' => [
                 'type' => 'text',
-                'description' => __('Name of item reviewed', 'schema-markup-generator'),
+                'description' => __('Name of product/business being reviewed. Required for rich results.', 'schema-markup-generator'),
             ],
             'positiveNotes' => [
                 'type' => 'repeater',
-                'description' => __('Pros/positive points', 'schema-markup-generator'),
+                'description' => __('Pros list. May be shown as expandable pros section in search results.', 'schema-markup-generator'),
             ],
             'negativeNotes' => [
                 'type' => 'repeater',
-                'description' => __('Cons/negative points', 'schema-markup-generator'),
+                'description' => __('Cons list. Shown alongside pros for balanced review display.', 'schema-markup-generator'),
             ],
         ];
     }

@@ -130,42 +130,42 @@ class ArticleSchema extends AbstractSchema
         return [
             'headline' => [
                 'type' => 'text',
-                'description' => __('Article headline', 'schema-markup-generator'),
+                'description' => __('Article title. Required for Google News and Discover eligibility.', 'schema-markup-generator'),
                 'auto' => 'post_title',
             ],
             'description' => [
                 'type' => 'text',
-                'description' => __('Short description or excerpt', 'schema-markup-generator'),
+                'description' => __('Summary shown in search results. Keep under 160 characters for best display.', 'schema-markup-generator'),
                 'auto' => 'post_excerpt',
             ],
             'image' => [
                 'type' => 'image',
-                'description' => __('Featured image', 'schema-markup-generator'),
+                'description' => __('Required for rich results. Use high-quality images (min 1200px wide recommended).', 'schema-markup-generator'),
                 'auto' => 'featured_image',
             ],
             'author' => [
                 'type' => 'person',
-                'description' => __('Article author', 'schema-markup-generator'),
+                'description' => __('Content creator. Important for E-E-A-T signals and author knowledge panels.', 'schema-markup-generator'),
                 'auto' => 'post_author',
             ],
             'datePublished' => [
                 'type' => 'datetime',
-                'description' => __('Publication date', 'schema-markup-generator'),
+                'description' => __('First publication date. Affects freshness signals for time-sensitive content.', 'schema-markup-generator'),
                 'auto' => 'post_date',
             ],
             'dateModified' => [
                 'type' => 'datetime',
-                'description' => __('Last modified date', 'schema-markup-generator'),
+                'description' => __('Last update date. Shows content freshness to search engines and users.', 'schema-markup-generator'),
                 'auto' => 'post_modified',
             ],
             'articleSection' => [
                 'type' => 'text',
-                'description' => __('Section/category', 'schema-markup-generator'),
+                'description' => __('Category or section. Helps search engines understand content organization.', 'schema-markup-generator'),
                 'auto' => 'category',
             ],
             'keywords' => [
                 'type' => 'text',
-                'description' => __('Keywords/tags', 'schema-markup-generator'),
+                'description' => __('Comma-separated keywords. Used by search engines and AI for topic matching.', 'schema-markup-generator'),
                 'auto' => 'tags',
             ],
         ];
