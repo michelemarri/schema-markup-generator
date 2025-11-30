@@ -1,74 +1,130 @@
-name: Release
+name: Create Release
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*.*.*'
+      - '*.*.*'
+
+permissions:
+  contents: write
 
 jobs:
   release:
-    name: Create Release
+    name: Create Release with Plugin ZIP
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          tools: composer
+          tools: composer:v2
 
       - name: Get version from tag
         id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          VERSION=${VERSION#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
-      - name: Install Composer dependencies
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Install Composer dependencies (no dev)
         run: composer install --no-dev --optimize-autoloader
 
-      - name: Create release directory
+      - name: Create plugin directory structure
         run: |
-          mkdir -p release/schema-markup-generator
+          mkdir -p build/schema-markup-generator
           
           # Copy plugin files
-          cp -r src release/schema-markup-generator/
-          cp -r assets release/schema-markup-generator/
-          cp -r vendor release/schema-markup-generator/
-          cp -r docs release/schema-markup-generator/ 2>/dev/null || true
-          cp schema-markup-generator.php release/schema-markup-generator/
-          cp composer.json release/schema-markup-generator/
-          cp uninstall.php release/schema-markup-generator/
-          cp README.md release/schema-markup-generator/
-          cp LICENSE release/schema-markup-generator/
+          cp -r assets build/schema-markup-generator/
+          cp -r docs build/schema-markup-generator/
+          cp -r src build/schema-markup-generator/
+          cp -r vendor build/schema-markup-generator/
+          cp schema-markup-generator.php build/schema-markup-generator/
+          cp uninstall.php build/schema-markup-generator/
+          cp README.md build/schema-markup-generator/
+          cp LICENSE build/schema-markup-generator/
           
-          # Create logs directory placeholder
-          mkdir -p release/schema-markup-generator/logs
-          echo "<?php // Silence is golden" > release/schema-markup-generator/logs/index.php
-          echo "Deny from all" > release/schema-markup-generator/logs/.htaccess
+          # Create empty logs directory with index.php
+          mkdir -p build/schema-markup-generator/logs
+          echo "<?php // Silence is golden" > build/schema-markup-generator/logs/index.php
 
-      - name: Create ZIP archive
+      - name: Remove development files from build
         run: |
-          cd release
-          zip -r ../schema-markup-generator-${{ steps.get_version.outputs.VERSION }}.zip schema-markup-generator
+          # Remove source CSS/JS (keep only built assets)
+          rm -rf build/schema-markup-generator/assets/src
+          
+          # Remove any remaining dev files
+          find build/schema-markup-generator -name "*.map" -delete
+          find build/schema-markup-generator -name ".DS_Store" -delete
+          find build/schema-markup-generator -name ".gitkeep" -delete
+
+      - name: Create ZIP file
+        run: |
+          cd build
+          zip -r ../schema-markup-generator-${{ steps.get_version.outputs.version }}.zip schema-markup-generator
+          cd ..
+          
+          # Also create a generic named zip for easier download
+          cp schema-markup-generator-${{ steps.get_version.outputs.version }}.zip schema-markup-generator.zip
+
+      - name: Generate changelog from commits
+        id: changelog
+        run: |
+          # Get commits since last tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -n "$PREVIOUS_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s" $PREVIOUS_TAG..HEAD --no-merges)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s" --no-merges -20)
+          fi
+          
+          # Escape for GitHub Actions
+          CHANGELOG="${CHANGELOG//'%'/'%25'}"
+          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
+          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+          
+          echo "changelog=$CHANGELOG" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          name: Release ${{ steps.get_version.outputs.VERSION }}
+          name: "Schema Markup Generator v${{ steps.get_version.outputs.version }}"
           body: |
-            ## Schema Markup Generator v${{ steps.get_version.outputs.VERSION }}
+            ## Schema Markup Generator v${{ steps.get_version.outputs.version }}
+            
+            ### Changes
+            ${{ steps.changelog.outputs.changelog }}
             
             ### Installation
-            1. Download the ZIP file below
+            1. Download `schema-markup-generator.zip`
             2. Go to WordPress Admin → Plugins → Add New → Upload Plugin
             3. Upload the ZIP file and activate
             
-            ### Changelog
-            See [CHANGELOG.md](https://github.com/michelemarri/schema-markup-generator/blob/main/docs/DOCUMENTATION.md) for details.
-          files: schema-markup-generator-${{ steps.get_version.outputs.VERSION }}.zip
+            ### Requirements
+            - WordPress 6.0+
+            - PHP 8.2+
+          files: |
+            schema-markup-generator-${{ steps.get_version.outputs.version }}.zip
+            schema-markup-generator.zip
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

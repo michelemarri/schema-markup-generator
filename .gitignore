@@ -29,3 +29,7 @@ Thumbs.db
 # Debug
 logs/*.log
 !logs/index.php
+
+# Build
+build/
+*.zip
