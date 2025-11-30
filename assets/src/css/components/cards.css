@@ -61,6 +61,16 @@
   box-shadow: var(--smg-shadow);
 }
 
+/* Mapped state - schema is selected */
+.smg-post-type-card.smg-mapped {
+  border-color: var(--smg-success-300);
+  border-left-width: 3px;
+}
+
+.smg-post-type-card.smg-mapped:hover {
+  border-color: var(--smg-success-400);
+}
+
 .smg-post-types-list {
   display: flex;
   flex-direction: column;

@@ -135,7 +135,7 @@ class PostTypesTab extends AbstractTab
                     $postTypeFields = $this->customFieldDiscovery->getFieldsForPostType($postType);
                     $currentFieldMapping = $fieldMappings[$postType] ?? [];
                     ?>
-                    <div class="smg-post-type-card" data-post-type="<?php echo esc_attr($postType); ?>">
+                    <div class="smg-post-type-card<?php echo $currentSchema ? ' smg-mapped' : ''; ?>" data-post-type="<?php echo esc_attr($postType); ?>">
                         <div class="smg-post-type-header">
                             <div class="smg-post-type-info">
                                 <span class="dashicons <?php echo esc_attr($postTypeObj->menu_icon ?? 'dashicons-admin-post'); ?>"></span>

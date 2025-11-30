@@ -238,13 +238,12 @@
             
             if (!fieldsContainer) return;
 
-            // Add visual feedback to card
-            card.style.transition = 'border-color 0.3s ease';
-            card.style.borderColor = 'var(--smg-primary-300)';
-            
-            setTimeout(() => {
-                card.style.borderColor = '';
-            }, 1000);
+            // Update mapped state
+            if (schemaType) {
+                card.classList.add('smg-mapped');
+            } else {
+                card.classList.remove('smg-mapped');
+            }
 
             // Show loading state
             fieldsContainer.style.opacity = '0.5';
