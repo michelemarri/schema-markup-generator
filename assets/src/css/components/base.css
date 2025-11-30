@@ -43,11 +43,6 @@
   color: var(--smg-text);
 }
 
-/* Paragraphs */
-.smg-settings-wrap p {
-  margin: 0;
-}
-
 /* Code */
 .smg-settings-wrap code {
   font-family: var(--smg-font-mono);

@@ -7,10 +7,6 @@
  * @author  Michele Marri <info@metodo.dev>
  */
 
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
-
 /* ========================================
    Design Tokens (CSS Custom Properties)
    Synced with Tailwind config
