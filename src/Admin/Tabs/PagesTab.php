@@ -154,7 +154,7 @@ class PagesTab extends AbstractTab
         $frontPageId = (int) get_option('page_on_front');
 
         ?>
-        <div class="mds-tab-panel" id="tab-pages">
+        <div class="mds-tab-panel mds-stack-gap" id="tab-pages">
             <?php $this->renderSection(
                 __('Page Schema Mapping', 'schema-markup-generator'),
                 __('Assign specific schema types to individual pages. Top-level pages are shown below. Child pages inherit from their parent unless overridden in the page editor.', 'schema-markup-generator')

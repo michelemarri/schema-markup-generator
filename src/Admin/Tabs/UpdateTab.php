@@ -96,13 +96,13 @@ class UpdateTab extends AbstractTab
         $tokenViaConstant = defined('SMG_GITHUB_TOKEN') && !empty(SMG_GITHUB_TOKEN);
 
         ?>
-        <div class="mds-tab-panel" id="tab-update">
+        <div class="mds-tab-panel mds-stack-gap" id="tab-update">
             <?php $this->renderSection(
                 __('Plugin Updates', 'schema-markup-generator'),
                 __('Configure automatic updates from GitHub repository.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-cards-grid">
+            <div class="mds-grid mds-grid-auto">
                 <?php
                 $this->renderCard(__('Current Version', 'schema-markup-generator'), function () {
                     $this->renderVersionInfo();
@@ -121,7 +121,7 @@ class UpdateTab extends AbstractTab
                 __('Configure how the plugin handles updates.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-cards-grid">
+            <div class="mds-grid mds-grid-auto">
                 <?php
                 $this->renderCard(__('Auto-Update', 'schema-markup-generator'), function () use ($settings) {
                     $this->renderToggle(
@@ -145,13 +145,11 @@ class UpdateTab extends AbstractTab
                 __('How your GitHub token is protected.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-cards-grid mds-cards-grid-single">
-                <?php
-                $this->renderCard(__('Token Security', 'schema-markup-generator'), function () {
-                    $this->renderSecurityInfo();
-                }, 'dashicons-shield');
-                ?>
-            </div>
+            <?php
+            $this->renderCard(__('Token Security', 'schema-markup-generator'), function () {
+                $this->renderSecurityInfo();
+            }, 'dashicons-shield');
+            ?>
         </div>
         <?php
     }

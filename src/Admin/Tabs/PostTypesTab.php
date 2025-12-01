@@ -122,13 +122,13 @@ class PostTypesTab extends AbstractTab
         $schemaTypes = $this->schemaFactory->getTypesGrouped();
 
         ?>
-        <div class="mds-tab-panel" id="tab-post-types">
+        <div class="mds-tab-panel mds-stack-gap" id="tab-post-types">
             <?php $this->renderSection(
                 __('Post Type Schema Mapping', 'schema-markup-generator'),
                 __('Assign a schema type to each post type. The schema will be automatically generated based on your content.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-post-types-list">
+            <div class="mds-stack-gap mds-stack-gap-sm">
                 <?php foreach ($postTypes as $postType => $postTypeObj): ?>
                     <?php
                     $currentSchema = $mappings[$postType] ?? '';

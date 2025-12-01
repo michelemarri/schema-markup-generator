@@ -65,13 +65,13 @@ class GeneralTab extends AbstractTab
         $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('general');
 
         ?>
-        <div class="mds-tab-panel" id="tab-general">
+        <div class="mds-tab-panel mds-stack-gap" id="tab-general">
             <?php $this->renderSection(
                 __('General Settings', 'schema-markup-generator'),
                 __('Configure the main plugin settings.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-cards-grid">
+            <div class="mds-grid mds-grid-auto">
                 <?php
                 $this->renderCard(__('Schema Output', 'schema-markup-generator'), function () use ($settings) {
                     $this->renderToggle(
@@ -148,7 +148,7 @@ class GeneralTab extends AbstractTab
                 __('Get started with schema markup in a few simple steps.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-quick-start">
+            <div class="mds-grid mds-grid-auto">
                 <div class="mds-step">
                     <div class="mds-step-number">1</div>
                     <div class="mds-step-content">

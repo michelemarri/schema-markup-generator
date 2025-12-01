@@ -33,17 +33,19 @@ class SchemaTypesTab extends AbstractTab
         $typesWithDescriptions = $schemaFactory->getTypesWithDescriptions();
 
         ?>
-        <div class="mds-tab-panel" id="tab-schema-types">
+        <div class="mds-tab-panel mds-stack-gap" id="tab-schema-types">
             <?php $this->renderSection(
                 __('Available Schema Types', 'schema-markup-generator'),
                 __('Overview of all supported schema.org types and their use cases.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-schema-types-grid">
+            <div class="mds-grid mds-grid-auto">
                 <?php foreach ($typesGrouped as $groupName => $types): ?>
-                    <div class="mds-schema-group">
-                        <h3 class="mds-group-title"><?php echo esc_html($groupName); ?></h3>
-                        <div class="mds-schema-list">
+                    <div class="mds-card">
+                        <div class="mds-card-header">
+                            <h3><?php echo esc_html($groupName); ?></h3>
+                        </div>
+                        <div class="mds-card-body mds-stack-gap mds-stack-gap-sm">
                             <?php foreach ($types as $type => $label): ?>
                                 <?php
                                 $description = $typesWithDescriptions[$type]['description'] ?? '';
@@ -51,7 +53,7 @@ class SchemaTypesTab extends AbstractTab
                                 $requiredProps = $schema ? $schema->getRequiredProperties() : [];
                                 ?>
                                 <div class="mds-schema-item">
-                                    <div class="mds-schema-header">
+                                    <div class="mds-flex-between">
                                         <h4><?php echo esc_html($label); ?></h4>
                                         <code><?php echo esc_html($type); ?></code>
                                     </div>
@@ -59,17 +61,17 @@ class SchemaTypesTab extends AbstractTab
                                         <p class="mds-schema-description"><?php echo esc_html($description); ?></p>
                                     <?php endif; ?>
                                     <?php if (!empty($requiredProps)): ?>
-                                        <div class="mds-schema-props">
+                                        <div class="mds-cluster mds-cluster-sm">
                                             <span class="mds-props-label"><?php esc_html_e('Required:', 'schema-markup-generator'); ?></span>
                                             <?php foreach ($requiredProps as $prop): ?>
-                                                <span class="mds-prop-badge"><?php echo esc_html($prop); ?></span>
+                                                <span class="mds-badge mds-badge-sm"><?php echo esc_html($prop); ?></span>
                                             <?php endforeach; ?>
                                         </div>
                                     <?php endif; ?>
                                     <a href="https://schema.org/<?php echo esc_attr($type); ?>"
                                        target="_blank"
                                        rel="noopener"
-                                       class="mds-schema-link">
+                                       class="mds-link-external">
                                         <?php esc_html_e('View on schema.org', 'schema-markup-generator'); ?>
                                         <span class="dashicons dashicons-external"></span>
                                     </a>
@@ -80,9 +82,9 @@ class SchemaTypesTab extends AbstractTab
                 <?php endforeach; ?>
             </div>
 
-            <div class="mds-extend-notice">
-                <span class="dashicons dashicons-plus-alt"></span>
-                <div>
+            <div class="mds-alert mds-alert-info">
+                <span class="dashicons dashicons-plus-alt mds-shrink-0"></span>
+                <div class="mds-flex-1">
                     <h4><?php esc_html_e('Need a custom schema type?', 'schema-markup-generator'); ?></h4>
                     <p><?php esc_html_e('You can register custom schema types using the smg_register_schema_types filter.', 'schema-markup-generator'); ?></p>
                     <code>add_filter('smg_register_schema_types', function($types) {

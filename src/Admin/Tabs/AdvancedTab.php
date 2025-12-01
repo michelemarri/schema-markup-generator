@@ -63,13 +63,13 @@ class AdvancedTab extends AbstractTab
         $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('advanced');
 
         ?>
-        <div class="mds-tab-panel" id="tab-advanced">
+        <div class="mds-tab-panel mds-stack-gap" id="tab-advanced">
             <?php $this->renderSection(
                 __('Cache Settings', 'schema-markup-generator'),
                 __('Configure how schema data is cached for better performance.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-cards-grid">
+            <div class="mds-grid mds-grid-auto">
                 <?php
                 $this->renderCard(__('Cache Configuration', 'schema-markup-generator'), function () use ($settings) {
                     $this->renderToggle(
@@ -93,8 +93,8 @@ class AdvancedTab extends AbstractTab
                         ? __('Object Cache (Redis/Memcached)', 'schema-markup-generator')
                         : __('WordPress Transients', 'schema-markup-generator');
                     ?>
-                    <div class="mds-cache-info">
-                        <span class="mds-info-label"><?php esc_html_e('Cache Type:', 'schema-markup-generator'); ?></span>
+                    <div class="mds-info-item">
+                        <span class="mds-info-label"><?php esc_html_e('Cache Type', 'schema-markup-generator'); ?></span>
                         <span class="mds-info-value"><?php echo esc_html($cacheType); ?></span>
                     </div>
                     <?php
@@ -107,7 +107,7 @@ class AdvancedTab extends AbstractTab
                 __('Enable debug mode and logging for troubleshooting.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-cards-grid">
+            <div class="mds-grid mds-grid-auto">
                 <?php
                 $this->renderCard(__('Debug Mode', 'schema-markup-generator'), function () use ($settings) {
                     $this->renderToggle(
@@ -121,15 +121,15 @@ class AdvancedTab extends AbstractTab
                     $logDir = SMG_PLUGIN_DIR . 'logs';
                     $logFile = $logDir . '/mds-' . date('Y-m-d') . '.log';
                     ?>
-                    <div class="mds-log-info">
-                        <span class="mds-info-label"><?php esc_html_e('Log Location:', 'schema-markup-generator'); ?></span>
-                        <code><?php echo esc_html($logDir); ?></code>
+                    <div class="mds-info-item">
+                        <span class="mds-info-label"><?php esc_html_e('Log Location', 'schema-markup-generator'); ?></span>
+                        <code class="mds-info-value"><?php echo esc_html($logDir); ?></code>
                     </div>
 
                     <?php if (file_exists($logFile)): ?>
-                        <div class="mds-log-preview">
+                        <div class="mds-stack-gap mds-stack-gap-sm">
                             <h4><?php esc_html_e('Recent Log Entries', 'schema-markup-generator'); ?></h4>
-                            <pre><?php
+                            <pre class="mds-code-block"><?php
                             $lines = file($logFile);
                             $lastLines = array_slice($lines, -10);
                             echo esc_html(implode('', $lastLines));
@@ -146,45 +146,47 @@ class AdvancedTab extends AbstractTab
                 __('Technical details about your installation.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-system-info">
-                <table class="mds-info-table">
-                    <tr>
-                        <th><?php esc_html_e('Plugin Version', 'schema-markup-generator'); ?></th>
-                        <td><?php echo esc_html(SMG_VERSION); ?></td>
-                    </tr>
-                    <tr>
-                        <th><?php esc_html_e('WordPress Version', 'schema-markup-generator'); ?></th>
-                        <td><?php echo esc_html(get_bloginfo('version')); ?></td>
-                    </tr>
-                    <tr>
-                        <th><?php esc_html_e('PHP Version', 'schema-markup-generator'); ?></th>
-                        <td><?php echo esc_html(PHP_VERSION); ?></td>
-                    </tr>
-                    <tr>
-                        <th><?php esc_html_e('Object Cache', 'schema-markup-generator'); ?></th>
-                        <td>
-                            <?php
-                            if (wp_using_ext_object_cache()) {
-                                echo '<span class="mds-status-ok">';
-                                esc_html_e('Enabled', 'schema-markup-generator');
-                                echo '</span>';
-                            } else {
-                                echo '<span class="mds-status-warning">';
-                                esc_html_e('Not Available', 'schema-markup-generator');
-                                echo '</span>';
-                            }
-                            ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th><?php esc_html_e('Max Execution Time', 'schema-markup-generator'); ?></th>
-                        <td><?php echo esc_html(ini_get('max_execution_time')); ?>s</td>
-                    </tr>
-                    <tr>
-                        <th><?php esc_html_e('Memory Limit', 'schema-markup-generator'); ?></th>
-                        <td><?php echo esc_html(ini_get('memory_limit')); ?></td>
-                    </tr>
-                </table>
+            <div class="mds-card">
+                <div class="mds-card-body">
+                    <table class="mds-table">
+                        <tr>
+                            <th><?php esc_html_e('Plugin Version', 'schema-markup-generator'); ?></th>
+                            <td><?php echo esc_html(SMG_VERSION); ?></td>
+                        </tr>
+                        <tr>
+                            <th><?php esc_html_e('WordPress Version', 'schema-markup-generator'); ?></th>
+                            <td><?php echo esc_html(get_bloginfo('version')); ?></td>
+                        </tr>
+                        <tr>
+                            <th><?php esc_html_e('PHP Version', 'schema-markup-generator'); ?></th>
+                            <td><?php echo esc_html(PHP_VERSION); ?></td>
+                        </tr>
+                        <tr>
+                            <th><?php esc_html_e('Object Cache', 'schema-markup-generator'); ?></th>
+                            <td>
+                                <?php
+                                if (wp_using_ext_object_cache()) {
+                                    echo '<span class="mds-badge mds-badge-success">';
+                                    esc_html_e('Enabled', 'schema-markup-generator');
+                                    echo '</span>';
+                                } else {
+                                    echo '<span class="mds-badge mds-badge-warning">';
+                                    esc_html_e('Not Available', 'schema-markup-generator');
+                                    echo '</span>';
+                                }
+                                ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><?php esc_html_e('Max Execution Time', 'schema-markup-generator'); ?></th>
+                            <td><?php echo esc_html(ini_get('max_execution_time')); ?>s</td>
+                        </tr>
+                        <tr>
+                            <th><?php esc_html_e('Memory Limit', 'schema-markup-generator'); ?></th>
+                            <td><?php echo esc_html(ini_get('memory_limit')); ?></td>
+                        </tr>
+                    </table>
+                </div>
             </div>
         </div>
         <?php

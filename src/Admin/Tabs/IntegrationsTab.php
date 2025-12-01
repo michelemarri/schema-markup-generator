@@ -76,13 +76,13 @@ class IntegrationsTab extends AbstractTab
         $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('integrations');
 
         ?>
-        <div class="mds-tab-panel" id="tab-integrations">
+        <div class="mds-tab-panel mds-stack-gap" id="tab-integrations">
             <?php $this->renderSection(
                 __('Plugin Integrations', 'schema-markup-generator'),
                 __('Configure how Schema Markup Generator works with other plugins.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-integrations-grid">
+            <div class="mds-grid mds-grid-auto-sm">
                 <?php
                 $this->renderIntegrationCard(
                     'Rank Math SEO',
@@ -124,7 +124,7 @@ class IntegrationsTab extends AbstractTab
                     __('Configure how Schema Markup Generator interacts with Rank Math.', 'schema-markup-generator')
                 ); ?>
 
-                <div class="mds-cards-grid">
+                <div class="mds-grid mds-grid-auto">
                     <?php
                     $this->renderCard(__('Duplicate Prevention', 'schema-markup-generator'), function () use ($settings) {
                         $this->renderToggle(
@@ -149,10 +149,10 @@ class IntegrationsTab extends AbstractTab
                             'VideoObject' => __('Video', 'schema-markup-generator'),
                         ];
                         ?>
-                        <p class="mds-field-description" style="margin-bottom: 15px;">
+                        <p class="mds-field-description">
                             <?php esc_html_e('Select schema types that SMG should handle instead of Rank Math.', 'schema-markup-generator'); ?>
                         </p>
-                        <div class="mds-checkboxes-grid">
+                        <div class="mds-cluster mds-cluster-sm">
                             <?php foreach ($schemaTypes as $type => $label): ?>
                                 <label class="mds-checkbox-label">
                                     <input type="checkbox"
@@ -175,7 +175,7 @@ class IntegrationsTab extends AbstractTab
                     __('Configure Advanced Custom Fields integration.', 'schema-markup-generator')
                 ); ?>
 
-                <div class="mds-cards-grid">
+                <div class="mds-grid mds-grid-auto">
                     <?php
                     $this->renderCard(__('Field Discovery', 'schema-markup-generator'), function () use ($settings) {
                         $this->renderToggle(
@@ -196,15 +196,15 @@ class IntegrationsTab extends AbstractTab
                     $isAcfPro = class_exists('ACF') && defined('ACF_PRO');
                     $this->renderCard(__('ACF Version', 'schema-markup-generator'), function () use ($isAcfPro) {
                         ?>
-                        <div class="mds-acf-version-info">
+                        <div class="mds-stack-gap mds-stack-gap-sm">
                             <?php if ($isAcfPro): ?>
-                                <div class="mds-version-badge pro">
+                                <div class="mds-badge mds-badge-success">
                                     <span class="dashicons dashicons-star-filled"></span>
                                     <?php esc_html_e('ACF Pro', 'schema-markup-generator'); ?>
                                 </div>
                                 <p><?php esc_html_e('Full support for all field types including repeaters, flexible content, and galleries.', 'schema-markup-generator'); ?></p>
                             <?php else: ?>
-                                <div class="mds-version-badge free">
+                                <div class="mds-badge mds-badge-info">
                                     <span class="dashicons dashicons-yes"></span>
                                     <?php esc_html_e('ACF Free', 'schema-markup-generator'); ?>
                                 </div>
@@ -223,7 +223,7 @@ class IntegrationsTab extends AbstractTab
                     __('Configure MemberPress Courses integration for educational content.', 'schema-markup-generator')
                 ); ?>
 
-                <div class="mds-cards-grid">
+                <div class="mds-grid mds-grid-auto">
                     <?php
                     $this->renderCard(__('Course Hierarchy', 'schema-markup-generator'), function () use ($settings) {
                         $this->renderToggle(
@@ -249,16 +249,16 @@ class IntegrationsTab extends AbstractTab
                         $courseCount = wp_count_posts('mpcs-course');
                         $lessonCount = wp_count_posts('mpcs-lesson');
                         ?>
-                        <div class="mds-integration-status-info">
-                            <div class="mds-status-item">
+                        <div class="mds-stack-gap mds-stack-gap-sm">
+                            <div class="mds-cluster mds-cluster-sm">
                                 <span class="dashicons dashicons-yes-alt" style="color: var(--mds-success);"></span>
                                 <span><?php printf(__('%d Courses detected', 'schema-markup-generator'), $courseCount->publish ?? 0); ?></span>
                             </div>
-                            <div class="mds-status-item">
+                            <div class="mds-cluster mds-cluster-sm">
                                 <span class="dashicons dashicons-yes-alt" style="color: var(--mds-success);"></span>
                                 <span><?php printf(__('%d Lessons detected', 'schema-markup-generator'), $lessonCount->publish ?? 0); ?></span>
                             </div>
-                            <div class="mds-status-item">
+                            <div class="mds-cluster mds-cluster-sm">
                                 <?php if ($sectionsExist): ?>
                                     <span class="dashicons dashicons-yes-alt" style="color: var(--mds-success);"></span>
                                     <span><?php esc_html_e('Sections table found', 'schema-markup-generator'); ?></span>
@@ -268,7 +268,7 @@ class IntegrationsTab extends AbstractTab
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <p class="mds-field-description" style="margin-top: 12px;">
+                        <p class="mds-text-muted">
                             <?php esc_html_e('Schema types: Course (mpcs-course) → LearningResource (mpcs-lesson)', 'schema-markup-generator'); ?>
                         </p>
                         <?php
@@ -283,7 +283,7 @@ class IntegrationsTab extends AbstractTab
                     __('Configure WooCommerce product schema generation.', 'schema-markup-generator')
                 ); ?>
 
-                <div class="mds-cards-grid">
+                <div class="mds-grid mds-grid-auto">
                     <?php
                     $this->renderCard(__('Product Schema', 'schema-markup-generator'), function () use ($settings) {
                         $this->renderToggle(
