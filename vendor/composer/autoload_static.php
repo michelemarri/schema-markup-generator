@@ -11,14 +11,14 @@ class ComposerStaticInit508961aaa9473d923d9e95aba666bd64
     );
 
     public static $prefixLengthsPsr4 = array (
-        'M' =>
+        'M' => 
         array (
             'Metodo\\SchemaMarkupGenerator\\' => 29,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Metodo\\SchemaMarkupGenerator\\' =>
+        'Metodo\\SchemaMarkupGenerator\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
