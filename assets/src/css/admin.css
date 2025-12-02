@@ -119,6 +119,7 @@
 
 .smg-tab-link .dashicons {
   @apply text-lg;
+  line-height: 1;
   transition: transform 200ms ease;
 }
 
@@ -1151,16 +1152,12 @@
    Utility Classes
    ======================================== */
 
-.smg-section {
-  @apply mb-6;
-}
-
 .smg-section-title {
-  @apply text-xl font-semibold text-gray-900 mb-1;
+  @apply text-xl font-semibold text-gray-900 m-0;
 }
 
 .smg-section-description {
-  @apply text-sm text-gray-500;
+  @apply text-sm text-gray-500 m-0;
 }
 
 .smg-footer {
