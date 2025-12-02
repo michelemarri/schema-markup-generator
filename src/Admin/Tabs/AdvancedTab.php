@@ -63,13 +63,13 @@ class AdvancedTab extends AbstractTab
         $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('advanced');
 
         ?>
-        <div class="mds-tab-panel mds-stack-gap" id="tab-advanced">
+        <div class="smg-tab-panel flex flex-col gap-6" id="tab-advanced">
             <?php $this->renderSection(
                 __('Cache Settings', 'schema-markup-generator'),
                 __('Configure how schema data is cached for better performance.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-grid mds-grid-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <?php
                 $this->renderCard(__('Cache Configuration', 'schema-markup-generator'), function () use ($settings) {
                     $this->renderToggle(
@@ -93,9 +93,9 @@ class AdvancedTab extends AbstractTab
                         ? __('Object Cache (Redis/Memcached)', 'schema-markup-generator')
                         : __('WordPress Transients', 'schema-markup-generator');
                     ?>
-                    <div class="mds-info-item">
-                        <span class="mds-info-label"><?php esc_html_e('Cache Type', 'schema-markup-generator'); ?></span>
-                        <span class="mds-info-value"><?php echo esc_html($cacheType); ?></span>
+                    <div class="smg-info-item">
+                        <span class="smg-info-label"><?php esc_html_e('Cache Type', 'schema-markup-generator'); ?></span>
+                        <span class="smg-info-value"><?php echo esc_html($cacheType); ?></span>
                     </div>
                     <?php
                 }, 'dashicons-performance');
@@ -107,7 +107,7 @@ class AdvancedTab extends AbstractTab
                 __('Enable debug mode and logging for troubleshooting.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-grid mds-grid-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <?php
                 $this->renderCard(__('Debug Mode', 'schema-markup-generator'), function () use ($settings) {
                     $this->renderToggle(
@@ -119,17 +119,17 @@ class AdvancedTab extends AbstractTab
 
                     // Show log file location
                     $logDir = SMG_PLUGIN_DIR . 'logs';
-                    $logFile = $logDir . '/mds-' . date('Y-m-d') . '.log';
+                    $logFile = $logDir . '/smg-' . date('Y-m-d') . '.log';
                     ?>
-                    <div class="mds-info-item">
-                        <span class="mds-info-label"><?php esc_html_e('Log Location', 'schema-markup-generator'); ?></span>
-                        <code class="mds-info-value"><?php echo esc_html($logDir); ?></code>
+                    <div class="smg-info-item">
+                        <span class="smg-info-label"><?php esc_html_e('Log Location', 'schema-markup-generator'); ?></span>
+                        <code class="smg-info-value"><?php echo esc_html($logDir); ?></code>
                     </div>
 
                     <?php if (file_exists($logFile)): ?>
-                        <div class="mds-stack-gap mds-stack-gap-sm">
+                        <div class="flex flex-col gap-4">
                             <h4><?php esc_html_e('Recent Log Entries', 'schema-markup-generator'); ?></h4>
-                            <pre class="mds-code-block"><?php
+                            <pre class="smg-code-block"><?php
                             $lines = file($logFile);
                             $lastLines = array_slice($lines, -10);
                             echo esc_html(implode('', $lastLines));
@@ -146,9 +146,9 @@ class AdvancedTab extends AbstractTab
                 __('Technical details about your installation.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-card">
-                <div class="mds-card-body">
-                    <table class="mds-table">
+            <div class="smg-card">
+                <div class="smg-card-body">
+                    <table class="smg-table">
                         <tr>
                             <th><?php esc_html_e('Plugin Version', 'schema-markup-generator'); ?></th>
                             <td><?php echo esc_html(SMG_VERSION); ?></td>
@@ -166,11 +166,11 @@ class AdvancedTab extends AbstractTab
                             <td>
                                 <?php
                                 if (wp_using_ext_object_cache()) {
-                                    echo '<span class="mds-badge mds-badge-success">';
+                                    echo '<span class="smg-badge smg-badge-success">';
                                     esc_html_e('Enabled', 'schema-markup-generator');
                                     echo '</span>';
                                 } else {
-                                    echo '<span class="mds-badge mds-badge-warning">';
+                                    echo '<span class="smg-badge smg-badge-warning">';
                                     esc_html_e('Not Available', 'schema-markup-generator');
                                     echo '</span>';
                                 }

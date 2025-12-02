@@ -59,12 +59,12 @@ class Exporter
     public function exportToFile(string $filename = ''): string
     {
         if (empty($filename)) {
-            $filename = 'mds-settings-' . date('Y-m-d-His') . '.json';
+            $filename = 'smg-settings-' . date('Y-m-d-His') . '.json';
         }
 
         $data = $this->export();
         $uploadDir = wp_upload_dir();
-        $filePath = $uploadDir['basedir'] . '/mds-exports/' . $filename;
+        $filePath = $uploadDir['basedir'] . '/smg-exports/' . $filename;
 
         // Create directory if needed
         $dir = dirname($filePath);

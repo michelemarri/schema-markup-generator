@@ -231,6 +231,15 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.7.0
+- **Changed**: Migrated from Metodo Design System (mds-*) to Tailwind CSS
+- **Changed**: CSS class prefix changed from `mds-*` to `smg-*` for consistency
+- **Changed**: Asset handle names changed from `mds-admin` to `smg-admin`
+- **Changed**: Log file prefix changed from `mds-` to `smg-`
+- **Changed**: Export file prefix changed from `mds-` to `smg-`
+- **Improved**: Lighter CSS bundle with only required Tailwind utilities
+- **Improved**: Consistent styling approach across Metodo plugins
+
 ### 1.6.0
 - **Changed**: Namespace updated from `flavor\SchemaMarkupGenerator` to `Metodo\SchemaMarkupGenerator`
 - **Changed**: Contact email updated to plugins@metodo.dev
