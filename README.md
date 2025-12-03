@@ -231,6 +231,15 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.8.0
+- **Improved**: Export/Import system now uses auto-discovery (format 2.0)
+- **New**: All settings with `smg_` prefix are automatically included in exports
+- **New**: Future settings will be exported/imported automatically without code changes
+- **New**: Backward compatible - imports both old and new format exports
+- **Security**: Sensitive data (tokens, API keys) are automatically excluded from exports
+- **Added**: `Exporter::getExportableOptions()` method to list all exportable options
+- **Added**: `Importer::validate()` method for pre-import validation
+
 ### 1.7.0
 - **Changed**: Migrated from Metodo Design System (mds-*) to Tailwind CSS
 - **Changed**: CSS class prefix changed from `mds-*` to `smg-*` for consistency
