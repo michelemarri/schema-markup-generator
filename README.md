@@ -231,6 +231,10 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.8.1
+- **Changed**: Repository is now public - automatic updates work without GitHub token
+- **Removed**: Admin notice for missing token (no longer required for public repo)
+
 ### 1.8.0
 - **Improved**: Export/Import system now uses auto-discovery (format 2.0)
 - **New**: All settings with `smg_` prefix are automatically included in exports
