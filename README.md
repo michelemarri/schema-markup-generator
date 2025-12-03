@@ -231,6 +231,10 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.6.1
+- **Compatibility**: Tested with WordPress 6.9
+- **Compatibility**: Verified PHP 8.4 support
+
 ### 1.6.0
 - **Changed**: Namespace updated from `flavor\SchemaMarkupGenerator` to `Metodo\SchemaMarkupGenerator`
 - **Changed**: Contact email updated to plugins@metodo.dev
