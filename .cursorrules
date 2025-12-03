@@ -1,3 +1,13 @@
+# Metodo Workspace Guidelines
+
+## Styling con Tailwind CSS
+
+- **Usare sempre Tailwind CSS** - Tutti gli stili vanno scritti con classi Tailwind, non usare più il Metodo Design System (classi mds-*)
+- **Mai stili inline nel JavaScript** - Usare solo classi Tailwind
+- **Mai SVG inline** - Usare sempre WordPress Dashicons (`<span class="dashicons dashicons-*">`)
+
+---
+
 # Schema Markup Generator - Project Rules
 
 ## Versioning

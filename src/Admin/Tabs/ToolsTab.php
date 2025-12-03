@@ -33,28 +33,28 @@ class ToolsTab extends AbstractTab
         $this->handleImport();
 
         ?>
-        <div class="mds-tab-panel mds-stack-gap" id="tab-tools">
+        <div class="smg-tab-panel flex flex-col gap-6" id="tab-tools">
             <?php $this->renderSection(
                 __('Import & Export', 'schema-markup-generator'),
                 __('Backup your settings or transfer them to another site.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-grid mds-grid-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <?php
                 $this->renderCard(__('Export Settings', 'schema-markup-generator'), function () {
                     ?>
                     <p><?php esc_html_e('Download all plugin settings as a JSON file.', 'schema-markup-generator'); ?></p>
-                    <form method="post" class="mds-stack-gap mds-stack-gap-sm">
+                    <form method="post" class="flex flex-col gap-4">
                         <?php wp_nonce_field('smg_export', 'smg_export_nonce'); ?>
-                        <label class="mds-checkbox">
+                        <label class="smg-checkbox">
                             <input type="checkbox" name="include_mappings" value="1" checked>
                             <?php esc_html_e('Include post type mappings', 'schema-markup-generator'); ?>
                         </label>
-                        <label class="mds-checkbox">
+                        <label class="smg-checkbox">
                             <input type="checkbox" name="include_field_mappings" value="1" checked>
                             <?php esc_html_e('Include field mappings', 'schema-markup-generator'); ?>
                         </label>
-                        <button type="submit" name="smg_export" class="mds-btn mds-btn-primary">
+                        <button type="submit" name="smg_export" class="smg-btn smg-btn-primary">
                             <span class="dashicons dashicons-download"></span>
                             <?php esc_html_e('Export Settings', 'schema-markup-generator'); ?>
                         </button>
@@ -67,20 +67,20 @@ class ToolsTab extends AbstractTab
                 $this->renderCard(__('Import Settings', 'schema-markup-generator'), function () {
                     ?>
                     <p><?php esc_html_e('Upload a previously exported JSON file to restore settings.', 'schema-markup-generator'); ?></p>
-                    <form method="post" enctype="multipart/form-data" class="mds-stack-gap mds-stack-gap-sm">
+                    <form method="post" enctype="multipart/form-data" class="flex flex-col gap-4">
                         <?php wp_nonce_field('smg_import', 'smg_import_nonce'); ?>
-                        <div class="mds-file-input">
-                            <input type="file" name="import_file" accept=".json" required class="mds-input">
+                        <div class="smg-file-input">
+                            <input type="file" name="import_file" accept=".json" required class="smg-input">
                         </div>
-                        <label class="mds-checkbox">
+                        <label class="smg-checkbox">
                             <input type="checkbox" name="backup_current" value="1" checked>
                             <?php esc_html_e('Create backup before importing', 'schema-markup-generator'); ?>
                         </label>
-                        <label class="mds-checkbox">
+                        <label class="smg-checkbox">
                             <input type="checkbox" name="merge_settings" value="1">
                             <?php esc_html_e('Merge with existing settings', 'schema-markup-generator'); ?>
                         </label>
-                        <button type="submit" name="smg_import" class="mds-btn mds-btn-secondary">
+                        <button type="submit" name="smg_import" class="smg-btn smg-btn-secondary">
                             <span class="dashicons dashicons-upload"></span>
                             <?php esc_html_e('Import Settings', 'schema-markup-generator'); ?>
                         </button>
@@ -95,14 +95,14 @@ class ToolsTab extends AbstractTab
                 __('Test and validate your schema markup.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-grid mds-grid-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <?php
                 $this->renderCard(__('Google Rich Results Test', 'schema-markup-generator'), function () {
                     ?>
                     <p><?php esc_html_e('Test your pages with Google\'s official Rich Results Test tool.', 'schema-markup-generator'); ?></p>
-                    <div class="mds-cluster">
-                        <input type="url" id="mds-test-url" class="mds-input mds-flex-1" placeholder="<?php esc_attr_e('Enter page URL...', 'schema-markup-generator'); ?>" value="<?php echo esc_url(home_url('/')); ?>">
-                        <a href="#" id="mds-test-google" class="mds-btn mds-btn-primary mds-shrink-0" target="_blank">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <input type="url" id="smg-test-url" class="smg-input smg-flex-1" placeholder="<?php esc_attr_e('Enter page URL...', 'schema-markup-generator'); ?>" value="<?php echo esc_url(home_url('/')); ?>">
+                        <a href="#" id="smg-test-google" class="smg-btn smg-btn-primary smg-shrink-0" target="_blank">
                             <span class="dashicons dashicons-external"></span>
                             <?php esc_html_e('Test on Google', 'schema-markup-generator'); ?>
                         </a>
@@ -115,9 +115,9 @@ class ToolsTab extends AbstractTab
                 $this->renderCard(__('Schema.org Validator', 'schema-markup-generator'), function () {
                     ?>
                     <p><?php esc_html_e('Validate your markup against schema.org specifications.', 'schema-markup-generator'); ?></p>
-                    <div class="mds-cluster">
-                        <input type="url" id="mds-validate-url" class="mds-input mds-flex-1" placeholder="<?php esc_attr_e('Enter page URL...', 'schema-markup-generator'); ?>" value="<?php echo esc_url(home_url('/')); ?>">
-                        <a href="#" id="mds-validate-schema" class="mds-btn mds-btn-secondary mds-shrink-0" target="_blank">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <input type="url" id="smg-validate-url" class="smg-input smg-flex-1" placeholder="<?php esc_attr_e('Enter page URL...', 'schema-markup-generator'); ?>" value="<?php echo esc_url(home_url('/')); ?>">
+                        <a href="#" id="smg-validate-schema" class="smg-btn smg-btn-secondary smg-shrink-0" target="_blank">
                             <span class="dashicons dashicons-yes-alt"></span>
                             <?php esc_html_e('Validate', 'schema-markup-generator'); ?>
                         </a>
@@ -132,15 +132,15 @@ class ToolsTab extends AbstractTab
                 __('Clear cached schema data.', 'schema-markup-generator')
             ); ?>
 
-            <div class="mds-stack-gap mds-stack-gap-sm">
+            <div class="flex flex-col gap-4">
                 <form method="post">
                     <?php wp_nonce_field('smg_clear_cache', 'smg_clear_cache_nonce'); ?>
-                    <button type="submit" name="smg_clear_cache" class="mds-btn mds-btn-secondary">
+                    <button type="submit" name="smg_clear_cache" class="smg-btn smg-btn-secondary">
                         <span class="dashicons dashicons-trash"></span>
                         <?php esc_html_e('Clear Schema Cache', 'schema-markup-generator'); ?>
                     </button>
                 </form>
-                <p class="mds-text-muted">
+                <p class="smg-text-muted">
                     <?php esc_html_e('This will clear all cached schema data. The cache will be rebuilt automatically.', 'schema-markup-generator'); ?>
                 </p>
             </div>
@@ -165,7 +165,7 @@ class ToolsTab extends AbstractTab
             !empty($_POST['include_field_mappings'])
         );
 
-        $filename = 'mds-settings-' . date('Y-m-d-His') . '.json';
+        $filename = 'smg-settings-' . date('Y-m-d-His') . '.json';
 
         header('Content-Type: application/json');
         header('Content-Disposition: attachment; filename="' . $filename . '"');

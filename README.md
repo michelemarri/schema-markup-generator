@@ -231,9 +231,27 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
-### 1.6.1
-- **Compatibility**: Tested with WordPress 6.9
-- **Compatibility**: Verified PHP 8.4 support
+### 1.8.1
+- **Changed**: Repository is now public - automatic updates work without GitHub token
+- **Removed**: Admin notice for missing token (no longer required for public repo)
+
+### 1.8.0
+- **Improved**: Export/Import system now uses auto-discovery (format 2.0)
+- **New**: All settings with `smg_` prefix are automatically included in exports
+- **New**: Future settings will be exported/imported automatically without code changes
+- **New**: Backward compatible - imports both old and new format exports
+- **Security**: Sensitive data (tokens, API keys) are automatically excluded from exports
+- **Added**: `Exporter::getExportableOptions()` method to list all exportable options
+- **Added**: `Importer::validate()` method for pre-import validation
+
+### 1.7.0
+- **Changed**: Migrated from Metodo Design System (mds-*) to Tailwind CSS
+- **Changed**: CSS class prefix changed from `mds-*` to `smg-*` for consistency
+- **Changed**: Asset handle names changed from `mds-admin` to `smg-admin`
+- **Changed**: Log file prefix changed from `mds-` to `smg-`
+- **Changed**: Export file prefix changed from `mds-` to `smg-`
+- **Improved**: Lighter CSS bundle with only required Tailwind utilities
+- **Improved**: Consistent styling approach across Metodo plugins
 
 ### 1.6.0
 - **Changed**: Namespace updated from `flavor\SchemaMarkupGenerator` to `Metodo\SchemaMarkupGenerator`

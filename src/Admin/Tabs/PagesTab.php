@@ -154,15 +154,15 @@ class PagesTab extends AbstractTab
         $frontPageId = (int) get_option('page_on_front');
 
         ?>
-        <div class="mds-tab-panel mds-stack-gap" id="tab-pages">
+        <div class="smg-tab-panel flex flex-col gap-6" id="tab-pages">
             <?php $this->renderSection(
                 __('Page Schema Mapping', 'schema-markup-generator'),
                 __('Assign specific schema types to individual pages. Top-level pages are shown below. Child pages inherit from their parent unless overridden in the page editor.', 'schema-markup-generator')
             ); ?>
 
             <?php if ($query->have_posts()): ?>
-                <div class="mds-pages-header">
-                    <div class="mds-pages-count">
+                <div class="smg-pages-header">
+                    <div class="smg-pages-count">
                         <?php
                         printf(
                             /* translators: %d: number of pages */
@@ -172,7 +172,7 @@ class PagesTab extends AbstractTab
                         ?>
                     </div>
                     <?php if ($totalPages > 1): ?>
-                        <div class="mds-pages-pagination-info">
+                        <div class="smg-pages-pagination-info">
                             <?php
                             printf(
                                 /* translators: 1: current page, 2: total pages */
@@ -185,15 +185,15 @@ class PagesTab extends AbstractTab
                     <?php endif; ?>
                 </div>
 
-                <div class="mds-pages-list">
-                    <table class="mds-pages-table">
+                <div class="smg-pages-list">
+                    <table class="smg-pages-table">
                         <thead>
                             <tr>
-                                <th class="mds-col-page"><?php esc_html_e('Page', 'schema-markup-generator'); ?></th>
-                                <th class="mds-col-slug"><?php esc_html_e('Slug', 'schema-markup-generator'); ?></th>
-                                <th class="mds-col-status"><?php esc_html_e('Status', 'schema-markup-generator'); ?></th>
-                                <th class="mds-col-schema"><?php esc_html_e('Schema Type', 'schema-markup-generator'); ?></th>
-                                <th class="mds-col-suggestion"><?php esc_html_e('Suggested', 'schema-markup-generator'); ?></th>
+                                <th class="smg-col-page"><?php esc_html_e('Page', 'schema-markup-generator'); ?></th>
+                                <th class="smg-col-slug"><?php esc_html_e('Slug', 'schema-markup-generator'); ?></th>
+                                <th class="smg-col-status"><?php esc_html_e('Status', 'schema-markup-generator'); ?></th>
+                                <th class="smg-col-schema"><?php esc_html_e('Schema Type', 'schema-markup-generator'); ?></th>
+                                <th class="smg-col-suggestion"><?php esc_html_e('Suggested', 'schema-markup-generator'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -206,11 +206,11 @@ class PagesTab extends AbstractTab
                                 $isFrontPage = ($pageId === $frontPageId);
                                 $childCount = $this->getChildPageCount($pageId);
                             ?>
-                                <tr class="mds-page-row <?php echo $isFrontPage ? 'mds-front-page' : ''; ?>">
-                                    <td class="mds-col-page">
-                                        <div class="mds-page-info">
+                                <tr class="smg-page-row <?php echo $isFrontPage ? 'smg-front-page' : ''; ?>">
+                                    <td class="smg-col-page">
+                                        <div class="smg-page-info">
                                             <?php if ($isFrontPage): ?>
-                                                <span class="mds-badge mds-badge-primary" title="<?php esc_attr_e('Front Page', 'schema-markup-generator'); ?>">
+                                                <span class="smg-badge smg-badge-primary" title="<?php esc_attr_e('Front Page', 'schema-markup-generator'); ?>">
                                                     <span class="dashicons dashicons-admin-home"></span>
                                                 </span>
                                             <?php endif; ?>
@@ -220,21 +220,21 @@ class PagesTab extends AbstractTab
                                                 </a>
                                             </strong>
                                             <?php if ($childCount > 0): ?>
-                                                <span class="mds-child-count" title="<?php esc_attr_e('Child pages', 'schema-markup-generator'); ?>">
+                                                <span class="smg-child-count" title="<?php esc_attr_e('Child pages', 'schema-markup-generator'); ?>">
                                                     +<?php echo esc_html((string) $childCount); ?>
                                                 </span>
                                             <?php endif; ?>
                                         </div>
                                     </td>
-                                    <td class="mds-col-slug">
+                                    <td class="smg-col-slug">
                                         <code>/<?php echo esc_html($pageSlug); ?></code>
                                     </td>
-                                    <td class="mds-col-status">
+                                    <td class="smg-col-status">
                                         <?php echo $this->renderStatusBadge($pageStatus); ?>
                                     </td>
-                                    <td class="mds-col-schema">
+                                    <td class="smg-col-schema">
                                         <select name="smg_page_mappings[<?php echo esc_attr((string) $pageId); ?>]"
-                                                class="mds-schema-select mds-page-schema-select"
+                                                class="smg-schema-select smg-page-schema-select"
                                                 data-page-id="<?php echo esc_attr((string) $pageId); ?>"
                                                 data-suggested="<?php echo esc_attr($suggestedSchema); ?>">
                                             <option value=""><?php esc_html_e('— No Schema —', 'schema-markup-generator'); ?></option>
@@ -250,10 +250,10 @@ class PagesTab extends AbstractTab
                                             <?php endforeach; ?>
                                         </select>
                                     </td>
-                                    <td class="mds-col-suggestion">
+                                    <td class="smg-col-suggestion">
                                         <?php if ($suggestedSchema && $suggestedSchema !== $currentSchema): ?>
                                             <button type="button" 
-                                                    class="mds-apply-suggestion button button-small"
+                                                    class="smg-apply-suggestion button button-small"
                                                     data-schema="<?php echo esc_attr($suggestedSchema); ?>"
                                                     data-page-id="<?php echo esc_attr((string) $pageId); ?>"
                                                     title="<?php esc_attr_e('Apply suggestion', 'schema-markup-generator'); ?>">
@@ -261,11 +261,11 @@ class PagesTab extends AbstractTab
                                                 <span class="dashicons dashicons-yes"></span>
                                             </button>
                                         <?php elseif ($currentSchema): ?>
-                                            <span class="mds-suggestion-applied">
+                                            <span class="smg-suggestion-applied">
                                                 <span class="dashicons dashicons-yes-alt"></span>
                                             </span>
                                         <?php else: ?>
-                                            <span class="mds-no-suggestion">—</span>
+                                            <span class="smg-no-suggestion">—</span>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -279,7 +279,7 @@ class PagesTab extends AbstractTab
                 <?php endif; ?>
 
             <?php else: ?>
-                <div class="mds-notice mds-notice-info">
+                <div class="smg-notice smg-notice-info">
                     <span class="dashicons dashicons-info"></span>
                     <?php esc_html_e('No top-level pages found. Create some pages to configure their schema markup.', 'schema-markup-generator'); ?>
                 </div>
@@ -287,30 +287,30 @@ class PagesTab extends AbstractTab
 
             <?php wp_reset_postdata(); ?>
 
-            <div class="mds-pages-help">
+            <div class="smg-pages-help">
                 <h4><?php esc_html_e('Schema Suggestions Guide', 'schema-markup-generator'); ?></h4>
-                <div class="mds-help-grid">
-                    <div class="mds-help-item">
+                <div class="smg-help-grid">
+                    <div class="smg-help-item">
                         <strong>AboutPage</strong>
                         <span><?php esc_html_e('About, Team, Chi siamo pages', 'schema-markup-generator'); ?></span>
                     </div>
-                    <div class="mds-help-item">
+                    <div class="smg-help-item">
                         <strong>ContactPage</strong>
                         <span><?php esc_html_e('Contact, Support pages', 'schema-markup-generator'); ?></span>
                     </div>
-                    <div class="mds-help-item">
+                    <div class="smg-help-item">
                         <strong>FAQPage</strong>
                         <span><?php esc_html_e('FAQ, Help, Domande frequenti pages', 'schema-markup-generator'); ?></span>
                     </div>
-                    <div class="mds-help-item">
+                    <div class="smg-help-item">
                         <strong>CollectionPage</strong>
                         <span><?php esc_html_e('Products, Portfolio, Gallery, Blog listing pages', 'schema-markup-generator'); ?></span>
                     </div>
-                    <div class="mds-help-item">
+                    <div class="smg-help-item">
                         <strong>WebPage</strong>
                         <span><?php esc_html_e('Generic pages, Privacy Policy, Terms', 'schema-markup-generator'); ?></span>
                     </div>
-                    <div class="mds-help-item">
+                    <div class="smg-help-item">
                         <strong>ItemPage</strong>
                         <span><?php esc_html_e('Single product/service pages', 'schema-markup-generator'); ?></span>
                     </div>
@@ -400,16 +400,16 @@ class PagesTab extends AbstractTab
     private function renderStatusBadge(string $status): string
     {
         $badges = [
-            'publish' => ['label' => __('Published', 'schema-markup-generator'), 'class' => 'mds-badge-success'],
-            'draft' => ['label' => __('Draft', 'schema-markup-generator'), 'class' => 'mds-badge-warning'],
-            'pending' => ['label' => __('Pending', 'schema-markup-generator'), 'class' => 'mds-badge-warning'],
-            'private' => ['label' => __('Private', 'schema-markup-generator'), 'class' => 'mds-badge-secondary'],
+            'publish' => ['label' => __('Published', 'schema-markup-generator'), 'class' => 'smg-badge-success'],
+            'draft' => ['label' => __('Draft', 'schema-markup-generator'), 'class' => 'smg-badge-warning'],
+            'pending' => ['label' => __('Pending', 'schema-markup-generator'), 'class' => 'smg-badge-warning'],
+            'private' => ['label' => __('Private', 'schema-markup-generator'), 'class' => 'smg-badge-secondary'],
         ];
 
-        $badge = $badges[$status] ?? ['label' => ucfirst($status), 'class' => 'mds-badge-secondary'];
+        $badge = $badges[$status] ?? ['label' => ucfirst($status), 'class' => 'smg-badge-secondary'];
 
         return sprintf(
-            '<span class="mds-badge %s">%s</span>',
+            '<span class="smg-badge %s">%s</span>',
             esc_attr($badge['class']),
             esc_html($badge['label'])
         );
@@ -423,36 +423,36 @@ class PagesTab extends AbstractTab
         $baseUrl = admin_url('options-general.php?page=schema-markup-generator&tab=pages');
 
         ?>
-        <div class="mds-pagination">
-            <div class="mds-pagination-links">
+        <div class="smg-pagination">
+            <div class="smg-pagination-links">
                 <?php if ($currentPage > 1): ?>
                     <a href="<?php echo esc_url(add_query_arg('paged', 1, $baseUrl)); ?>" 
-                       class="mds-pagination-link mds-pagination-first"
+                       class="smg-pagination-link smg-pagination-first"
                        title="<?php esc_attr_e('First page', 'schema-markup-generator'); ?>">
                         <span class="dashicons dashicons-controls-skipback"></span>
                     </a>
                     <a href="<?php echo esc_url(add_query_arg('paged', $currentPage - 1, $baseUrl)); ?>" 
-                       class="mds-pagination-link mds-pagination-prev"
+                       class="smg-pagination-link smg-pagination-prev"
                        title="<?php esc_attr_e('Previous page', 'schema-markup-generator'); ?>">
                         <span class="dashicons dashicons-arrow-left-alt2"></span>
                     </a>
                 <?php else: ?>
-                    <span class="mds-pagination-link mds-pagination-first disabled">
+                    <span class="smg-pagination-link smg-pagination-first disabled">
                         <span class="dashicons dashicons-controls-skipback"></span>
                     </span>
-                    <span class="mds-pagination-link mds-pagination-prev disabled">
+                    <span class="smg-pagination-link smg-pagination-prev disabled">
                         <span class="dashicons dashicons-arrow-left-alt2"></span>
                     </span>
                 <?php endif; ?>
 
-                <span class="mds-pagination-current">
+                <span class="smg-pagination-current">
                     <input type="number" 
-                           class="mds-pagination-input" 
+                           class="smg-pagination-input" 
                            min="1" 
                            max="<?php echo esc_attr((string) $totalPages); ?>" 
                            value="<?php echo esc_attr((string) $currentPage); ?>"
                            data-base-url="<?php echo esc_attr($baseUrl); ?>">
-                    <span class="mds-pagination-total">
+                    <span class="smg-pagination-total">
                         <?php
                         printf(
                             /* translators: %d: total pages */
@@ -465,20 +465,20 @@ class PagesTab extends AbstractTab
 
                 <?php if ($currentPage < $totalPages): ?>
                     <a href="<?php echo esc_url(add_query_arg('paged', $currentPage + 1, $baseUrl)); ?>" 
-                       class="mds-pagination-link mds-pagination-next"
+                       class="smg-pagination-link smg-pagination-next"
                        title="<?php esc_attr_e('Next page', 'schema-markup-generator'); ?>">
                         <span class="dashicons dashicons-arrow-right-alt2"></span>
                     </a>
                     <a href="<?php echo esc_url(add_query_arg('paged', $totalPages, $baseUrl)); ?>" 
-                       class="mds-pagination-link mds-pagination-last"
+                       class="smg-pagination-link smg-pagination-last"
                        title="<?php esc_attr_e('Last page', 'schema-markup-generator'); ?>">
                         <span class="dashicons dashicons-controls-skipforward"></span>
                     </a>
                 <?php else: ?>
-                    <span class="mds-pagination-link mds-pagination-next disabled">
+                    <span class="smg-pagination-link smg-pagination-next disabled">
                         <span class="dashicons dashicons-arrow-right-alt2"></span>
                     </span>
-                    <span class="mds-pagination-link mds-pagination-last disabled">
+                    <span class="smg-pagination-link smg-pagination-last disabled">
                         <span class="dashicons dashicons-controls-skipforward"></span>
                     </span>
                 <?php endif; ?>

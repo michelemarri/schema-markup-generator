@@ -1,58 +1,669 @@
-(()=>{(function(){"use strict";let r={config:{animationDuration:200,toastDuration:3e3,debounceDelay:300},elements:{},init(){this.cacheElements(),this.bindEvents(),this.initComponents(),this.initAnimations()},cacheElements(){this.elements={settingsForm:document.getElementById("mds-settings-form"),tabsNav:document.querySelector(".mds-tabs-nav"),tabContent:document.querySelector(".mds-tab-content"),schemaPreview:document.getElementById("mds-schema-preview"),validationStatus:document.getElementById("mds-validation-status")}},bindEvents(){document.addEventListener("click",e=>{e.target.closest(".mds-toggle-fields")&&this.handleToggleFields(e)}),document.addEventListener("change",e=>{e.target.classList.contains("mds-schema-select")&&this.handleSchemaTypeChange(e)}),document.addEventListener("click",e=>{e.target.closest(".mds-refresh-preview")&&this.handleRefreshPreview(e)}),document.addEventListener("click",e=>{e.target.closest(".mds-copy-schema")&&this.handleCopySchema(e)}),document.addEventListener("click",e=>{(e.target.id==="mds-test-google"||e.target.closest("#mds-test-google"))&&this.handleGoogleTest(e)}),document.addEventListener("click",e=>{(e.target.id==="mds-validate-schema"||e.target.closest("#mds-validate-schema"))&&this.handleSchemaValidator(e)}),this.elements.settingsForm&&this.elements.settingsForm.addEventListener("submit",e=>{this.handleFormSubmit(e)}),document.addEventListener("change",e=>{e.target.closest(".mds-toggle input")&&this.animateToggle(e.target)}),document.addEventListener("click",e=>{e.target.closest(".mds-apply-suggestion")&&this.handleApplySuggestion(e)}),document.addEventListener("keypress",e=>{e.target.classList.contains("mds-pagination-input")&&e.key==="Enter"&&this.handlePaginationInput(e)}),document.addEventListener("change",e=>{e.target.classList.contains("mds-pagination-input")&&this.handlePaginationInput(e)}),document.addEventListener("click",e=>{e.target.closest(".mds-toggle-password")&&this.handleTogglePassword(e)}),document.addEventListener("click",e=>{e.target.closest("#mds-remove-token")&&this.handleRemoveToken(e)}),document.addEventListener("click",e=>{e.target.closest("#mds-check-updates")&&this.handleCheckUpdates(e)})},initComponents(){this.initPreview(),this.initTooltips(),this.initCollapsibles()},initAnimations(){document.querySelectorAll(".mds-card, .mds-post-type-card, .mds-integration-card, .mds-step").forEach((t,a)=>{t.style.opacity="0",t.style.transform="translateY(10px)",setTimeout(()=>{t.style.transition="opacity 0.3s ease, transform 0.3s ease",t.style.opacity="1",t.style.transform="translateY(0)"},50*a)}),document.querySelectorAll(".mds-schema-item").forEach((t,a)=>{t.style.opacity="0",setTimeout(()=>{t.style.transition="opacity 0.3s ease",t.style.opacity="1"},30*a)}),document.querySelectorAll(".mds-page-row").forEach((t,a)=>{t.style.opacity="0",t.style.transform="translateX(-10px)",setTimeout(()=>{t.style.transition="opacity 0.3s ease, transform 0.3s ease",t.style.opacity="1",t.style.transform="translateX(0)"},30*a)})},handleToggleFields(e){e.preventDefault();let s=e.target.closest(".mds-toggle-fields"),t=s.closest(".mds-post-type-card").querySelector(".mds-post-type-fields"),a=s.getAttribute("aria-expanded")==="true";s.setAttribute("aria-expanded",!a),a?this.slideUp(t):this.slideDown(t)},async handleSchemaTypeChange(e){let s=e.target,n=s.dataset.postType,t=s.value,a=s.closest(".mds-post-type-card"),i=a.querySelector(".mds-field-mappings");if(i){t?a.classList.add("mds-mapped"):a.classList.remove("mds-mapped"),i.style.opacity="0.5",i.innerHTML=`
-                <div class="mds-loading-fields">
-                    <span class="dashicons dashicons-update mds-spin"></span>
-                    ${typeof smgAdmin<"u"&&smgAdmin.strings?.loading?smgAdmin.strings.loading:"Loading..."}
+(() => {
+  // assets/src/js/admin.js
+  (function() {
+    "use strict";
+    const SMGAdmin = {
+      /**
+       * Configuration
+       */
+      config: {
+        animationDuration: 200,
+        toastDuration: 3e3,
+        debounceDelay: 300
+      },
+      /**
+       * DOM elements cache
+       */
+      elements: {},
+      /**
+       * Initialize the module
+       */
+      init() {
+        this.cacheElements();
+        this.bindEvents();
+        this.initComponents();
+        this.initAnimations();
+      },
+      /**
+       * Cache frequently used DOM elements
+       */
+      cacheElements() {
+        this.elements = {
+          settingsForm: document.getElementById("smg-settings-form"),
+          tabsNav: document.querySelector(".smg-tabs-nav"),
+          tabContent: document.querySelector(".smg-tab-content"),
+          schemaPreview: document.getElementById("smg-schema-preview"),
+          validationStatus: document.getElementById("smg-validation-status")
+        };
+      },
+      /**
+       * Bind event handlers
+       */
+      bindEvents() {
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-toggle-fields")) {
+            this.handleToggleFields(e);
+          }
+        });
+        document.addEventListener("change", (e) => {
+          if (e.target.classList.contains("smg-schema-select")) {
+            this.handleSchemaTypeChange(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-refresh-preview")) {
+            this.handleRefreshPreview(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-copy-schema")) {
+            this.handleCopySchema(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.id === "smg-test-google" || e.target.closest("#smg-test-google")) {
+            this.handleGoogleTest(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.id === "smg-validate-schema" || e.target.closest("#smg-validate-schema")) {
+            this.handleSchemaValidator(e);
+          }
+        });
+        if (this.elements.settingsForm) {
+          this.elements.settingsForm.addEventListener("submit", (e) => {
+            this.handleFormSubmit(e);
+          });
+        }
+        document.addEventListener("change", (e) => {
+          if (e.target.closest(".smg-toggle input")) {
+            this.animateToggle(e.target);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-apply-suggestion")) {
+            this.handleApplySuggestion(e);
+          }
+        });
+        document.addEventListener("keypress", (e) => {
+          if (e.target.classList.contains("smg-pagination-input") && e.key === "Enter") {
+            this.handlePaginationInput(e);
+          }
+        });
+        document.addEventListener("change", (e) => {
+          if (e.target.classList.contains("smg-pagination-input")) {
+            this.handlePaginationInput(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-toggle-password")) {
+            this.handleTogglePassword(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest("#smg-remove-token")) {
+            this.handleRemoveToken(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest("#smg-check-updates")) {
+            this.handleCheckUpdates(e);
+          }
+        });
+      },
+      /**
+       * Initialize UI components
+       */
+      initComponents() {
+        this.initPreview();
+        this.initTooltips();
+        this.initCollapsibles();
+      },
+      /**
+       * Initialize staggered animations for list items
+       */
+      initAnimations() {
+        const cards = document.querySelectorAll(".smg-card, .smg-post-type-card, .smg-integration-card, .smg-step");
+        cards.forEach((card, index) => {
+          card.style.opacity = "0";
+          card.style.transform = "translateY(10px)";
+          setTimeout(() => {
+            card.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+            card.style.opacity = "1";
+            card.style.transform = "translateY(0)";
+          }, 50 * index);
+        });
+        const schemaItems = document.querySelectorAll(".smg-schema-item");
+        schemaItems.forEach((item, index) => {
+          item.style.opacity = "0";
+          setTimeout(() => {
+            item.style.transition = "opacity 0.3s ease";
+            item.style.opacity = "1";
+          }, 30 * index);
+        });
+        const pageRows = document.querySelectorAll(".smg-page-row");
+        pageRows.forEach((row, index) => {
+          row.style.opacity = "0";
+          row.style.transform = "translateX(-10px)";
+          setTimeout(() => {
+            row.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+            row.style.opacity = "1";
+            row.style.transform = "translateX(0)";
+          }, 30 * index);
+        });
+      },
+      /**
+       * Handle toggle fields button click
+       */
+      handleToggleFields(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-toggle-fields");
+        const card = button.closest(".smg-post-type-card");
+        const fields = card.querySelector(".smg-post-type-fields");
+        const isExpanded = button.getAttribute("aria-expanded") === "true";
+        button.setAttribute("aria-expanded", !isExpanded);
+        if (isExpanded) {
+          this.slideUp(fields);
+        } else {
+          this.slideDown(fields);
+        }
+      },
+      /**
+       * Handle schema type change
+       * 
+       * Dynamically loads field mappings when schema type changes
+       */
+      async handleSchemaTypeChange(e) {
+        const select = e.target;
+        const postType = select.dataset.postType;
+        const schemaType = select.value;
+        const card = select.closest(".smg-post-type-card");
+        const fieldsContainer = card.querySelector(".smg-field-mappings");
+        if (!fieldsContainer)
+          return;
+        if (schemaType) {
+          card.classList.add("smg-mapped");
+        } else {
+          card.classList.remove("smg-mapped");
+        }
+        fieldsContainer.style.opacity = "0.5";
+        fieldsContainer.innerHTML = `
+                <div class="smg-loading-fields">
+                    <span class="dashicons dashicons-update smg-spin"></span>
+                    ${typeof smgAdmin !== "undefined" && smgAdmin.strings?.loading ? smgAdmin.strings.loading : "Loading..."}
                 </div>
-            `;try{let o=await this.fetchSchemaProperties(n,t);if(o.success&&o.data.html){i.innerHTML=o.data.html,i.style.opacity="1",i.querySelectorAll(".mds-mapping-row").forEach((d,m)=>{d.style.opacity="0",d.style.transform="translateY(10px)",setTimeout(()=>{d.style.transition="opacity 0.3s ease, transform 0.3s ease",d.style.opacity="1",d.style.transform="translateY(0)"},50*m)});let l=a.querySelector(".mds-post-type-fields"),c=a.querySelector(".mds-toggle-fields");l&&l.style.display==="none"&&t&&(this.slideDown(l),c&&c.setAttribute("aria-expanded","true"))}else i.innerHTML=`
-                        <p class="mds-notice">
+            `;
+        try {
+          const response = await this.fetchSchemaProperties(postType, schemaType);
+          if (response.success && response.data.html) {
+            fieldsContainer.innerHTML = response.data.html;
+            fieldsContainer.style.opacity = "1";
+            const rows = fieldsContainer.querySelectorAll(".smg-mapping-row");
+            rows.forEach((row, index) => {
+              row.style.opacity = "0";
+              row.style.transform = "translateY(10px)";
+              setTimeout(() => {
+                row.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+                row.style.opacity = "1";
+                row.style.transform = "translateY(0)";
+              }, 50 * index);
+            });
+            const fieldsSection = card.querySelector(".smg-post-type-fields");
+            const toggleButton = card.querySelector(".smg-toggle-fields");
+            if (fieldsSection && fieldsSection.style.display === "none" && schemaType) {
+              this.slideDown(fieldsSection);
+              if (toggleButton) {
+                toggleButton.setAttribute("aria-expanded", "true");
+              }
+            }
+          } else {
+            fieldsContainer.innerHTML = `
+                        <p class="smg-notice">
                             <span class="dashicons dashicons-warning"></span>
-                            ${o.data?.message||"Failed to load schema properties"}
+                            ${response.data?.message || "Failed to load schema properties"}
                         </p>
-                    `,i.style.opacity="1"}catch(o){console.error("Failed to load schema properties:",o),i.innerHTML=`
-                    <p class="mds-notice">
+                    `;
+            fieldsContainer.style.opacity = "1";
+          }
+        } catch (error) {
+          console.error("Failed to load schema properties:", error);
+          fieldsContainer.innerHTML = `
+                    <p class="smg-notice">
                         <span class="dashicons dashicons-warning"></span>
                         Failed to load schema properties. Please try again.
                     </p>
-                `,i.style.opacity="1"}}},fetchSchemaProperties(e,s){return new Promise((n,t)=>{let a=new FormData;a.append("action","smg_get_schema_properties"),a.append("nonce",typeof smgAdmin<"u"?smgAdmin.nonce:""),a.append("post_type",e),a.append("schema_type",s),fetch(typeof smgAdmin<"u"?smgAdmin.ajaxUrl:ajaxurl,{method:"POST",body:a,credentials:"same-origin"}).then(i=>i.json()).then(i=>n(i)).catch(i=>t(i))})},initPreview(){this.elements.schemaPreview&&typeof smgAdmin<"u"&&this.validateCurrentSchema()},async handleRefreshPreview(e){e.preventDefault();let s=e.target.closest(".mds-refresh-preview"),n=document.querySelector('input[name="smg_post_id"]');if(!n)return;let t=n.value;s.disabled=!0,s.classList.add("loading"),this.elements.schemaPreview.style.opacity="0.5";try{let a=await this.fetchPreview(t);a.success&&(this.elements.schemaPreview.textContent=a.data.json,this.showValidation(a.data.validation),this.elements.schemaPreview.style.transition="opacity 0.3s ease",this.elements.schemaPreview.style.opacity="1")}catch(a){console.error("Preview refresh failed:",a),this.showToast("Failed to refresh preview","error")}finally{s.disabled=!1,s.classList.remove("loading")}},fetchPreview(e){return new Promise((s,n)=>{let t=new FormData;t.append("action","smg_preview_schema"),t.append("nonce",smgAdmin.nonce),t.append("post_id",e),fetch(smgAdmin.ajaxUrl,{method:"POST",body:t,credentials:"same-origin"}).then(a=>a.json()).then(a=>s(a)).catch(a=>n(a))})},async validateCurrentSchema(){let e=document.querySelector('input[name="smg_post_id"]');if(!(!e||!this.elements.schemaPreview))try{let s=await this.fetchPreview(e.value);s.success&&s.data.validation&&this.showValidation(s.data.validation)}catch(s){console.error("Validation failed:",s)}},showValidation(e){if(!e||!this.elements.validationStatus)return;let s="";e.valid?s=`
-                    <div class="mds-validation-status valid mds-animate-fade-in">
+                `;
+          fieldsContainer.style.opacity = "1";
+        }
+      },
+      /**
+       * Fetch schema properties via AJAX
+       */
+      fetchSchemaProperties(postType, schemaType) {
+        return new Promise((resolve, reject) => {
+          const formData = new FormData();
+          formData.append("action", "smg_get_schema_properties");
+          formData.append("nonce", typeof smgAdmin !== "undefined" ? smgAdmin.nonce : "");
+          formData.append("post_type", postType);
+          formData.append("schema_type", schemaType);
+          fetch(typeof smgAdmin !== "undefined" ? smgAdmin.ajaxUrl : ajaxurl, {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+          }).then((response) => response.json()).then((data) => resolve(data)).catch((error) => reject(error));
+        });
+      },
+      /**
+       * Initialize preview functionality
+       */
+      initPreview() {
+        if (this.elements.schemaPreview && typeof smgAdmin !== "undefined") {
+          this.validateCurrentSchema();
+        }
+      },
+      /**
+       * Handle refresh preview
+       */
+      async handleRefreshPreview(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-refresh-preview");
+        const postIdInput = document.querySelector('input[name="smg_post_id"]');
+        if (!postIdInput)
+          return;
+        const postId = postIdInput.value;
+        button.disabled = true;
+        button.classList.add("loading");
+        this.elements.schemaPreview.style.opacity = "0.5";
+        try {
+          const response = await this.fetchPreview(postId);
+          if (response.success) {
+            this.elements.schemaPreview.textContent = response.data.json;
+            this.showValidation(response.data.validation);
+            this.elements.schemaPreview.style.transition = "opacity 0.3s ease";
+            this.elements.schemaPreview.style.opacity = "1";
+          }
+        } catch (error) {
+          console.error("Preview refresh failed:", error);
+          this.showToast("Failed to refresh preview", "error");
+        } finally {
+          button.disabled = false;
+          button.classList.remove("loading");
+        }
+      },
+      /**
+       * Fetch preview via AJAX
+       */
+      fetchPreview(postId) {
+        return new Promise((resolve, reject) => {
+          const formData = new FormData();
+          formData.append("action", "smg_preview_schema");
+          formData.append("nonce", smgAdmin.nonce);
+          formData.append("post_id", postId);
+          fetch(smgAdmin.ajaxUrl, {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+          }).then((response) => response.json()).then((data) => resolve(data)).catch((error) => reject(error));
+        });
+      },
+      /**
+       * Validate current schema
+       */
+      async validateCurrentSchema() {
+        const postIdInput = document.querySelector('input[name="smg_post_id"]');
+        if (!postIdInput || !this.elements.schemaPreview)
+          return;
+        try {
+          const response = await this.fetchPreview(postIdInput.value);
+          if (response.success && response.data.validation) {
+            this.showValidation(response.data.validation);
+          }
+        } catch (error) {
+          console.error("Validation failed:", error);
+        }
+      },
+      /**
+       * Show validation status
+       */
+      showValidation(validation) {
+        if (!validation || !this.elements.validationStatus)
+          return;
+        let html = "";
+        if (validation.valid) {
+          html = `
+                    <div class="smg-validation-status valid smg-animate-fade-in">
                         <span class="dashicons dashicons-yes-alt"></span>
                         ${smgAdmin.strings.valid}
                     </div>
-                `:s=`
-                    <div class="mds-validation-status invalid mds-animate-fade-in">
+                `;
+        } else {
+          html = `
+                    <div class="smg-validation-status invalid smg-animate-fade-in">
                         <span class="dashicons dashicons-warning"></span>
                         ${smgAdmin.strings.invalid}
-                        ${e.errors&&e.errors.length?`
+                        ${validation.errors && validation.errors.length ? `
                             <ul>
-                                ${e.errors.map(n=>`<li>${n}</li>`).join("")}
+                                ${validation.errors.map((error) => `<li>${error}</li>`).join("")}
                             </ul>
-                        `:""}
+                        ` : ""}
                     </div>
-                `,e.warnings&&e.warnings.length&&(s+=`
-                    <div class="mds-validation-warnings mds-animate-fade-in">
+                `;
+        }
+        if (validation.warnings && validation.warnings.length) {
+          html += `
+                    <div class="smg-validation-warnings smg-animate-fade-in">
                         <strong>Warnings:</strong>
                         <ul>
-                            ${e.warnings.map(n=>`<li>${n}</li>`).join("")}
+                            ${validation.warnings.map((warning) => `<li>${warning}</li>`).join("")}
                         </ul>
                     </div>
-                `),this.elements.validationStatus.innerHTML=s},async handleCopySchema(e){e.preventDefault();let s=e.target.closest(".mds-copy-schema"),n=this.elements.schemaPreview?.textContent;if(n)try{await navigator.clipboard.writeText(n);let t=s.innerHTML;s.innerHTML='<span class="dashicons dashicons-yes"></span> '+smgAdmin.strings.copied,s.classList.add("mds-btn-success"),setTimeout(()=>{s.innerHTML=t,s.classList.remove("mds-btn-success")},2e3),this.showToast(smgAdmin.strings.copied,"success")}catch(t){console.error("Copy failed:",t),this.showToast("Failed to copy","error")}},handleGoogleTest(e){e.preventDefault();let n=document.getElementById("mds-test-url")?.value||window.location.origin,t=`https://search.google.com/test/rich-results?url=${encodeURIComponent(n)}`;window.open(t,"_blank","noopener,noreferrer")},handleSchemaValidator(e){e.preventDefault();let n=document.getElementById("mds-validate-url")?.value||window.location.origin,t=`https://validator.schema.org/?url=${encodeURIComponent(n)}`;window.open(t,"_blank","noopener,noreferrer")},handleFormSubmit(e){let s=this.elements.settingsForm.querySelector('[type="submit"]');s&&s.classList.add("loading")},handleApplySuggestion(e){e.preventDefault();let s=e.target.closest(".mds-apply-suggestion"),n=s.dataset.pageId,t=s.dataset.schema,a=document.querySelector(`select[name="smg_page_mappings[${n}]"]`);if(a&&t){a.value=t;let i=s.closest(".mds-page-row");i.style.transition="background-color 0.3s ease",i.style.backgroundColor="var(--mds-success-50)",setTimeout(()=>{i.style.backgroundColor=""},1e3);let o=s.closest(".mds-col-suggestion");o.innerHTML=`
-                    <span class="mds-suggestion-applied">
+                `;
+        }
+        this.elements.validationStatus.innerHTML = html;
+      },
+      /**
+       * Handle copy schema
+       */
+      async handleCopySchema(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-copy-schema");
+        const schema = this.elements.schemaPreview?.textContent;
+        if (!schema)
+          return;
+        try {
+          await navigator.clipboard.writeText(schema);
+          const originalHtml = button.innerHTML;
+          button.innerHTML = '<span class="dashicons dashicons-yes"></span> ' + smgAdmin.strings.copied;
+          button.classList.add("smg-btn-success");
+          setTimeout(() => {
+            button.innerHTML = originalHtml;
+            button.classList.remove("smg-btn-success");
+          }, 2e3);
+          this.showToast(smgAdmin.strings.copied, "success");
+        } catch (error) {
+          console.error("Copy failed:", error);
+          this.showToast("Failed to copy", "error");
+        }
+      },
+      /**
+       * Handle Google test
+       */
+      handleGoogleTest(e) {
+        e.preventDefault();
+        const urlInput = document.getElementById("smg-test-url");
+        const url = urlInput?.value || window.location.origin;
+        const testUrl = `https://search.google.com/test/rich-results?url=${encodeURIComponent(url)}`;
+        window.open(testUrl, "_blank", "noopener,noreferrer");
+      },
+      /**
+       * Handle Schema validator
+       */
+      handleSchemaValidator(e) {
+        e.preventDefault();
+        const urlInput = document.getElementById("smg-validate-url");
+        const url = urlInput?.value || window.location.origin;
+        const testUrl = `https://validator.schema.org/?url=${encodeURIComponent(url)}`;
+        window.open(testUrl, "_blank", "noopener,noreferrer");
+      },
+      /**
+       * Handle form submit
+       */
+      handleFormSubmit(e) {
+        const submitBtn = this.elements.settingsForm.querySelector('[type="submit"]');
+        if (submitBtn) {
+          submitBtn.classList.add("loading");
+        }
+      },
+      /**
+       * Handle apply suggestion button click (Pages tab)
+       */
+      handleApplySuggestion(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-apply-suggestion");
+        const pageId = button.dataset.pageId;
+        const schema = button.dataset.schema;
+        const select = document.querySelector(`select[name="smg_page_mappings[${pageId}]"]`);
+        if (select && schema) {
+          select.value = schema;
+          const row = button.closest(".smg-page-row");
+          row.style.transition = "background-color 0.3s ease";
+          row.style.backgroundColor = "var(--smg-success-50)";
+          setTimeout(() => {
+            row.style.backgroundColor = "";
+          }, 1e3);
+          const cell = button.closest(".smg-col-suggestion");
+          cell.innerHTML = `
+                    <span class="smg-suggestion-applied">
                         <span class="dashicons dashicons-yes-alt"></span>
                     </span>
-                `,a.dispatchEvent(new Event("change",{bubbles:!0}))}},handlePaginationInput(e){e.preventDefault();let s=e.target,n=s.dataset.baseUrl,t=parseInt(s.value,10),a=parseInt(s.max,10);t&&t>=1&&t<=a&&n&&(window.location.href=`${n}&paged=${t}`)},handleTogglePassword(e){e.preventDefault();let s=e.target.closest(".mds-toggle-password"),n=s.dataset.target,t=document.getElementById(n),a=s.querySelector(".dashicons");t&&(t.type==="password"?(t.type="text",a.classList.remove("dashicons-visibility"),a.classList.add("dashicons-hidden")):(t.type="password",a.classList.remove("dashicons-hidden"),a.classList.add("dashicons-visibility")))},handleRemoveToken(e){if(e.preventDefault(),!confirm("Are you sure you want to remove the GitHub token?"))return;let s=document.getElementById("smg_github_token");if(s){s.value="";let n=document.querySelector(".mds-token-status");n&&n.remove();let t=document.getElementById("mds-remove-token");t&&(t.style.display="none"),this.showToast("Token will be removed when you save settings","info")}},async handleCheckUpdates(e){e.preventDefault();let s=e.target.closest("#mds-check-updates"),n=document.getElementById("mds-update-result");s.disabled=!0;let t=s.innerHTML;s.innerHTML='<span class="dashicons dashicons-update mds-spin"></span> Checking...',n&&(n.style.display="none");try{let a=new FormData;a.append("action","smg_check_updates"),a.append("nonce",typeof smgAdmin<"u"?smgAdmin.nonce:"");let o=await(await fetch(typeof smgAdmin<"u"?smgAdmin.ajaxUrl:ajaxurl,{method:"POST",body:a,credentials:"same-origin"})).json();n&&(n.style.display="block",o.success?o.data.update_available?(n.className="mds-update-result mds-result-success",n.innerHTML=`
+                `;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      },
+      /**
+       * Handle pagination input (Pages tab)
+       */
+      handlePaginationInput(e) {
+        e.preventDefault();
+        const input = e.target;
+        const baseUrl = input.dataset.baseUrl;
+        const page = parseInt(input.value, 10);
+        const max = parseInt(input.max, 10);
+        if (page && page >= 1 && page <= max && baseUrl) {
+          window.location.href = `${baseUrl}&paged=${page}`;
+        }
+      },
+      /**
+       * Handle toggle password visibility (Update tab)
+       */
+      handleTogglePassword(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-toggle-password");
+        const targetId = button.dataset.target;
+        const input = document.getElementById(targetId);
+        const icon = button.querySelector(".dashicons");
+        if (!input)
+          return;
+        if (input.type === "password") {
+          input.type = "text";
+          icon.classList.remove("dashicons-visibility");
+          icon.classList.add("dashicons-hidden");
+        } else {
+          input.type = "password";
+          icon.classList.remove("dashicons-hidden");
+          icon.classList.add("dashicons-visibility");
+        }
+      },
+      /**
+       * Handle remove token (Update tab)
+       */
+      handleRemoveToken(e) {
+        e.preventDefault();
+        if (!confirm("Are you sure you want to remove the GitHub token?")) {
+          return;
+        }
+        const tokenInput = document.getElementById("smg_github_token");
+        if (tokenInput) {
+          tokenInput.value = "";
+          const statusElement = document.querySelector(".smg-token-status");
+          if (statusElement) {
+            statusElement.remove();
+          }
+          const removeButton = document.getElementById("smg-remove-token");
+          if (removeButton) {
+            removeButton.style.display = "none";
+          }
+          this.showToast("Token will be removed when you save settings", "info");
+        }
+      },
+      /**
+       * Handle check for updates (Update tab)
+       */
+      async handleCheckUpdates(e) {
+        e.preventDefault();
+        const button = e.target.closest("#smg-check-updates");
+        const resultDiv = document.getElementById("smg-update-result");
+        button.disabled = true;
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<span class="dashicons dashicons-update smg-spin"></span> Checking...';
+        if (resultDiv) {
+          resultDiv.style.display = "none";
+        }
+        try {
+          const formData = new FormData();
+          formData.append("action", "smg_check_updates");
+          formData.append("nonce", typeof smgAdmin !== "undefined" ? smgAdmin.nonce : "");
+          const response = await fetch(typeof smgAdmin !== "undefined" ? smgAdmin.ajaxUrl : ajaxurl, {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+          });
+          const data = await response.json();
+          if (resultDiv) {
+            resultDiv.style.display = "block";
+            if (data.success) {
+              if (data.data.update_available) {
+                resultDiv.className = "smg-update-result smg-result-success";
+                resultDiv.innerHTML = `
                                 <span class="dashicons dashicons-yes-alt"></span>
-                                New version available: <strong>${o.data.new_version}</strong>
-                                <a href="${o.data.update_url}" class="mds-btn mds-btn-sm mds-btn-primary" style="margin-left: 10px;">Update Now</a>
-                            `):(n.className="mds-update-result mds-result-info",n.innerHTML=`
+                                New version available: <strong>${data.data.new_version}</strong>
+                                <a href="${data.data.update_url}" class="smg-btn smg-btn-sm smg-btn-primary" style="margin-left: 10px;">Update Now</a>
+                            `;
+              } else {
+                resultDiv.className = "smg-update-result smg-result-info";
+                resultDiv.innerHTML = `
                                 <span class="dashicons dashicons-yes"></span>
                                 You have the latest version installed.
-                            `):(n.className="mds-update-result mds-result-error",n.innerHTML=`
+                            `;
+              }
+            } else {
+              resultDiv.className = "smg-update-result smg-result-error";
+              resultDiv.innerHTML = `
                             <span class="dashicons dashicons-warning"></span>
-                            ${o.data?.message||"Could not check for updates."}
-                        `))}catch(a){console.error("Update check failed:",a),n&&(n.style.display="block",n.className="mds-update-result mds-result-error",n.innerHTML=`
+                            ${data.data?.message || "Could not check for updates."}
+                        `;
+            }
+          }
+        } catch (error) {
+          console.error("Update check failed:", error);
+          if (resultDiv) {
+            resultDiv.style.display = "block";
+            resultDiv.className = "smg-update-result smg-result-error";
+            resultDiv.innerHTML = `
                         <span class="dashicons dashicons-warning"></span>
                         Failed to check for updates. Please try again.
-                    `)}finally{s.disabled=!1,s.innerHTML=t}},animateToggle(e){let s=e.closest(".mds-toggle");s&&(s.style.transform="scale(0.95)",setTimeout(()=>{s.style.transform="scale(1)"},100))},initTooltips(){},initCollapsibles(){document.querySelectorAll(".mds-meta-box-panel-header").forEach(e=>{e.addEventListener("click",()=>{e.closest(".mds-meta-box-panel").classList.toggle("collapsed")})})},slideUp(e){e.style.height=e.scrollHeight+"px",e.offsetHeight,e.style.transition=`height ${this.config.animationDuration}ms ease`,e.style.height="0",e.style.overflow="hidden",setTimeout(()=>{e.style.display="none",e.style.height="",e.style.overflow="",e.style.transition=""},this.config.animationDuration)},slideDown(e){e.style.display="block",e.style.height="0",e.style.overflow="hidden",e.offsetHeight;let s=e.scrollHeight;e.style.transition=`height ${this.config.animationDuration}ms ease`,e.style.height=s+"px",setTimeout(()=>{e.style.height="",e.style.overflow="",e.style.transition=""},this.config.animationDuration)},showToast(e,s="info"){let n=document.createElement("div");n.className=`mds-toast mds-toast-${s} mds-animate-slide-in-right`,n.innerHTML=`
-                <span class="dashicons dashicons-${s==="success"?"yes-alt":s==="error"?"warning":"info"}"></span>
-                ${e}
-            `;let t=document.querySelector(".mds-toast-container");t||(t=document.createElement("div"),t.className="mds-toast-container",t.style.cssText="position: fixed; top: 50px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;",document.body.appendChild(t)),t.appendChild(n),setTimeout(()=>{n.style.opacity="0",n.style.transform="translateX(20px)",setTimeout(()=>n.remove(),300)},this.config.toastDuration)},debounce(e,s){let n;return function(...a){let i=()=>{clearTimeout(n),e(...a)};clearTimeout(n),n=setTimeout(i,s)}}};document.readyState==="loading"?document.addEventListener("DOMContentLoaded",()=>r.init()):r.init(),window.SMGAdmin=r})();})();
+                    `;
+          }
+        } finally {
+          button.disabled = false;
+          button.innerHTML = originalHtml;
+        }
+      },
+      /**
+       * Animate toggle switch
+       */
+      animateToggle(input) {
+        const toggle = input.closest(".smg-toggle");
+        if (toggle) {
+          toggle.style.transform = "scale(0.95)";
+          setTimeout(() => {
+            toggle.style.transform = "scale(1)";
+          }, 100);
+        }
+      },
+      /**
+       * Initialize tooltips
+       */
+      initTooltips() {
+      },
+      /**
+       * Initialize collapsible panels
+       */
+      initCollapsibles() {
+        document.querySelectorAll(".smg-meta-box-panel-header").forEach((header) => {
+          header.addEventListener("click", () => {
+            const panel = header.closest(".smg-meta-box-panel");
+            panel.classList.toggle("collapsed");
+          });
+        });
+      },
+      /**
+       * Slide up animation
+       */
+      slideUp(element) {
+        element.style.height = element.scrollHeight + "px";
+        element.offsetHeight;
+        element.style.transition = `height ${this.config.animationDuration}ms ease`;
+        element.style.height = "0";
+        element.style.overflow = "hidden";
+        setTimeout(() => {
+          element.style.display = "none";
+          element.style.height = "";
+          element.style.overflow = "";
+          element.style.transition = "";
+        }, this.config.animationDuration);
+      },
+      /**
+       * Slide down animation
+       */
+      slideDown(element) {
+        element.style.display = "block";
+        element.style.height = "0";
+        element.style.overflow = "hidden";
+        element.offsetHeight;
+        const height = element.scrollHeight;
+        element.style.transition = `height ${this.config.animationDuration}ms ease`;
+        element.style.height = height + "px";
+        setTimeout(() => {
+          element.style.height = "";
+          element.style.overflow = "";
+          element.style.transition = "";
+        }, this.config.animationDuration);
+      },
+      /**
+       * Show toast notification
+       */
+      showToast(message, type = "info") {
+        const toast = document.createElement("div");
+        toast.className = `smg-toast smg-toast-${type} smg-animate-slide-in-right`;
+        toast.innerHTML = `
+                <span class="dashicons dashicons-${type === "success" ? "yes-alt" : type === "error" ? "warning" : "info"}"></span>
+                ${message}
+            `;
+        let container = document.querySelector(".smg-toast-container");
+        if (!container) {
+          container = document.createElement("div");
+          container.className = "smg-toast-container";
+          container.style.cssText = "position: fixed; top: 50px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;";
+          document.body.appendChild(container);
+        }
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          toast.style.transform = "translateX(20px)";
+          setTimeout(() => toast.remove(), 300);
+        }, this.config.toastDuration);
+      },
+      /**
+       * Debounce utility
+       */
+      debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+    };
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => SMGAdmin.init());
+    } else {
+      SMGAdmin.init();
+    }
+    window.SMGAdmin = SMGAdmin;
+  })();
+})();

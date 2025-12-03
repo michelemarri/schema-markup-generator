@@ -178,6 +178,7 @@ class Plugin
             add_action('admin_menu', [$this->services['settings_page'], 'addMenuPage']);
             add_action('admin_init', [$this->services['settings_page'], 'registerSettings']);
             add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
+            add_action('admin_enqueue_scripts', [$this, 'deregisterThirdPartyStyles'], 999);
             add_action('add_meta_boxes', [$this->services['metabox'], 'register']);
             add_action('save_post', [$this->services['metabox'], 'save'], 10, 2);
             add_action('wp_ajax_smg_preview_schema', [$this->services['preview_handler'], 'handle']);
@@ -213,28 +214,28 @@ class Plugin
 
         // Enqueue Inter font for modern typography
         wp_enqueue_style(
-            'mds-fonts',
+            'smg-fonts',
             'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap',
             [],
             null
         );
 
         wp_enqueue_style(
-            'mds-admin',
+            'smg-admin',
             SMG_PLUGIN_URL . 'assets/css/admin.css',
-            ['mds-fonts'],
+            ['smg-fonts'],
             SMG_VERSION
         );
 
         wp_enqueue_script(
-            'mds-admin',
+            'smg-admin',
             SMG_PLUGIN_URL . 'assets/js/admin.js',
             [], // No jQuery dependency - pure ES6
             SMG_VERSION,
             true
         );
 
-        wp_localize_script('mds-admin', 'smgAdmin', [
+        wp_localize_script('smg-admin', 'smgAdmin', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('smg_admin_nonce'),
             'isSettingsPage' => $isSettingsPage,
@@ -273,6 +274,105 @@ class Plugin
         $defaultTypes = ['post', 'page'];
         
         return in_array($post->post_type, $defaultTypes, true);
+    }
+
+    /**
+     * Deregister third-party plugin styles on our settings page
+     * 
+     * This prevents CSS conflicts from other poorly-coded plugins
+     * that load their styles globally instead of only on their pages.
+     * Only runs on settings page, not on post edit screens.
+     */
+    public function deregisterThirdPartyStyles(string $hook): void
+    {
+        // Only run on our settings page (not post edit screens)
+        if ($hook !== 'settings_page_schema-markup-generator') {
+            return;
+        }
+
+        global $wp_styles;
+        
+        if (!($wp_styles instanceof \WP_Styles)) {
+            return;
+        }
+
+        // WordPress core handle prefixes to always keep
+        $wpCorePrefixes = [
+            'wp-',
+            'admin-',
+            'common',
+            'dashicons',
+            'buttons',
+            'forms',
+            'l10n',
+            'list-tables',
+            'edit',
+            'media',
+            'nav-menus',
+            'widgets',
+            'site-icon',
+            'colors',
+            'ie',
+            'thickbox',
+            'farbtastic',
+            'jcrop',
+            'imgareaselect',
+            'jquery-ui',
+        ];
+
+        // Our plugin handle prefixes (whitelist)
+        $ourPrefixes = [
+            'smg-', // Schema Markup Generator
+        ];
+
+        /**
+         * Filter to add additional style handle prefixes to whitelist
+         * 
+         * @param array $prefixes Array of handle prefixes to keep
+         * @param string $hook Current admin page hook
+         */
+        $ourPrefixes = apply_filters('smg_allowed_style_prefixes', $ourPrefixes, $hook);
+
+        foreach ($wp_styles->registered as $handle => $style) {
+            // Skip inline styles (src = true means inline/no external file)
+            $src = $style->src ?? '';
+            if ($src === true || $src === '') {
+                continue;
+            }
+
+            // Auto-detect WordPress core styles by file path
+            if (is_string($src) && (str_contains($src, '/wp-admin/') || str_contains($src, '/wp-includes/'))) {
+                continue;
+            }
+
+            // Skip WordPress core handles by prefix
+            $isWpCore = false;
+            foreach ($wpCorePrefixes as $prefix) {
+                if (str_starts_with($handle, $prefix)) {
+                    $isWpCore = true;
+                    break;
+                }
+            }
+            if ($isWpCore) {
+                continue;
+            }
+
+            // Skip our plugin handles
+            $isOurs = false;
+            foreach ($ourPrefixes as $prefix) {
+                if (str_starts_with($handle, $prefix)) {
+                    $isOurs = true;
+                    break;
+                }
+            }
+            if ($isOurs) {
+                continue;
+            }
+
+            // Dequeue and deregister third-party styles
+            wp_dequeue_style($handle);
+            wp_deregister_style($handle);
+        }
     }
 
     /**

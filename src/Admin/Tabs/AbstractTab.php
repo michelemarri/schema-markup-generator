@@ -91,10 +91,10 @@ abstract class AbstractTab
     protected function renderSection(string $title, string $description = ''): void
     {
         ?>
-        <div class="mds-section">
-            <h2 class="mds-section-title"><?php echo esc_html($title); ?></h2>
+        <div class="smg-section">
+            <h2 class="smg-section-title"><?php echo esc_html($title); ?></h2>
             <?php if ($description): ?>
-                <p class="mds-section-description"><?php echo esc_html($description); ?></p>
+                <p class="smg-section-description"><?php echo esc_html($description); ?></p>
             <?php endif; ?>
         </div>
         <?php
@@ -106,14 +106,14 @@ abstract class AbstractTab
     protected function renderCard(string $title, callable $content, string $icon = ''): void
     {
         ?>
-        <div class="mds-card">
-            <div class="mds-card-header">
+        <div class="smg-card">
+            <div class="smg-card-header">
                 <?php if ($icon): ?>
                     <span class="dashicons <?php echo esc_attr($icon); ?>"></span>
                 <?php endif; ?>
                 <h3><?php echo esc_html($title); ?></h3>
             </div>
-            <div class="mds-card-body">
+            <div class="smg-card-body">
                 <?php $content(); ?>
             </div>
         </div>
@@ -126,18 +126,18 @@ abstract class AbstractTab
     protected function renderToggle(string $name, bool $checked, string $label, string $description = ''): void
     {
         ?>
-        <div class="mds-field mds-field-toggle">
-            <label class="mds-toggle">
+        <div class="smg-field smg-field-toggle">
+            <label class="smg-toggle">
                 <input type="checkbox"
                        name="<?php echo esc_attr($name); ?>"
                        value="1"
                        <?php checked($checked); ?>>
-                <span class="mds-toggle-slider"></span>
+                <span class="smg-toggle-slider"></span>
             </label>
-            <div class="mds-field-content">
-                <span class="mds-field-label"><?php echo esc_html($label); ?></span>
+            <div class="smg-field-content">
+                <span class="smg-field-label"><?php echo esc_html($label); ?></span>
                 <?php if ($description): ?>
-                    <span class="mds-field-description"><?php echo esc_html($description); ?></span>
+                    <span class="smg-field-description"><?php echo esc_html($description); ?></span>
                 <?php endif; ?>
             </div>
         </div>
@@ -150,11 +150,11 @@ abstract class AbstractTab
     protected function renderSelect(string $name, array $options, string $selected, string $label, string $description = ''): void
     {
         ?>
-        <div class="mds-field mds-field-select">
-            <label class="mds-field-label" for="<?php echo esc_attr($name); ?>">
+        <div class="smg-field smg-field-select">
+            <label class="smg-field-label" for="<?php echo esc_attr($name); ?>">
                 <?php echo esc_html($label); ?>
             </label>
-            <select name="<?php echo esc_attr($name); ?>" id="<?php echo esc_attr($name); ?>" class="mds-select">
+            <select name="<?php echo esc_attr($name); ?>" id="<?php echo esc_attr($name); ?>" class="smg-select">
                 <?php foreach ($options as $value => $optionLabel): ?>
                     <option value="<?php echo esc_attr($value); ?>" <?php selected($selected, $value); ?>>
                         <?php echo esc_html($optionLabel); ?>
@@ -162,7 +162,7 @@ abstract class AbstractTab
                 <?php endforeach; ?>
             </select>
             <?php if ($description): ?>
-                <span class="mds-field-description"><?php echo esc_html($description); ?></span>
+                <span class="smg-field-description"><?php echo esc_html($description); ?></span>
             <?php endif; ?>
         </div>
         <?php
@@ -174,8 +174,8 @@ abstract class AbstractTab
     protected function renderTextField(string $name, string $value, string $label, string $description = '', string $placeholder = ''): void
     {
         ?>
-        <div class="mds-field mds-field-text">
-            <label class="mds-field-label" for="<?php echo esc_attr($name); ?>">
+        <div class="smg-field smg-field-text">
+            <label class="smg-field-label" for="<?php echo esc_attr($name); ?>">
                 <?php echo esc_html($label); ?>
             </label>
             <input type="text"
@@ -183,9 +183,9 @@ abstract class AbstractTab
                    id="<?php echo esc_attr($name); ?>"
                    value="<?php echo esc_attr($value); ?>"
                    placeholder="<?php echo esc_attr($placeholder); ?>"
-                   class="mds-input">
+                   class="smg-input">
             <?php if ($description): ?>
-                <span class="mds-field-description"><?php echo esc_html($description); ?></span>
+                <span class="smg-field-description"><?php echo esc_html($description); ?></span>
             <?php endif; ?>
         </div>
         <?php
@@ -197,8 +197,8 @@ abstract class AbstractTab
     protected function renderNumberField(string $name, int $value, string $label, string $description = '', int $min = 0, int $max = 0): void
     {
         ?>
-        <div class="mds-field mds-field-number">
-            <label class="mds-field-label" for="<?php echo esc_attr($name); ?>">
+        <div class="smg-field smg-field-number">
+            <label class="smg-field-label" for="<?php echo esc_attr($name); ?>">
                 <?php echo esc_html($label); ?>
             </label>
             <input type="number"
@@ -207,9 +207,9 @@ abstract class AbstractTab
                    value="<?php echo esc_attr((string) $value); ?>"
                    <?php if ($min > 0): ?>min="<?php echo esc_attr((string) $min); ?>"<?php endif; ?>
                    <?php if ($max > 0): ?>max="<?php echo esc_attr((string) $max); ?>"<?php endif; ?>
-                   class="mds-input mds-input-number">
+                   class="smg-input smg-input-number">
             <?php if ($description): ?>
-                <span class="mds-field-description"><?php echo esc_html($description); ?></span>
+                <span class="smg-field-description"><?php echo esc_html($description); ?></span>
             <?php endif; ?>
         </div>
         <?php

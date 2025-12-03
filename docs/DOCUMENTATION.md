@@ -12,7 +12,8 @@ Complete documentation for the Schema Markup Generator WordPress plugin.
 6. [MemberPress Courses Integration](#memberpress-courses-integration)
 7. [Caching](#caching)
 8. [REST API](#rest-api)
-9. [Troubleshooting](#troubleshooting)
+9. [Import/Export](#importexport)
+10. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -35,47 +36,14 @@ Complete documentation for the Schema Markup Generator WordPress plugin.
 
 The plugin includes automatic update functionality from GitHub. When a new release is published, you'll see an update notification in your WordPress admin.
 
+**No configuration required!** The repository is public, so updates work automatically without any authentication.
+
 #### Update Settings
 
 Navigate to **Settings → Schema Markup → Update** to configure:
 
 - **Current Version**: See installed version and last update check
-- **GitHub Authentication**: Required for private repositories
 - **Auto-Update**: Enable automatic updates when new versions are available
-
-#### Private Repository Configuration
-
-For private GitHub repositories, you need to provide a GitHub Personal Access Token (PAT).
-
-**Method 1: wp-config.php (Recommended)**
-
-The most secure method. Add to your `wp-config.php`:
-
-```php
-define('SMG_GITHUB_TOKEN', 'ghp_xxxxxxxxxxxx');
-```
-
-**Method 2: Admin Settings**
-
-Go to Settings → Schema Markup → Update and enter your token. It will be encrypted using AES-256-CBC before being stored in the database.
-
-**Method 3: Filter**
-
-Use the `smg_github_token` filter for dynamic token retrieval:
-
-```php
-add_filter('smg_github_token', function() {
-    return getenv('GITHUB_TOKEN');
-});
-```
-
-#### Creating a GitHub Token
-
-1. Go to [GitHub Settings → Personal Access Tokens](https://github.com/settings/tokens?type=beta)
-2. Click "Generate new token"
-3. Select the repository
-4. Set permissions: **Contents** (Read-only) and **Metadata** (Read-only)
-5. Generate and copy the token
 
 ---
 
@@ -499,6 +467,102 @@ Optional: Clear cache for specific post:
 ```json
 {
     "post_id": 123
+}
+```
+
+---
+
+## Import/Export
+
+The Import/Export feature allows you to backup settings or transfer them between sites.
+
+### Export Settings
+
+Navigate to **Settings → Schema Markup → Tools** to export:
+
+1. Select options:
+   - **Include post type mappings**: Include schema-to-post-type assignments
+   - **Include field mappings**: Include custom field mappings
+2. Click **Export Settings**
+3. A JSON file will be downloaded
+
+#### Export Format (v2.0)
+
+The export uses auto-discovery, meaning all options with `smg_` prefix are automatically included:
+
+```json
+{
+    "export_format": "2.0",
+    "plugin_version": "1.8.0",
+    "exported_at": "2024-01-15T12:00:00+00:00",
+    "site_url": "https://example.com/",
+    "options": {
+        "smg_general_settings": { ... },
+        "smg_advanced_settings": { ... },
+        "smg_post_type_mappings": { ... },
+        "smg_field_mappings": { ... },
+        ...
+    }
+}
+```
+
+#### What's Included
+
+- General settings (enabled, WebSite schema, breadcrumbs)
+- Advanced settings
+- Integration settings
+- Post type mappings (which schema type for each post type)
+- Page mappings (specific page settings)
+- Field mappings (custom field to schema property)
+
+#### What's Excluded (Security)
+
+For security reasons, the following are **never** exported:
+
+- GitHub tokens (encrypted or plain)
+- API keys and secrets
+- Any sensitive authentication data
+
+### Import Settings
+
+1. Navigate to **Settings → Schema Markup → Tools**
+2. Click **Choose File** and select a previously exported JSON file
+3. Select options:
+   - **Create backup before importing**: Saves current settings to `smg_settings_backup`
+   - **Merge with existing settings**: Combines imported settings with current ones
+4. Click **Import Settings**
+
+#### Backward Compatibility
+
+The importer supports both:
+
+- **v2.0 format**: New auto-discovery format
+- **v1.0 format**: Legacy format from older exports
+
+Old exports will be imported correctly and converted to the new format when re-exported.
+
+#### Programmatic Export/Import
+
+```php
+use Metodo\SchemaMarkupGenerator\Tools\Exporter;
+use Metodo\SchemaMarkupGenerator\Tools\Importer;
+
+// Export
+$exporter = new Exporter();
+$data = $exporter->export(
+    includeMappings: true,
+    includeFieldMappings: true
+);
+
+// Get list of exportable options
+$options = $exporter->getExportableOptions();
+
+// Validate before import
+$importer = new Importer();
+$validation = $importer->validate($data);
+
+if ($validation['valid']) {
+    $importer->import($data, mergeExisting: false);
 }
 ```
 

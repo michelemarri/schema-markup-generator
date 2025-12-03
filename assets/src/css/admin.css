@@ -1,11 +1,1282 @@
 /**
  * Schema Markup Generator - Admin Styles
  * 
- * Uses Metodo Design System for all components.
+ * Built with Tailwind CSS
+ * Theme: Black & White + Accent Orange (#ff5f01)
  * 
  * @package Metodo\SchemaMarkupGenerator
  * @author  Michele Marri <plugins@metodo.dev>
  */
 
-/* Import the complete Metodo Design System */
-@import 'metodo-design-system/src/index.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================
+   Base Overrides for WP Admin
+   ======================================== */
+
+.smg-wrap {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  max-width: 1280px;
+  margin: 20px auto;
+  padding: 0 24px;
+}
+
+.smg-wrap *,
+.smg-wrap *::before,
+.smg-wrap *::after {
+  box-sizing: border-box;
+}
+
+/* Border reset with zero specificity - Tailwind classes will override */
+:where(.smg-wrap) *,
+:where(.smg-wrap) *::before,
+:where(.smg-wrap) *::after {
+  border-style: solid;
+  border-width: 0;
+}
+
+.smg-wrap a {
+  color: #171717;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.smg-wrap a:hover {
+  color: #ff5f01;
+}
+
+/* ========================================
+   Hero Component
+   ======================================== */
+
+.smg-hero {
+  @apply relative w-full h-48 rounded-xl overflow-hidden shadow-lg;
+}
+
+.smg-hero-banner {
+  @apply w-full h-full object-cover object-center;
+}
+
+.smg-hero-overlay {
+  @apply absolute inset-0 flex flex-col justify-center p-8;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.4));
+}
+
+.smg-hero-title {
+  @apply text-3xl font-bold text-white mb-2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.smg-hero-description {
+  @apply text-lg text-white/90 max-w-xl;
+}
+
+.smg-hero-version {
+  @apply absolute top-4 right-4 px-3 py-1 text-sm font-semibold text-white rounded-full;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ========================================
+   Logo Component
+   ======================================== */
+
+.smg-logo {
+  @apply flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-xl shadow-lg;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.smg-logo:hover {
+  transform: scale(1.05);
+  @apply shadow-xl;
+}
+
+/* ========================================
+   Tabs Navigation
+   ======================================== */
+
+.smg-tabs-nav {
+  @apply flex flex-wrap gap-1 p-1 bg-gray-100 rounded-lg;
+}
+
+.smg-tab-link {
+  @apply flex items-center gap-2 px-5 py-3 text-sm font-medium text-gray-500 rounded whitespace-nowrap;
+  transition: all 200ms ease;
+}
+
+.smg-tab-link:hover {
+  @apply bg-white text-gray-900;
+}
+
+.smg-tab-link.active {
+  @apply bg-white text-gray-900 shadow-sm;
+}
+
+.smg-tab-link .dashicons {
+  @apply text-lg;
+  line-height: 1;
+  transition: transform 200ms ease;
+}
+
+.smg-tab-link:hover .dashicons {
+  transform: scale(1.1);
+}
+
+.smg-tab-content {
+  @apply bg-white border border-gray-200 rounded-xl shadow p-8;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ========================================
+   Card Component
+   ======================================== */
+
+.smg-card {
+  @apply bg-white border border-gray-200 rounded-lg overflow-hidden;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.smg-card:hover {
+  @apply border-gray-300 shadow;
+}
+
+.smg-card-header {
+  @apply flex items-center gap-3 px-6 py-5 border-b border-gray-200;
+  background: linear-gradient(to bottom, #fafafa, #f5f5f5);
+}
+
+.smg-card-header h3 {
+  @apply text-base font-semibold m-0;
+}
+
+.smg-card-header .dashicons {
+  @apply text-gray-900;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.smg-card-body {
+  @apply p-6;
+}
+
+.smg-card-footer {
+  @apply px-6 py-4 bg-gray-50 border-t border-gray-200;
+}
+
+/* ========================================
+   Toggle Switch
+   ======================================== */
+
+.smg-toggle {
+  @apply cursor-pointer;
+}
+
+.smg-toggle input {
+  @apply absolute opacity-0 w-0 h-0;
+}
+
+.smg-toggle-slider {
+  @apply relative inline-block w-12 h-7 rounded-full bg-gray-300 transition-all duration-200 flex-shrink-0;
+}
+
+.smg-toggle-slider::before {
+  content: '';
+  @apply absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200;
+}
+
+.smg-toggle input:checked+.smg-toggle-slider {
+  @apply bg-gray-800;
+}
+
+.smg-toggle input:checked+.smg-toggle-slider::before {
+  transform: translateX(20px);
+}
+
+.smg-toggle:hover .smg-toggle-slider {
+  @apply bg-gray-400;
+}
+
+.smg-toggle input:checked+.smg-toggle-slider:hover {
+  @apply bg-gray-700;
+}
+
+/* ========================================
+   Form Fields
+   ======================================== */
+
+.smg-field {
+  @apply mb-6;
+}
+
+.smg-field:last-child {
+  @apply mb-0;
+}
+
+.smg-field-label {
+  @apply block text-sm font-semibold text-gray-900 mb-2;
+}
+
+.smg-field-description {
+  @apply block text-sm text-gray-500 mt-2 leading-relaxed;
+}
+
+.smg-input {
+  @apply w-full max-w-md px-4 py-3 text-sm bg-white border border-gray-200 rounded text-gray-900;
+  transition: all 200ms ease;
+}
+
+.smg-input:hover {
+  @apply border-gray-300;
+}
+
+.smg-input:focus {
+  @apply border-gray-900 outline-none;
+  box-shadow: 0 0 0 3px rgba(23, 23, 23, 0.1);
+}
+
+.smg-input::placeholder {
+  @apply text-gray-400;
+}
+
+.smg-input-number {
+  @apply max-w-[160px];
+}
+
+.smg-select {
+  @apply w-full max-w-md px-4 py-3 text-sm bg-white border border-gray-200 rounded text-gray-900 cursor-pointer appearance-none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  padding-right: 40px;
+  transition: all 200ms ease;
+}
+
+.smg-select:hover {
+  @apply border-gray-300;
+}
+
+.smg-select:focus {
+  @apply border-gray-900 outline-none;
+  box-shadow: 0 0 0 3px rgba(23, 23, 23, 0.1);
+}
+
+.smg-textarea {
+  @apply w-full px-4 py-3 text-sm bg-white border border-gray-200 rounded text-gray-900 resize-y min-h-[120px];
+  transition: all 200ms ease;
+}
+
+.smg-textarea:focus {
+  @apply border-gray-900 outline-none;
+  box-shadow: 0 0 0 3px rgba(23, 23, 23, 0.1);
+}
+
+.smg-checkbox-label {
+  @apply inline-flex items-center gap-3 text-sm text-gray-900 cursor-pointer select-none;
+}
+
+.smg-checkbox-label input[type="checkbox"] {
+  @apply w-[18px] h-[18px] m-0 cursor-pointer rounded;
+  accent-color: #171717;
+}
+
+.smg-file-input input[type="file"] {
+  @apply block w-full text-sm text-gray-500 cursor-pointer;
+  @apply file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200;
+}
+
+/* Field toggle layout */
+.smg-field-toggle {
+  @apply flex items-start gap-4;
+}
+
+.smg-field-content {
+  @apply flex-1;
+}
+
+.smg-field-content .smg-field-label {
+  @apply mb-1;
+}
+
+/* ========================================
+   Buttons
+   ======================================== */
+
+.smg-btn {
+  @apply inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-medium rounded cursor-pointer whitespace-nowrap select-none;
+  border: 1px solid transparent;
+  transition: all 200ms ease;
+}
+
+.smg-btn:focus-visible {
+  @apply outline-2 outline-gray-900 outline-offset-2;
+}
+
+.smg-btn:disabled {
+  @apply opacity-60 cursor-not-allowed;
+}
+
+.smg-btn .dashicons {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.smg-btn-primary {
+  @apply bg-gray-900 text-white;
+  background: linear-gradient(135deg, #404040, #171717);
+  border-color: #171717;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.smg-btn-primary:hover {
+  background: linear-gradient(135deg, #525252, #262626);
+  transform: translateY(-1px);
+  @apply shadow-lg;
+}
+
+.smg-btn-secondary {
+  @apply bg-white text-gray-900 border-gray-200;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.smg-btn-secondary:hover {
+  @apply bg-gray-50 border-gray-300 shadow-sm;
+}
+
+.smg-btn-danger {
+  @apply text-white;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-color: #dc2626;
+}
+
+.smg-btn-danger:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.smg-btn-ghost {
+  @apply bg-transparent text-gray-500;
+}
+
+.smg-btn-ghost:hover {
+  @apply bg-gray-100 text-gray-900;
+}
+
+.smg-btn-sm {
+  @apply px-3 py-2 text-xs;
+}
+
+.smg-btn-sm .dashicons {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.smg-btn-icon {
+  @apply p-2 min-w-[36px] min-h-[36px];
+}
+
+/* WordPress button overrides */
+.smg-wrap .button.button-primary {
+  @apply bg-gray-900 text-white rounded font-medium;
+  background: linear-gradient(135deg, #404040, #171717) !important;
+  border-color: #171717 !important;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  height: auto !important;
+  padding: 12px 20px !important;
+  transition: all 200ms ease !important;
+}
+
+.smg-wrap .button.button-primary:hover {
+  background: linear-gradient(135deg, #525252, #262626) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.smg-wrap .button:not(.button-primary) {
+  @apply bg-white rounded;
+  border-color: #e5e5e5 !important;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+  transition: all 200ms ease !important;
+}
+
+.smg-wrap .button:not(.button-primary):hover {
+  @apply bg-gray-50;
+  border-color: #d4d4d4 !important;
+}
+
+/* ========================================
+   Badges
+   ======================================== */
+
+.smg-badge {
+  @apply inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap;
+}
+
+.smg-badge .dashicons {
+  font-size: 12px;
+  width: 12px;
+  height: 12px;
+}
+
+.smg-badge-primary {
+  @apply bg-gray-100 text-gray-700;
+}
+
+.smg-badge-success {
+  @apply bg-green-100 text-green-700;
+}
+
+.smg-badge-warning {
+  @apply bg-amber-100 text-amber-700;
+}
+
+.smg-badge-error {
+  @apply bg-red-100 text-red-700;
+}
+
+.smg-badge-neutral {
+  @apply bg-gray-100 text-gray-600;
+}
+
+.smg-status-badge {
+  @apply inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-full;
+}
+
+.smg-status-badge.active {
+  @apply text-white;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.3);
+}
+
+.smg-status-badge.inactive {
+  @apply bg-white text-gray-500 border border-gray-300;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+/* ========================================
+   Alerts & Notices
+   ======================================== */
+
+.smg-alert {
+  @apply flex items-start gap-4 p-5 rounded-lg text-sm leading-relaxed;
+}
+
+.smg-alert .dashicons {
+  @apply flex-shrink-0 mt-[-2px];
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.smg-alert>div {
+  @apply flex-1;
+}
+
+.smg-alert strong {
+  @apply block text-base font-semibold mb-2;
+}
+
+.smg-alert p {
+  @apply m-0 opacity-90;
+}
+
+.smg-alert-info {
+  @apply bg-blue-50 border border-blue-200 text-blue-800;
+}
+
+.smg-alert-info .dashicons {
+  @apply text-blue-600;
+}
+
+.smg-alert-success {
+  @apply bg-green-50 border border-green-200 text-green-700;
+}
+
+.smg-alert-success .dashicons {
+  @apply text-green-600;
+}
+
+.smg-alert-warning {
+  @apply bg-amber-50 border border-amber-200 text-amber-800;
+}
+
+.smg-alert-warning .dashicons {
+  @apply text-amber-600;
+}
+
+.smg-alert-error {
+  @apply bg-red-50 border border-red-200 text-red-700;
+}
+
+.smg-alert-error .dashicons {
+  @apply text-red-600;
+}
+
+.smg-notice {
+  @apply flex items-start gap-3 p-4 text-sm text-gray-900 bg-blue-50 border-l-4 border-blue-600 rounded;
+}
+
+.smg-notice .dashicons {
+  @apply text-blue-600;
+}
+
+.smg-note {
+  @apply flex items-start gap-3 p-4 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded;
+}
+
+.smg-note .dashicons {
+  @apply flex-shrink-0 text-gray-400;
+}
+
+.smg-note a {
+  @apply text-gray-900 font-medium;
+}
+
+/* ========================================
+   Tables
+   ======================================== */
+
+.smg-table {
+  @apply w-full text-sm border-collapse;
+}
+
+.smg-table th,
+.smg-table td {
+  @apply p-4 text-left border-b border-gray-200;
+}
+
+.smg-table th {
+  @apply bg-gray-50 text-xs font-semibold text-gray-900 uppercase tracking-wide;
+}
+
+.smg-table tr:last-child td {
+  @apply border-b-0;
+}
+
+.smg-table tr:hover td {
+  @apply bg-gray-50;
+}
+
+.smg-mapping-table {
+  @apply w-full text-sm border-collapse;
+}
+
+.smg-mapping-table th,
+.smg-mapping-table td {
+  @apply p-4 text-left border-b border-gray-200;
+}
+
+.smg-mapping-table th {
+  @apply bg-gray-50 text-xs font-semibold text-gray-900 uppercase tracking-wide;
+}
+
+.smg-mapping-table tr:last-child td {
+  @apply border-b-0;
+}
+
+.smg-mapping-table tr:hover td {
+  @apply bg-gray-50;
+}
+
+/* ========================================
+   Info Grid
+   ======================================== */
+
+.smg-info-grid {
+  @apply grid gap-4 mb-4;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.smg-info-item {
+  @apply p-4 bg-gray-50 border border-gray-200 rounded;
+}
+
+.smg-info-label {
+  @apply block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1;
+}
+
+.smg-info-value {
+  @apply text-sm font-semibold text-gray-900 break-words;
+}
+
+/* ========================================
+   Steps
+   ======================================== */
+
+.smg-step {
+  @apply flex gap-4 p-6 border border-gray-200 rounded-lg;
+  background: linear-gradient(135deg, #fafafa, #f5f5f5);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.smg-step:hover {
+  transform: translateY(-2px);
+  @apply shadow-lg;
+}
+
+.smg-step-number {
+  @apply flex-shrink-0 flex items-center justify-center w-10 h-10 text-lg font-bold text-white rounded-full;
+  background: linear-gradient(135deg, #404040, #171717);
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+.smg-step-content h4 {
+  @apply text-base font-semibold mb-1;
+}
+
+.smg-step-content p {
+  @apply text-sm text-gray-500 leading-relaxed;
+}
+
+/* ========================================
+   Post Type Card
+   ======================================== */
+
+.smg-post-type-card {
+  @apply bg-white border border-gray-200 rounded-lg overflow-hidden;
+  transition: all 200ms ease;
+}
+
+.smg-post-type-card:hover {
+  @apply border-gray-300 shadow;
+}
+
+.smg-post-type-card.smg-mapped {
+  @apply border-l-[3px] border-l-green-500;
+}
+
+.smg-post-type-header {
+  @apply flex flex-wrap items-center gap-4 px-6 py-5;
+  background: linear-gradient(135deg, #fafafa, #f5f5f5);
+}
+
+.smg-post-type-info {
+  @apply flex items-center gap-3 flex-1 min-w-[200px];
+}
+
+.smg-post-type-info .dashicons {
+  @apply text-gray-500;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.smg-post-type-info h3 {
+  @apply text-base font-semibold m-0;
+}
+
+.smg-post-type-info code {
+  @apply px-2 py-1 text-xs text-gray-500 bg-gray-200 rounded;
+}
+
+.smg-post-type-schema {
+  @apply min-w-[220px];
+}
+
+.smg-post-type-fields {
+  @apply p-6 border-t border-gray-200 bg-white;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.smg-toggle-fields {
+  @apply inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-full cursor-pointer;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition: all 200ms ease;
+}
+
+.smg-toggle-fields:hover {
+  @apply bg-gray-50 border-gray-300 shadow-sm text-gray-800;
+}
+
+.smg-toggle-fields:focus {
+  @apply outline-none;
+  box-shadow: 0 0 0 3px rgba(23, 23, 23, 0.1);
+}
+
+.smg-toggle-fields .dashicons {
+  @apply text-gray-500;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  transition: transform 200ms ease;
+}
+
+.smg-toggle-fields[aria-expanded="true"] .dashicons {
+  transform: rotate(180deg);
+}
+
+.smg-toggle-fields[aria-expanded="true"] {
+  @apply bg-gray-50 border-gray-300;
+}
+
+/* ========================================
+   Schema Preview
+   ======================================== */
+
+.smg-code-preview {
+  @apply bg-gray-900 rounded-lg shadow-lg overflow-hidden;
+}
+
+.smg-code-header {
+  @apply flex items-center justify-between px-4 py-3 bg-gray-800 border-b border-gray-700;
+}
+
+.smg-code-title {
+  @apply text-xs font-medium text-gray-400 uppercase tracking-wide;
+}
+
+.smg-code-actions {
+  @apply flex gap-2;
+}
+
+.smg-schema-preview {
+  @apply p-5 max-h-[400px] overflow-auto font-mono text-xs leading-relaxed text-gray-200 whitespace-pre-wrap break-words;
+  background: #1a1a1a;
+  tab-size: 2;
+}
+
+.smg-schema-preview::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.smg-schema-preview::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+.smg-schema-preview::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded;
+}
+
+.smg-schema-preview::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
+
+.smg-preview-section {
+  @apply p-5 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+.smg-preview-header {
+  @apply flex items-center justify-between mb-4;
+}
+
+.smg-preview-header h4 {
+  @apply text-sm font-semibold m-0;
+}
+
+.smg-preview-actions {
+  @apply flex gap-2;
+}
+
+.smg-validation-status {
+  @apply mt-4 p-3 text-sm rounded;
+}
+
+.smg-validation-status.valid {
+  @apply bg-green-50 border border-green-200 text-green-600;
+}
+
+.smg-validation-status.invalid {
+  @apply bg-red-50 border border-red-200 text-red-600;
+}
+
+.smg-validation-status .dashicons {
+  @apply mr-2 align-middle;
+}
+
+.smg-test-links {
+  @apply flex gap-3 mt-4;
+}
+
+.smg-test-links .button {
+  @apply inline-flex items-center gap-2;
+}
+
+/* ========================================
+   Pages Tab
+   ======================================== */
+
+.smg-pages-header {
+  @apply flex items-center justify-between p-3 mb-4 bg-gray-50 border border-gray-200 rounded;
+}
+
+.smg-pages-count {
+  @apply text-sm font-medium text-gray-500;
+}
+
+.smg-pages-pagination-info {
+  @apply text-sm text-gray-400;
+}
+
+.smg-pages-list {
+  @apply mb-6 bg-white border border-gray-200 rounded-lg overflow-hidden;
+}
+
+.smg-pages-table {
+  @apply w-full border-collapse;
+}
+
+.smg-pages-table th,
+.smg-pages-table td {
+  @apply p-3 text-left border-b border-gray-200;
+}
+
+.smg-pages-table thead th {
+  @apply bg-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap;
+}
+
+.smg-pages-table tbody tr:last-child td {
+  @apply border-b-0;
+}
+
+.smg-pages-table tbody tr:hover td {
+  @apply bg-gray-50;
+}
+
+.smg-pagination {
+  @apply flex justify-center my-6;
+}
+
+.smg-pagination-links {
+  @apply flex items-center gap-2 p-2 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+.smg-pagination-link {
+  @apply flex items-center justify-center w-9 h-9 text-gray-500 bg-white border border-gray-200 rounded;
+  transition: all 150ms ease;
+}
+
+.smg-pagination-link:hover:not(.disabled) {
+  @apply bg-gray-50 border-gray-300 text-gray-900;
+}
+
+.smg-pagination-link.disabled {
+  @apply opacity-40 cursor-not-allowed;
+}
+
+/* ========================================
+   Integrations
+   ======================================== */
+
+.smg-integration-card {
+  @apply bg-white border border-gray-200 rounded-lg overflow-hidden;
+  transition: all 200ms ease;
+}
+
+.smg-integration-card:hover {
+  @apply shadow-lg;
+}
+
+.smg-integration-card.active {
+  @apply border-green-300;
+}
+
+.smg-integration-header {
+  @apply flex flex-col gap-3 px-6 py-5 border-b border-gray-200;
+}
+
+.smg-integration-card.active .smg-integration-header {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+}
+
+.smg-integration-card.inactive .smg-integration-header {
+  background: linear-gradient(135deg, #fafafa, #f5f5f5);
+}
+
+.smg-integration-title {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.smg-integration-card.inactive .smg-integration-title {
+  @apply text-gray-500;
+}
+
+.smg-integration-body {
+  @apply px-6 py-5;
+}
+
+.smg-integration-body p {
+  @apply text-sm text-gray-500 leading-relaxed;
+}
+
+.smg-integration-footer {
+  @apply px-6 py-4 bg-gray-50 border-t border-gray-200;
+}
+
+/* ========================================
+   Schema Types Tab
+   ======================================== */
+
+.smg-schema-item {
+  @apply p-4 bg-white border border-gray-200 rounded;
+  transition: all 200ms ease;
+}
+
+.smg-schema-item:hover {
+  @apply border-gray-300 shadow-sm;
+}
+
+.smg-schema-description {
+  @apply text-sm text-gray-500 mb-3;
+}
+
+.smg-props-label {
+  @apply text-xs text-gray-400;
+}
+
+.smg-link-external {
+  @apply inline-flex items-center gap-1 text-xs font-medium text-gray-900;
+}
+
+.smg-link-external .dashicons {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+/* ========================================
+   Update Tab
+   ======================================== */
+
+.smg-version-info .smg-info-grid {
+  @apply gap-4;
+}
+
+.smg-token-input-wrapper {
+  @apply flex gap-2 max-w-md;
+}
+
+.smg-token-input-wrapper .smg-input {
+  @apply flex-1;
+}
+
+.smg-input-token {
+  @apply font-mono tracking-wide;
+}
+
+.smg-toggle-password {
+  @apply inline-flex items-center justify-center flex-shrink-0 w-10 h-10 bg-gray-100 border border-gray-200 rounded cursor-pointer text-gray-500;
+  transition: all 200ms ease;
+}
+
+.smg-toggle-password:hover {
+  @apply bg-gray-200 border-gray-300 text-gray-900;
+}
+
+.smg-toggle-password .dashicons {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.smg-token-status {
+  @apply inline-flex items-center gap-2 px-3 py-2 mt-3 text-sm rounded;
+}
+
+.smg-token-status-active {
+  @apply bg-green-100 text-green-700;
+}
+
+.smg-token-status-active .dashicons {
+  @apply text-green-500;
+}
+
+.smg-token-status-inactive {
+  @apply bg-gray-100 text-gray-500;
+}
+
+.smg-update-result {
+  @apply mt-4 p-3 text-sm rounded;
+  animation: fadeIn 0.2s ease;
+}
+
+.smg-update-result.smg-result-success {
+  @apply bg-green-100 border border-green-200 text-green-700;
+}
+
+.smg-update-result.smg-result-error {
+  @apply bg-red-100 border border-red-200 text-red-700;
+}
+
+.smg-update-result.smg-result-info {
+  @apply bg-blue-100 border border-blue-200 text-blue-700;
+}
+
+.smg-security-info {
+  @apply py-2;
+}
+
+.smg-security-list {
+  @apply list-none m-0 p-0;
+}
+
+.smg-security-list li {
+  @apply flex flex-col gap-1 p-4 border-b border-gray-100;
+}
+
+.smg-security-list li:last-child {
+  @apply border-b-0;
+}
+
+.smg-security-list .dashicons {
+  @apply mr-2 text-green-500;
+}
+
+.smg-security-list .dashicons-info {
+  @apply text-blue-500;
+}
+
+.smg-security-list strong {
+  @apply inline-flex items-center text-sm text-gray-900;
+}
+
+.smg-security-list span {
+  @apply text-sm text-gray-500 leading-relaxed pl-7;
+}
+
+.smg-security-list code {
+  @apply block mt-2 px-3 py-2 font-mono text-xs text-gray-900 bg-gray-100 rounded overflow-x-auto;
+}
+
+/* ========================================
+   Meta Box
+   ======================================== */
+
+.smg-meta-box {
+  @apply p-4 font-sans;
+}
+
+.smg-meta-box-section {
+  @apply mb-5;
+}
+
+.smg-meta-box-section:last-child {
+  @apply mb-0;
+}
+
+.smg-meta-box-header {
+  @apply flex items-center justify-between mb-4;
+}
+
+.smg-meta-box-title {
+  @apply flex items-center gap-2 text-sm font-semibold text-gray-900;
+}
+
+.smg-meta-box-title .dashicons {
+  @apply text-gray-900;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.smg-meta-box .smg-toggle {
+  height: 24px;
+  width: 44px;
+}
+
+.smg-meta-box .smg-toggle-slider::before {
+  height: 18px;
+  width: 18px;
+}
+
+.smg-meta-box .smg-toggle input:checked+.smg-toggle-slider::before {
+  transform: translateX(20px);
+}
+
+.smg-meta-box .smg-select {
+  @apply max-w-full;
+}
+
+.smg-meta-box-info {
+  @apply flex items-center gap-3 p-3 text-sm text-gray-500 bg-gray-50 rounded;
+}
+
+.smg-meta-box-info .dashicons {
+  @apply text-gray-900;
+}
+
+.smg-meta-box .smg-preview-section {
+  @apply p-4;
+}
+
+.smg-meta-box .smg-schema-preview {
+  @apply text-[11px] max-h-[200px];
+}
+
+.smg-meta-box-actions {
+  @apply flex gap-2 mt-3;
+}
+
+.smg-meta-box-actions .button {
+  @apply flex-1 justify-center;
+}
+
+.smg-preview-notice {
+  @apply flex items-center gap-2 p-4 text-sm text-gray-500 bg-gray-50 rounded;
+}
+
+/* ========================================
+   Auto/Manual Badges
+   ======================================== */
+
+.smg-auto-badge {
+  @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-600 rounded;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+}
+
+.smg-auto-badge .dashicons {
+  font-size: 12px;
+  width: 12px;
+  height: 12px;
+}
+
+.smg-manual-badge {
+  @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded;
+}
+
+/* ========================================
+   ACF Notice
+   ======================================== */
+
+.smg-acf-notice {
+  @apply mt-4 p-4 text-sm text-blue-800 bg-blue-50 border border-blue-200 rounded-lg;
+}
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+
+.smg-section-title {
+  @apply text-xl font-semibold text-gray-900 m-0;
+}
+
+.smg-section-description {
+  @apply text-sm text-gray-500 m-0;
+}
+
+.smg-footer {
+  @apply p-8 text-center text-sm text-gray-400;
+}
+
+.smg-footer a {
+  @apply font-medium text-gray-900;
+}
+
+.smg-footer a:hover {
+  @apply underline;
+}
+
+.smg-actions {
+  @apply flex gap-3 mt-8 pt-6 border-t border-gray-200;
+}
+
+.smg-fields-description {
+  @apply text-sm text-gray-500 mb-4;
+}
+
+/* Hidden utility */
+.smg-hidden {
+  display: none !important;
+}
+
+/* Flex utilities */
+.smg-flex-1 {
+  flex: 1;
+}
+
+.smg-shrink-0 {
+  flex-shrink: 0;
+}
+
+/* Text utilities */
+.smg-text-muted {
+  @apply text-gray-400;
+}
+
+/* Info text */
+.smg-info {
+  @apply text-sm text-gray-500 mb-4;
+}
+
+/* ========================================
+   Animations
+   ======================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ========================================
+   Focus Ring
+   ======================================== */
+
+.smg-wrap :focus-visible {
+  @apply outline-2 outline-gray-900 outline-offset-2;
+}
+
+/* ========================================
+   Responsive
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .smg-wrap {
+    @apply px-4;
+  }
+}
+
+@media (max-width: 782px) {
+  .smg-wrap {
+    @apply mx-2 px-3;
+  }
+
+  .smg-tabs-nav {
+    @apply gap-0 overflow-x-auto -mx-3 px-3;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .smg-tab-link {
+    @apply px-4 py-2 text-xs;
+  }
+
+  .smg-tab-link .dashicons {
+    display: none;
+  }
+
+  .smg-tab-content {
+    @apply p-5 rounded-lg;
+  }
+
+  .smg-actions {
+    @apply flex-col;
+  }
+
+  .smg-actions .button {
+    @apply justify-center w-full;
+  }
+}

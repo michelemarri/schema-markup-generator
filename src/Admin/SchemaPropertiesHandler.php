@@ -98,11 +98,11 @@ class SchemaPropertiesHandler
     ): string {
         ob_start();
         ?>
-        <p class="mds-fields-description">
+        <p class="smg-fields-description">
             <?php esc_html_e('Map your custom fields to schema properties for richer structured data.', 'schema-markup-generator'); ?>
         </p>
 
-        <table class="mds-mapping-table">
+        <table class="smg-mapping-table">
             <thead>
                 <tr>
                     <th><?php esc_html_e('Schema Property', 'schema-markup-generator'); ?></th>
@@ -112,7 +112,7 @@ class SchemaPropertiesHandler
             </thead>
             <tbody>
                 <?php foreach ($schemaProps as $propName => $propDef): ?>
-                    <tr class="mds-mapping-row mds-animate-fade-in">
+                    <tr class="smg-mapping-row smg-animate-fade-in">
                         <td>
                             <strong><?php echo esc_html($propName); ?></strong>
                             <br>
@@ -120,7 +120,7 @@ class SchemaPropertiesHandler
                         </td>
                         <td>
                             <select name="smg_field_mappings[<?php echo esc_attr($postType); ?>][<?php echo esc_attr($propName); ?>]"
-                                    class="mds-field-select">
+                                    class="smg-field-select">
                                 <option value=""><?php esc_html_e('— Select Field —', 'schema-markup-generator'); ?></option>
                                 <optgroup label="<?php esc_attr_e('WordPress Fields', 'schema-markup-generator'); ?>">
                                     <option value="post_title" <?php selected($currentFieldMapping[$propName] ?? '', 'post_title'); ?>>
@@ -163,12 +163,12 @@ class SchemaPropertiesHandler
                                     $autoLabel = __('Auto', 'schema-markup-generator');
                                 }
                                 ?>
-                                <span class="mds-auto-badge" title="<?php echo esc_attr($autoTitle); ?>">
+                                <span class="smg-auto-badge" title="<?php echo esc_attr($autoTitle); ?>">
                                     <span class="dashicons dashicons-yes-alt"></span>
                                     <?php echo esc_html($autoLabel); ?>
                                 </span>
                             <?php else: ?>
-                                <span class="mds-manual-badge">
+                                <span class="smg-manual-badge">
                                     <?php esc_html_e('Manual', 'schema-markup-generator'); ?>
                                 </span>
                             <?php endif; ?>
@@ -188,7 +188,7 @@ class SchemaPropertiesHandler
     {
         ob_start();
         ?>
-        <p class="mds-notice mds-animate-fade-in">
+        <p class="smg-notice smg-animate-fade-in">
             <span class="dashicons dashicons-info"></span>
             <?php esc_html_e('Select a schema type above to configure field mappings.', 'schema-markup-generator'); ?>
         </p>
@@ -203,7 +203,7 @@ class SchemaPropertiesHandler
     {
         ob_start();
         ?>
-        <p class="mds-notice mds-animate-fade-in">
+        <p class="smg-notice smg-animate-fade-in">
             <span class="dashicons dashicons-yes-alt"></span>
             <?php esc_html_e('This schema type is fully automatic and doesn\'t require field mapping.', 'schema-markup-generator'); ?>
         </p>

@@ -34,7 +34,7 @@ class GitHubUpdater
     /**
      * Whether the repository requires authentication
      */
-    private bool $isPrivateRepo = true;
+    private bool $isPrivateRepo = false;
 
     /**
      * Whether a valid token is configured
