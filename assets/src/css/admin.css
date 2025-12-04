@@ -410,6 +410,15 @@
   border-color: #d4d4d4 !important;
 }
 
+/* All buttons should have pointer cursor */
+.smg-wrap button,
+.smg-wrap .button,
+.smg-wrap [type="button"],
+.smg-wrap [type="submit"],
+.smg-wrap [type="reset"] {
+  cursor: pointer;
+}
+
 /* ========================================
    Badges
    ======================================== */
