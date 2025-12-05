@@ -232,6 +232,9 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.11.1
+- **New**: Website fields in field mapping - Site Name and Site URL are now available as mappable sources
+
 ### 1.11.0
 - **New**: Taxonomies available in field mapping - All public taxonomies (including custom) are now mappable to schema properties
 - **Fixed**: Duplicate custom fields - Fields discovered via ACF no longer appear twice in the dropdown

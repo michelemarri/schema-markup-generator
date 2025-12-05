@@ -256,9 +256,9 @@ For individual lessons or educational materials.
 
 ## Field Mapping
 
-### WordPress Default Fields
+### Post Fields
 
-These fields are automatically available:
+These fields are automatically available for every post:
 - `post_title` - Post title
 - `post_excerpt` - Post excerpt
 - `post_content` - Full content
@@ -266,6 +266,12 @@ These fields are automatically available:
 - `post_modified` - Last modified date
 - `featured_image` - Featured image URL
 - `author` - Author name
+
+### Website Fields
+
+Global site information available for mapping:
+- `site_name` - The site name from WordPress General Settings
+- `site_url` - The home URL of the website
 
 ### Custom Fields
 

@@ -245,7 +245,7 @@ class PostTypesTab extends AbstractTab
                                                         <select name="smg_field_mappings[<?php echo esc_attr($postType); ?>][<?php echo esc_attr($propName); ?>]"
                                                                 class="smg-select smg-field-select">
                                                             <option value=""><?php esc_html_e('— Select Field —', 'schema-markup-generator'); ?></option>
-                                                            <optgroup label="<?php esc_attr_e('WordPress Fields', 'schema-markup-generator'); ?>">
+                                                            <optgroup label="<?php esc_attr_e('Post Fields', 'schema-markup-generator'); ?>">
                                                                 <option value="post_title" <?php selected($currentFieldMapping[$propName] ?? '', 'post_title'); ?>>
                                                                     <?php esc_html_e('Post Title', 'schema-markup-generator'); ?>
                                                                 </option>
@@ -260,6 +260,14 @@ class PostTypesTab extends AbstractTab
                                                                 </option>
                                                                 <option value="author" <?php selected($currentFieldMapping[$propName] ?? '', 'author'); ?>>
                                                                     <?php esc_html_e('Author', 'schema-markup-generator'); ?>
+                                                                </option>
+                                                            </optgroup>
+                                                            <optgroup label="<?php esc_attr_e('Website', 'schema-markup-generator'); ?>">
+                                                                <option value="site_name" <?php selected($currentFieldMapping[$propName] ?? '', 'site_name'); ?>>
+                                                                    <?php esc_html_e('Site Name', 'schema-markup-generator'); ?>
+                                                                </option>
+                                                                <option value="site_url" <?php selected($currentFieldMapping[$propName] ?? '', 'site_url'); ?>>
+                                                                    <?php esc_html_e('Site URL', 'schema-markup-generator'); ?>
                                                                 </option>
                                                             </optgroup>
                                                             <?php if (!empty($postTypeFields)): ?>

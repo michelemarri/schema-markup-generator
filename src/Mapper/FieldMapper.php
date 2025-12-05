@@ -86,6 +86,11 @@ class FieldMapper
             return $this->resolvePostField($post, $source);
         }
 
+        // Site fields
+        if (str_starts_with($source, 'site_')) {
+            return $this->resolveSiteField($source);
+        }
+
         // Featured image
         if ($source === 'featured_image') {
             return $this->getFeaturedImageUrl($post);
@@ -246,6 +251,19 @@ class FieldMapper
             'post_author' => $this->getAuthorName($post),
             'post_url' => get_permalink($post),
             default => $post->$field ?? null,
+        };
+    }
+
+    /**
+     * Resolve WordPress site field
+     */
+    private function resolveSiteField(string $field): mixed
+    {
+        return match ($field) {
+            'site_name' => get_bloginfo('name'),
+            'site_url' => home_url('/'),
+            'site_description' => get_bloginfo('description'),
+            default => null,
         };
     }
 
