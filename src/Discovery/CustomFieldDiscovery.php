@@ -33,17 +33,34 @@ class CustomFieldDiscovery
         }
 
         $fields = [];
+        $knownKeys = [];
 
-        // Get ACF fields if available
+        // Get ACF fields if available (first priority)
         if ($this->isACFActive()) {
-            $fields = array_merge($fields, $this->getACFFields($postType));
+            $acfFields = $this->getACFFields($postType);
+            foreach ($acfFields as $field) {
+                $fields[] = $field;
+                $knownKeys[$field['key']] = true;
+            }
         }
 
-        // Get native WordPress meta keys
-        $fields = array_merge($fields, $this->getNativeMetaKeys($postType));
+        // Get native WordPress meta keys (skip already known from ACF)
+        $nativeFields = $this->getNativeMetaKeys($postType);
+        foreach ($nativeFields as $field) {
+            if (!isset($knownKeys[$field['key']])) {
+                $fields[] = $field;
+                $knownKeys[$field['key']] = true;
+            }
+        }
 
-        // Get registered meta fields
-        $fields = array_merge($fields, $this->getRegisteredMeta($postType));
+        // Get registered meta fields (skip already known)
+        $registeredFields = $this->getRegisteredMeta($postType);
+        foreach ($registeredFields as $field) {
+            if (!isset($knownKeys[$field['key']])) {
+                $fields[] = $field;
+                $knownKeys[$field['key']] = true;
+            }
+        }
 
         /**
          * Filter discovered custom fields

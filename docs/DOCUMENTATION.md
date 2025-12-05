@@ -267,13 +267,16 @@ These fields are automatically available:
 - `featured_image` - Featured image URL
 - `author` - Author name
 
-### Custom Meta Fields
+### Custom Fields
 
-Any public post meta can be mapped to schema properties.
+Any public custom fields (post meta) can be mapped to schema properties. The plugin discovers custom fields from multiple sources:
+- **ACF (Advanced Custom Fields)** - All field groups assigned to a post type
+- **WordPress Secure Custom Fields** - Native WordPress custom fields
+- **Other field plugins** - Any plugin that registers meta keys
 
-### ACF Fields
+All custom fields are displayed uniformly in the "Custom Fields" group without specifying their source, making it easier to work with mixed field providers.
 
-When ACF is installed, all field groups assigned to a post type are automatically discovered:
+**Supported field types:**
 - Text fields
 - Image fields (returns URL)
 - Gallery fields (returns array of URLs)
@@ -281,11 +284,31 @@ When ACF is installed, all field groups assigned to a post type are automaticall
 - Repeater fields
 - Group fields
 
+### Taxonomies
+
+All public taxonomies (both built-in and custom) are available for mapping. This is useful for:
+- Mapping categories to `articleSection`
+- Mapping tags to `keywords`
+- Mapping custom taxonomies like "difficulty" or "cuisine" to appropriate schema properties
+
+**Usage:**
+Taxonomies appear in the "Taxonomies" group in the field mapping dropdown. When mapped, they return a comma-separated list of term names.
+
+**Examples:**
+- `category` → Maps to the post's categories
+- `post_tag` → Maps to the post's tags
+- Custom taxonomy like `recipe_cuisine` → Maps to your custom taxonomy terms
+
 ### Mapping Syntax
 
 **Simple mapping:**
 ```
 Schema Property → Field Key
+```
+
+**Taxonomy mapping:**
+```
+Schema Property → taxonomy:taxonomy_slug
 ```
 
 **Nested properties (ACF Repeater):**

@@ -268,9 +268,19 @@ class PostTypesTab extends AbstractTab
                                                                         <option value="<?php echo esc_attr($field['key']); ?>"
                                                                                 <?php selected($currentFieldMapping[$propName] ?? '', $field['key']); ?>>
                                                                             <?php echo esc_html($field['label']); ?>
-                                                                            <?php if ($field['source'] === 'acf'): ?>
-                                                                                <span>(ACF)</span>
-                                                                            <?php endif; ?>
+                                                                        </option>
+                                                                    <?php endforeach; ?>
+                                                                </optgroup>
+                                                            <?php endif; ?>
+                                                            <?php
+                                                            $taxonomies = $this->taxonomyDiscovery->getTaxonomiesForPostType($postType);
+                                                            if (!empty($taxonomies)):
+                                                            ?>
+                                                                <optgroup label="<?php esc_attr_e('Taxonomies', 'schema-markup-generator'); ?>">
+                                                                    <?php foreach ($taxonomies as $taxSlug => $taxonomy): ?>
+                                                                        <option value="taxonomy:<?php echo esc_attr($taxSlug); ?>"
+                                                                                <?php selected($currentFieldMapping[$propName] ?? '', 'taxonomy:' . $taxSlug); ?>>
+                                                                            <?php echo esc_html($taxonomy->labels->singular_name); ?>
                                                                         </option>
                                                                     <?php endforeach; ?>
                                                                 </optgroup>

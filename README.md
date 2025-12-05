@@ -70,12 +70,11 @@ Assign a schema type to each post type. The plugin will automatically populate s
 
 ### Field Mapping
 
-Map custom fields (including ACF fields) to schema properties:
+Map custom fields to schema properties:
 
-- WordPress native fields (title, excerpt, content, author)
-- ACF text, image, date, and repeater fields
-- Custom post meta
-- Taxonomy terms
+- WordPress native fields (title, excerpt, content, author, featured image)
+- Custom fields from any source (ACF, Secure Custom Fields, other plugins)
+- All public taxonomies (categories, tags, and custom taxonomies)
 
 ### Per-Post Override
 
@@ -232,6 +231,11 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - [Metodo.dev](https://metodo.dev)
 
 ## Changelog
+
+### 1.11.0
+- **New**: Taxonomies available in field mapping - All public taxonomies (including custom) are now mappable to schema properties
+- **Fixed**: Duplicate custom fields - Fields discovered via ACF no longer appear twice in the dropdown
+- **Improved**: Removed source indicator "(ACF)" from custom fields label - all custom fields are now shown uniformly without specifying their origin
 
 ### 1.10.0
 - **New**: Auto-save for schema mappings - Schema type and field mappings now save automatically when you make a selection (no Save button needed)

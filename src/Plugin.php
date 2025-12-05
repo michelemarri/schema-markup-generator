@@ -123,7 +123,8 @@ class Plugin
             );
             $this->services['schema_properties_handler'] = new SchemaPropertiesHandler(
                 $this->services['schema_factory'],
-                $this->services['custom_field_discovery']
+                $this->services['custom_field_discovery'],
+                $this->services['taxonomy_discovery']
             );
             $this->services['mapping_save_handler'] = new MappingSaveHandler();
         }
