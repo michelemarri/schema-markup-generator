@@ -232,6 +232,14 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.12.0
+- **New**: Schema Example modal - Click the eye icon next to any post type to see a real schema example generated from a random published post
+- **New**: Copy and refresh actions in example modal - Easily copy the JSON-LD or load a different random post
+- **New**: Direct links to edit/view the example post from the modal
+
+### 1.11.2
+- **Removed**: Lightbulb icon next to post type names - redundant with existing recommendation indicators (★ star and "Recommended" badge)
+
 ### 1.11.1
 - **New**: Website fields in field mapping - Site Name and Site URL are now available as mappable sources
 

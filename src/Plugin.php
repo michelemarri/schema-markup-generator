@@ -9,6 +9,7 @@ use Metodo\SchemaMarkupGenerator\Admin\MetaBox;
 use Metodo\SchemaMarkupGenerator\Admin\PreviewHandler;
 use Metodo\SchemaMarkupGenerator\Admin\SchemaPropertiesHandler;
 use Metodo\SchemaMarkupGenerator\Admin\MappingSaveHandler;
+use Metodo\SchemaMarkupGenerator\Admin\RandomExampleHandler;
 use Metodo\SchemaMarkupGenerator\Discovery\PostTypeDiscovery;
 use Metodo\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
 use Metodo\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
@@ -127,6 +128,10 @@ class Plugin
                 $this->services['taxonomy_discovery']
             );
             $this->services['mapping_save_handler'] = new MappingSaveHandler();
+            $this->services['random_example_handler'] = new RandomExampleHandler(
+                $this->services['schema_renderer'],
+                $this->services['schema_factory']
+            );
         }
     }
 
@@ -189,6 +194,7 @@ class Plugin
             add_action('wp_ajax_smg_get_schema_properties', [$this->services['schema_properties_handler'], 'handle']);
             add_action('wp_ajax_smg_save_schema_mapping', [$this->services['mapping_save_handler'], 'handleSaveSchemaMapping']);
             add_action('wp_ajax_smg_save_field_mapping', [$this->services['mapping_save_handler'], 'handleSaveFieldMapping']);
+            add_action('wp_ajax_smg_get_random_example', [$this->services['random_example_handler'], 'handle']);
         }
 
         // Plugin action links

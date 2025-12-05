@@ -417,6 +417,7 @@
 .smg-wrap [type="submit"],
 .smg-wrap [type="reset"] {
   cursor: pointer;
+  line-height: 1.2;
 }
 
 /* ========================================
@@ -1215,22 +1216,6 @@
   color: #135e96;
 }
 
-/* ========================================
-   Recommended Badge
-   ======================================== */
-
-.smg-recommended-badge {
-  @apply inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-green-700 rounded-full whitespace-nowrap ml-2;
-  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-  box-shadow: 0 1px 2px rgba(34, 197, 94, 0.2);
-}
-
-.smg-recommended-badge .dashicons {
-  font-size: 14px;
-  width: 14px;
-  height: 14px;
-}
-
 .smg-recommendation-reason {
   @apply text-amber-500 ml-2;
   cursor: help;
@@ -1352,6 +1337,100 @@
   height: 16px;
 }
 
+/* ========================================
+   View Example Button
+   ======================================== */
+
+.smg-view-example-btn {
+  @apply inline-flex items-center justify-center w-7 h-7 ml-2 p-0 text-gray-400 bg-transparent border border-transparent rounded-full cursor-pointer;
+  transition: all 200ms ease;
+}
+
+.smg-view-example-btn:hover {
+  @apply text-gray-700 bg-gray-100 border-gray-200;
+}
+
+.smg-view-example-btn:focus {
+  @apply outline-none;
+  box-shadow: 0 0 0 2px rgba(23, 23, 23, 0.1);
+}
+
+.smg-view-example-btn .dashicons {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/* ========================================
+   Large Modal (for schema examples)
+   ======================================== */
+
+.smg-modal-lg .smg-modal-content {
+  @apply max-w-2xl;
+}
+
+.smg-modal-lg .smg-modal-title {
+  @apply flex items-center gap-2;
+}
+
+.smg-modal-lg .smg-modal-title .dashicons {
+  @apply text-gray-400;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* ========================================
+   Schema Example Modal Specifics
+   ======================================== */
+
+.smg-example-info {
+  @apply flex items-center justify-between gap-4 mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg;
+  transition: opacity 200ms ease;
+}
+
+.smg-example-info.smg-loading {
+  @apply opacity-50;
+}
+
+.smg-example-post-title {
+  @apply text-sm font-medium text-gray-900 truncate;
+  flex: 1;
+}
+
+.smg-example-actions {
+  @apply flex items-center gap-3;
+}
+
+.smg-example-actions a {
+  @apply inline-flex items-center gap-1 text-xs font-medium text-gray-500 no-underline;
+  transition: color 200ms ease;
+}
+
+.smg-example-actions a:hover {
+  @apply text-gray-900;
+}
+
+.smg-example-actions .dashicons {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.smg-example-schema {
+  @apply max-h-[350px];
+}
+
+.smg-example-hint {
+  @apply flex items-center gap-2 text-xs text-gray-400;
+}
+
+.smg-example-hint .dashicons {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
 /* Hidden utility */
 .smg-hidden {
   display: none !important;
@@ -1439,6 +1518,7 @@
     opacity: 0;
     transform: translateX(100%);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);

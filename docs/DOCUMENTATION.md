@@ -93,7 +93,7 @@ The plugin automatically recommends schema types based on your post type names. 
 When a recommendation is available:
 - The suggested schema is **automatically selected** for unconfigured post types
 - A **"Recommended" badge** appears next to the suggested option
-- A **lightbulb icon** shows why that schema was recommended
+- A **★ star** marks the recommended option in the dropdown
 
 You can always override the suggestion and select a different schema type.
 
@@ -105,6 +105,22 @@ When configuring field mappings, **click on any property name** to open a detail
 - **Schema.org link**: Direct link to the official schema.org documentation
 
 This helps you understand exactly what data to provide for each schema property.
+
+#### Schema Example Preview
+
+Want to see what the generated schema looks like for a specific post type? **Click the eye icon (👁)** next to any post type name to open the Schema Example modal.
+
+The modal shows:
+- **Real JSON-LD output**: Generated schema from a random published post of that type
+- **Post information**: Title of the example post with links to edit or view it
+- **Copy button**: One-click copy of the schema JSON to clipboard
+- **Refresh button**: Load a different random post to see various examples
+
+This feature helps you:
+- Verify your field mappings are working correctly
+- See real schema output before publishing
+- Test different posts to ensure consistent schema generation
+- Debug issues by examining actual generated data
 
 ### Advanced Settings
 

@@ -157,11 +157,12 @@ class PostTypesTab extends AbstractTab
                                 <span class="dashicons <?php echo esc_attr($postTypeObj->menu_icon ?? 'dashicons-admin-post'); ?>"></span>
                                 <h3><?php echo esc_html($postTypeObj->labels->singular_name); ?></h3>
                                 <code><?php echo esc_html($postType); ?></code>
-                                <?php if ($recommendedSchema): ?>
-                                    <span class="smg-recommendation-reason" title="<?php echo esc_attr($this->schemaRecommender->getRecommendationReason($postType) ?? ''); ?>">
-                                        <span class="dashicons dashicons-lightbulb"></span>
-                                    </span>
-                                <?php endif; ?>
+                                <button type="button" 
+                                        class="smg-view-example-btn" 
+                                        data-post-type="<?php echo esc_attr($postType); ?>"
+                                        title="<?php esc_attr_e('View schema example from a random post', 'schema-markup-generator'); ?>">
+                                    <span class="dashicons dashicons-visibility"></span>
+                                </button>
                             </div>
                             <div class="smg-post-type-schema">
                                 <select name="smg_post_type_mappings[<?php echo esc_attr($postType); ?>]"
@@ -176,21 +177,12 @@ class PostTypesTab extends AbstractTab
                                                 <option value="<?php echo esc_attr($type); ?>"
                                                         <?php selected($currentSchema, $type); ?>
                                                         <?php echo $isRecommended ? 'data-recommended="true"' : ''; ?>>
-                                                    <?php echo esc_html($label); ?>
-                                                    <?php if ($isRecommended): ?>
-                                                        ★
-                                                    <?php endif; ?>
+                                                    <?php echo esc_html($label); ?><?php if ($isRecommended): ?> — <?php esc_html_e('Recommended', 'schema-markup-generator'); ?><?php endif; ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         </optgroup>
                                     <?php endforeach; ?>
                                 </select>
-                                <?php if ($recommendedSchema && $currentSchema === $recommendedSchema): ?>
-                                    <span class="smg-recommended-badge">
-                                        <span class="dashicons dashicons-yes"></span>
-                                        <?php esc_html_e('Recommended', 'schema-markup-generator'); ?>
-                                    </span>
-                                <?php endif; ?>
                             </div>
                             <button type="button" class="smg-toggle-fields button button-secondary"
                                     aria-expanded="false">
@@ -358,6 +350,57 @@ class PostTypesTab extends AbstractTab
                             <span class="dashicons dashicons-external"></span>
                             <?php esc_html_e('View on schema.org', 'schema-markup-generator'); ?>
                         </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schema Example Modal -->
+            <div id="smg-example-modal" class="smg-modal smg-modal-lg" style="display: none;">
+                <div class="smg-modal-overlay"></div>
+                <div class="smg-modal-content">
+                    <button type="button" class="smg-modal-close">
+                        <span class="dashicons dashicons-no-alt"></span>
+                    </button>
+                    <h3 class="smg-modal-title">
+                        <span class="dashicons dashicons-editor-code"></span>
+                        <?php esc_html_e('Schema Example', 'schema-markup-generator'); ?>
+                    </h3>
+                    <div class="smg-modal-body">
+                        <div class="smg-example-info">
+                            <span class="smg-example-post-title"></span>
+                            <div class="smg-example-actions">
+                                <a href="#" class="smg-example-edit-link" target="_blank" rel="noopener">
+                                    <span class="dashicons dashicons-edit"></span>
+                                    <?php esc_html_e('Edit Post', 'schema-markup-generator'); ?>
+                                </a>
+                                <a href="#" class="smg-example-view-link" target="_blank" rel="noopener">
+                                    <span class="dashicons dashicons-external"></span>
+                                    <?php esc_html_e('View Post', 'schema-markup-generator'); ?>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="smg-code-preview">
+                            <div class="smg-code-header">
+                                <span class="smg-code-title">JSON-LD</span>
+                                <div class="smg-code-actions">
+                                    <button type="button" class="smg-copy-example smg-btn smg-btn-sm smg-btn-ghost">
+                                        <span class="dashicons dashicons-admin-page"></span>
+                                        <?php esc_html_e('Copy', 'schema-markup-generator'); ?>
+                                    </button>
+                                    <button type="button" class="smg-refresh-example smg-btn smg-btn-sm smg-btn-ghost">
+                                        <span class="dashicons dashicons-update"></span>
+                                        <?php esc_html_e('New Random', 'schema-markup-generator'); ?>
+                                    </button>
+                                </div>
+                            </div>
+                            <pre class="smg-schema-preview smg-example-schema"></pre>
+                        </div>
+                    </div>
+                    <div class="smg-modal-footer">
+                        <span class="smg-example-hint">
+                            <span class="dashicons dashicons-info"></span>
+                            <?php esc_html_e('This schema is generated from a random published post of this type.', 'schema-markup-generator'); ?>
+                        </span>
                     </div>
                 </div>
             </div>

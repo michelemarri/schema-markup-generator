@@ -180,6 +180,37 @@
                     this.handleCheckUpdates(e);
                 }
             });
+
+            // View example button click
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.smg-view-example-btn')) {
+                    this.handleViewExample(e);
+                }
+            });
+
+            // Copy example schema
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.smg-copy-example')) {
+                    this.handleCopyExample(e);
+                }
+            });
+
+            // Refresh example (new random)
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.smg-refresh-example')) {
+                    this.handleRefreshExample(e);
+                }
+            });
+
+            // Close example modal
+            document.addEventListener('click', (e) => {
+                const modal = document.getElementById('smg-example-modal');
+                if (modal && (e.target.closest('.smg-modal-close') || e.target.classList.contains('smg-modal-overlay'))) {
+                    if (modal.contains(e.target)) {
+                        this.closeExampleModal();
+                    }
+                }
+            });
         },
 
         /**
@@ -1036,6 +1067,176 @@
                 element.style.overflow = '';
                 element.style.transition = '';
             }, this.config.animationDuration);
+        },
+
+        /**
+         * Handle view example button click
+         */
+        async handleViewExample(e) {
+            e.preventDefault();
+            const button = e.target.closest('.smg-view-example-btn');
+            const postType = button.dataset.postType;
+            const card = button.closest('.smg-post-type-card');
+            const schemaSelect = card?.querySelector('.smg-schema-select');
+            const schemaType = schemaSelect?.value || '';
+
+            // Store current post type for refresh
+            this.currentExamplePostType = postType;
+            this.currentExampleSchemaType = schemaType;
+
+            await this.loadAndShowExample(postType, schemaType);
+        },
+
+        /**
+         * Load and show schema example
+         */
+        async loadAndShowExample(postType, schemaType) {
+            const modal = document.getElementById('smg-example-modal');
+            if (!modal) return;
+
+            // Show modal with loading state
+            const schemaPreview = modal.querySelector('.smg-example-schema');
+            const postTitleEl = modal.querySelector('.smg-example-post-title');
+            const editLink = modal.querySelector('.smg-example-edit-link');
+            const viewLink = modal.querySelector('.smg-example-view-link');
+            const infoEl = modal.querySelector('.smg-example-info');
+
+            schemaPreview.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.loading
+                ? smgAdmin.strings.loading
+                : 'Loading...';
+            postTitleEl.textContent = '';
+            editLink.style.display = 'none';
+            viewLink.style.display = 'none';
+            infoEl.classList.add('smg-loading');
+
+            // Show modal
+            modal.style.display = 'flex';
+            modal.offsetHeight; // Force reflow
+            modal.classList.add('smg-modal-open');
+            document.body.style.overflow = 'hidden';
+
+            try {
+                const response = await this.fetchRandomExample(postType, schemaType);
+
+                if (response.success) {
+                    schemaPreview.textContent = response.data.json;
+                    postTitleEl.textContent = response.data.post_title;
+                    
+                    if (response.data.edit_url) {
+                        editLink.href = response.data.edit_url;
+                        editLink.style.display = 'inline-flex';
+                    }
+                    
+                    if (response.data.view_url) {
+                        viewLink.href = response.data.view_url;
+                        viewLink.style.display = 'inline-flex';
+                    }
+                } else {
+                    schemaPreview.textContent = response.data?.message || 'Failed to load example';
+                }
+            } catch (error) {
+                console.error('Failed to load example:', error);
+                schemaPreview.textContent = 'Failed to load example. Please try again.';
+            } finally {
+                infoEl.classList.remove('smg-loading');
+            }
+        },
+
+        /**
+         * Fetch random example via AJAX
+         */
+        fetchRandomExample(postType, schemaType) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('action', 'smg_get_random_example');
+                formData.append('nonce', typeof smgAdmin !== 'undefined' ? smgAdmin.nonce : '');
+                formData.append('post_type', postType);
+                formData.append('schema_type', schemaType);
+
+                fetch(typeof smgAdmin !== 'undefined' ? smgAdmin.ajaxUrl : ajaxurl, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                })
+                    .then(response => response.json())
+                    .then(data => resolve(data))
+                    .catch(error => reject(error));
+            });
+        },
+
+        /**
+         * Handle copy example schema
+         */
+        async handleCopyExample(e) {
+            e.preventDefault();
+            const button = e.target.closest('.smg-copy-example');
+            const modal = document.getElementById('smg-example-modal');
+            const schema = modal?.querySelector('.smg-example-schema')?.textContent;
+
+            if (!schema) return;
+
+            try {
+                await navigator.clipboard.writeText(schema);
+
+                // Visual feedback
+                const originalHtml = button.innerHTML;
+                button.innerHTML = '<span class="dashicons dashicons-yes"></span> ' + 
+                    (typeof smgAdmin !== 'undefined' && smgAdmin.strings?.copied ? smgAdmin.strings.copied : 'Copied');
+                button.classList.add('smg-btn-success');
+
+                setTimeout(() => {
+                    button.innerHTML = originalHtml;
+                    button.classList.remove('smg-btn-success');
+                }, 2000);
+
+                this.showToast(
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.copied 
+                        ? smgAdmin.strings.copied 
+                        : 'Copied to clipboard',
+                    'success'
+                );
+            } catch (error) {
+                console.error('Copy failed:', error);
+                this.showToast('Failed to copy', 'error');
+            }
+        },
+
+        /**
+         * Handle refresh example (load new random post)
+         */
+        async handleRefreshExample(e) {
+            e.preventDefault();
+            const button = e.target.closest('.smg-refresh-example');
+
+            // Add loading state
+            button.disabled = true;
+            const originalHtml = button.innerHTML;
+            button.innerHTML = '<span class="dashicons dashicons-update smg-spin"></span>';
+
+            try {
+                await this.loadAndShowExample(this.currentExamplePostType, this.currentExampleSchemaType);
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalHtml;
+            }
+        },
+
+        /**
+         * Close the example modal
+         */
+        closeExampleModal() {
+            const modal = document.getElementById('smg-example-modal');
+
+            if (!modal || modal.style.display === 'none') return;
+
+            modal.classList.remove('smg-modal-open');
+
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, this.config.animationDuration);
+
+            // Restore body scrolling
+            document.body.style.overflow = '';
         },
 
         /**
