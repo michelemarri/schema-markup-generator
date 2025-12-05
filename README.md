@@ -10,6 +10,8 @@ Automatic schema.org structured data generation for WordPress, optimized for sea
 
 - **Auto-Discovery** - Automatically detects all post types, custom fields, and taxonomies
 - **16 Schema Types** - Article, Product, Organization, Person, FAQ, HowTo, Event, Recipe, Review, Course, LearningResource and more
+- **Smart Schema Suggestions** - Recommends schema types based on post type names
+- **Property Documentation** - Click any property for detailed description, examples, and schema.org link
 - **ACF Integration** - Full support for Advanced Custom Fields with visual field mapping
 - **Rank Math Compatibility** - Prevents duplicate schemas when Rank Math is active
 - **MemberPress Courses Integration** - Automatic Course/Lesson hierarchy for LearningResource schemas
@@ -230,6 +232,14 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - [Metodo.dev](https://metodo.dev)
 
 ## Changelog
+
+### 1.9.0
+- **New**: Property information modal - Click on any schema property name to see detailed description, examples, and schema.org documentation link
+- **New**: Smart schema suggestions - Plugin now recommends schema types based on post type names (e.g., "recipes" → Recipe schema, "guides" → LearningResource)
+- **New**: Auto-selection of recommended schema for unconfigured post types
+- **New**: "Recommended" badge displayed next to suggested schema types
+- **Improved**: All 16 schema types now include `description_long`, `example`, and `schema_url` for comprehensive documentation
+- **New**: Added `SchemaRecommender` class for intelligent post type → schema matching (English patterns)
 
 ### 1.8.1
 - **Changed**: Repository is now public - automatic updates work without GitHub token

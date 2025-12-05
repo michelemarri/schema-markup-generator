@@ -74,6 +74,30 @@ In the **Post Types** tab, you can:
 2. **Configure Field Mappings**: Map custom fields to schema properties
 3. **View Available Fields**: See all discoverable fields (ACF, meta, etc.)
 
+#### Smart Schema Suggestions
+
+The plugin automatically recommends schema types based on your post type names. For example:
+- Post types containing "recipe" or "recipes" → Recipe schema
+- Post types containing "guide" or "guides" → LearningResource schema
+- Post types containing "product" or "shop" → Product schema
+- Post types containing "event" → Event schema
+
+When a recommendation is available:
+- The suggested schema is **automatically selected** for unconfigured post types
+- A **"Recommended" badge** appears next to the suggested option
+- A **lightbulb icon** shows why that schema was recommended
+
+You can always override the suggestion and select a different schema type.
+
+#### Property Information Modal
+
+When configuring field mappings, **click on any property name** to open a detailed information modal that includes:
+- **Detailed description**: In-depth explanation of what the property is for
+- **Examples**: Real-world examples of valid values
+- **Schema.org link**: Direct link to the official schema.org documentation
+
+This helps you understand exactly what data to provide for each schema property.
+
 ### Advanced Settings
 
 In the **Advanced** tab:

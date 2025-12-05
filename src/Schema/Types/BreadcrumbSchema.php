@@ -262,6 +262,9 @@ class BreadcrumbSchema extends AbstractSchema
             'itemListElement' => [
                 'type' => 'auto',
                 'description' => __('Auto-generated navigation path. Shows clickable breadcrumb trail in Google search results.', 'schema-markup-generator'),
+                'description_long' => __('The breadcrumb trail is automatically generated based on the page hierarchy: homepage → post type archive → categories/parent pages → current page. This displays as clickable links in Google search results, helping users understand where the page sits in your site structure.', 'schema-markup-generator'),
+                'example' => __('Home > Blog > Technology > How to Build a Website', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/BreadcrumbList',
                 'auto' => 'hierarchy',
             ],
         ];

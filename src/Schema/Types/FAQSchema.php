@@ -133,9 +133,22 @@ class FAQSchema extends AbstractSchema
             'faqItems' => [
                 'type' => 'repeater',
                 'description' => __('Question/Answer pairs. Enables expandable FAQ rich results in Google - major SERP real estate boost.', 'schema-markup-generator'),
+                'description_long' => __('A list of frequently asked questions and their answers. FAQ rich results display as expandable Q&A sections directly in search results, dramatically increasing your SERP visibility. Each question should match common user search queries.', 'schema-markup-generator'),
+                'example' => __('Q: How long does shipping take? A: Standard shipping takes 3-5 business days. Express shipping delivers within 1-2 days.', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/FAQPage',
                 'fields' => [
-                    'question' => ['type' => 'text', 'description' => __('The question text. Should match user search intent.', 'schema-markup-generator')],
-                    'answer' => ['type' => 'textarea', 'description' => __('Complete answer. Keep concise but informative (50-300 words ideal).', 'schema-markup-generator')],
+                    'question' => [
+                        'type' => 'text',
+                        'description' => __('The question text. Should match user search intent.', 'schema-markup-generator'),
+                        'description_long' => __('The full text of the question. Use natural language that matches how users actually search. Questions ending with "?" work best.', 'schema-markup-generator'),
+                        'example' => __('What are your return policies?, How do I reset my password?, Is shipping free?', 'schema-markup-generator'),
+                    ],
+                    'answer' => [
+                        'type' => 'textarea',
+                        'description' => __('Complete answer. Keep concise but informative (50-300 words ideal).', 'schema-markup-generator'),
+                        'description_long' => __('The complete answer to the question. Be thorough but concise. Google typically displays the first 1-2 sentences, so front-load the key information. HTML links are supported.', 'schema-markup-generator'),
+                        'example' => __('We offer free returns within 30 days of purchase. Simply visit our returns portal to generate a prepaid shipping label.', 'schema-markup-generator'),
+                    ],
                 ],
             ],
         ];

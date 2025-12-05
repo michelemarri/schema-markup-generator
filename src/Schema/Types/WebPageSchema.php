@@ -185,16 +185,25 @@ class WebPageSchema extends AbstractSchema
             'name' => [
                 'type' => 'text',
                 'description' => __('Page title. Establishes page identity in site hierarchy.', 'schema-markup-generator'),
+                'description_long' => __('The name of the web page. This helps establish the page\'s identity within the site hierarchy and is used by search engines to understand the page structure.', 'schema-markup-generator'),
+                'example' => __('About Us, Contact, Privacy Policy, Services', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/name',
                 'auto' => 'post_title',
             ],
             'description' => [
                 'type' => 'text',
                 'description' => __('Page summary. Helps search engines understand page purpose.', 'schema-markup-generator'),
+                'description_long' => __('A short description of the web page\'s content and purpose. This helps search engines understand what the page is about and may be used in search result snippets.', 'schema-markup-generator'),
+                'example' => __('Learn more about our company history, mission, and the team behind our success.', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/description',
                 'auto' => 'post_excerpt',
             ],
             'pageType' => [
                 'type' => 'select',
                 'description' => __('Specific page type. Auto-detected from URL/title, or override manually.', 'schema-markup-generator'),
+                'description_long' => __('The specific type of web page. Different page types may have different rich result eligibility. Google can auto-detect some page types, but manual override ensures accuracy.', 'schema-markup-generator'),
+                'example' => __('AboutPage for "About Us", ContactPage for "Contact", FAQPage for FAQ sections', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/WebPage',
                 'options' => [
                     'WebPage',
                     'AboutPage',

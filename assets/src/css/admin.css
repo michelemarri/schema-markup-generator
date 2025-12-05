@@ -1189,6 +1189,169 @@
   @apply text-sm text-gray-500 mb-4;
 }
 
+.smg-fields-hint {
+  @apply text-gray-400;
+}
+
+/* ========================================
+   Property Name Link (Clickable)
+   ======================================== */
+
+.smg-property-name {
+  @apply font-semibold cursor-pointer;
+  color: #2271b1;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  transition: color 200ms ease;
+}
+
+.smg-property-name:hover {
+  color: #135e96;
+  text-decoration-style: solid;
+}
+
+.smg-property-name:focus {
+  @apply outline-none;
+  color: #135e96;
+}
+
+/* ========================================
+   Recommended Badge
+   ======================================== */
+
+.smg-recommended-badge {
+  @apply inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-green-700 rounded-full whitespace-nowrap ml-2;
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  box-shadow: 0 1px 2px rgba(34, 197, 94, 0.2);
+}
+
+.smg-recommended-badge .dashicons {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.smg-recommendation-reason {
+  @apply text-amber-500 ml-2;
+  cursor: help;
+}
+
+.smg-recommendation-reason .dashicons {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.smg-post-type-schema {
+  @apply flex items-center min-w-[220px];
+}
+
+/* ========================================
+   Property Details Modal
+   ======================================== */
+
+.smg-modal {
+  @apply fixed inset-0 z-[100000] items-center justify-center p-4;
+  display: none;
+}
+
+.smg-modal-overlay {
+  @apply absolute inset-0 bg-black/50;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.smg-modal.smg-modal-open .smg-modal-overlay {
+  opacity: 1;
+}
+
+.smg-modal-content {
+  @apply relative w-full max-w-lg bg-white rounded-xl shadow-2xl;
+  transform: scale(0.95) translateY(-20px);
+  opacity: 0;
+  transition: all 200ms ease;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.smg-modal.smg-modal-open .smg-modal-content {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.smg-modal-close {
+  @apply absolute top-4 right-4 flex items-center justify-center w-8 h-8 text-gray-400 bg-transparent border-0 rounded-full cursor-pointer;
+  transition: all 200ms ease;
+  z-index: 10;
+}
+
+.smg-modal-close:hover {
+  @apply bg-gray-100 text-gray-600;
+}
+
+.smg-modal-close .dashicons {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.smg-modal-title {
+  @apply text-lg font-semibold text-gray-900 m-0 pr-10 px-6 pt-6 pb-4 border-b border-gray-100;
+  background: linear-gradient(135deg, #fafafa, #f5f5f5);
+}
+
+.smg-modal-body {
+  @apply px-6 py-5 overflow-y-auto;
+  flex: 1;
+}
+
+.smg-modal-description {
+  @apply text-sm text-gray-600 leading-relaxed mb-5;
+}
+
+.smg-modal-examples {
+  @apply p-4 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+.smg-modal-examples > strong {
+  @apply block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3;
+}
+
+.smg-examples-list {
+  @apply list-none m-0 p-0 flex flex-col gap-2;
+}
+
+.smg-examples-list li {
+  @apply text-sm text-gray-700;
+}
+
+.smg-examples-list code {
+  @apply px-2 py-1 text-xs font-mono bg-white border border-gray-200 rounded;
+  word-break: break-all;
+}
+
+.smg-modal-footer {
+  @apply px-6 py-4 bg-gray-50 border-t border-gray-200;
+}
+
+.smg-modal-link {
+  @apply inline-flex items-center gap-2 text-sm font-medium text-gray-700;
+  text-decoration: none !important;
+}
+
+.smg-modal-link:hover {
+  @apply text-gray-900;
+}
+
+.smg-modal-link .dashicons {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
 /* Hidden utility */
 .smg-hidden {
   display: none !important;

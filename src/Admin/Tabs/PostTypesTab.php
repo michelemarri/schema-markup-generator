@@ -7,6 +7,7 @@ namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
 use Metodo\SchemaMarkupGenerator\Discovery\PostTypeDiscovery;
 use Metodo\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
 use Metodo\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
+use Metodo\SchemaMarkupGenerator\Discovery\SchemaRecommender;
 use Metodo\SchemaMarkupGenerator\Integration\ACFIntegration;
 use Metodo\SchemaMarkupGenerator\Schema\SchemaFactory;
 
@@ -25,6 +26,7 @@ class PostTypesTab extends AbstractTab
     private TaxonomyDiscovery $taxonomyDiscovery;
     private ACFIntegration $acfIntegration;
     private SchemaFactory $schemaFactory;
+    private SchemaRecommender $schemaRecommender;
 
     public function __construct(
         PostTypeDiscovery $postTypeDiscovery,
@@ -37,6 +39,7 @@ class PostTypesTab extends AbstractTab
         $this->taxonomyDiscovery = $taxonomyDiscovery;
         $this->acfIntegration = $acfIntegration;
         $this->schemaFactory = new SchemaFactory();
+        $this->schemaRecommender = new SchemaRecommender();
     }
 
     public function getTitle(): string
@@ -131,7 +134,12 @@ class PostTypesTab extends AbstractTab
             <div class="flex flex-col gap-4">
                 <?php foreach ($postTypes as $postType => $postTypeObj): ?>
                     <?php
+                    $recommendedSchema = $this->schemaRecommender->getRecommendedSchema($postType);
                     $currentSchema = $mappings[$postType] ?? '';
+                    // Auto-select recommended schema if no mapping exists
+                    if (empty($currentSchema) && $recommendedSchema) {
+                        $currentSchema = $recommendedSchema;
+                    }
                     $postTypeFields = $this->customFieldDiscovery->getFieldsForPostType($postType);
                     $currentFieldMapping = $fieldMappings[$postType] ?? [];
                     ?>
@@ -141,23 +149,40 @@ class PostTypesTab extends AbstractTab
                                 <span class="dashicons <?php echo esc_attr($postTypeObj->menu_icon ?? 'dashicons-admin-post'); ?>"></span>
                                 <h3><?php echo esc_html($postTypeObj->labels->singular_name); ?></h3>
                                 <code><?php echo esc_html($postType); ?></code>
+                                <?php if ($recommendedSchema): ?>
+                                    <span class="smg-recommendation-reason" title="<?php echo esc_attr($this->schemaRecommender->getRecommendationReason($postType) ?? ''); ?>">
+                                        <span class="dashicons dashicons-lightbulb"></span>
+                                    </span>
+                                <?php endif; ?>
                             </div>
                             <div class="smg-post-type-schema">
                                 <select name="smg_post_type_mappings[<?php echo esc_attr($postType); ?>]"
                                         class="smg-select"
-                                        data-post-type="<?php echo esc_attr($postType); ?>">
+                                        data-post-type="<?php echo esc_attr($postType); ?>"
+                                        data-recommended="<?php echo esc_attr($recommendedSchema ?? ''); ?>">
                                     <option value=""><?php esc_html_e('— No Schema —', 'schema-markup-generator'); ?></option>
                                     <?php foreach ($schemaTypes as $group => $types): ?>
                                         <optgroup label="<?php echo esc_attr($group); ?>">
                                             <?php foreach ($types as $type => $label): ?>
+                                                <?php $isRecommended = ($type === $recommendedSchema); ?>
                                                 <option value="<?php echo esc_attr($type); ?>"
-                                                        <?php selected($currentSchema, $type); ?>>
+                                                        <?php selected($currentSchema, $type); ?>
+                                                        <?php echo $isRecommended ? 'data-recommended="true"' : ''; ?>>
                                                     <?php echo esc_html($label); ?>
+                                                    <?php if ($isRecommended): ?>
+                                                        ★
+                                                    <?php endif; ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         </optgroup>
                                     <?php endforeach; ?>
                                 </select>
+                                <?php if ($recommendedSchema && $currentSchema === $recommendedSchema): ?>
+                                    <span class="smg-recommended-badge">
+                                        <span class="dashicons dashicons-yes"></span>
+                                        <?php esc_html_e('Recommended', 'schema-markup-generator'); ?>
+                                    </span>
+                                <?php endif; ?>
                             </div>
                             <button type="button" class="smg-toggle-fields button button-secondary"
                                     aria-expanded="false">
@@ -182,6 +207,7 @@ class PostTypesTab extends AbstractTab
                                 <?php if (!empty($schemaProps)): ?>
                                     <p class="smg-fields-description">
                                         <?php esc_html_e('Map your custom fields to schema properties for richer structured data.', 'schema-markup-generator'); ?>
+                                        <span class="smg-fields-hint"><?php esc_html_e('Click on a property name for more details.', 'schema-markup-generator'); ?></span>
                                     </p>
 
                                     <table class="smg-mapping-table">
@@ -196,7 +222,14 @@ class PostTypesTab extends AbstractTab
                                             <?php foreach ($schemaProps as $propName => $propDef): ?>
                                                 <tr>
                                                     <td>
-                                                        <strong><?php echo esc_html($propName); ?></strong>
+                                                        <a href="#" 
+                                                           class="smg-property-name" 
+                                                           data-property="<?php echo esc_attr($propName); ?>"
+                                                           data-description="<?php echo esc_attr($propDef['description_long'] ?? $propDef['description'] ?? ''); ?>"
+                                                           data-example="<?php echo esc_attr($propDef['example'] ?? ''); ?>"
+                                                           data-schema-url="<?php echo esc_attr($propDef['schema_url'] ?? ''); ?>">
+                                                            <?php echo esc_html($propName); ?>
+                                                        </a>
                                                         <br>
                                                         <small class="text-gray-500"><?php echo esc_html($propDef['description'] ?? ''); ?></small>
                                                     </td>
@@ -278,6 +311,30 @@ class PostTypesTab extends AbstractTab
                     <?php esc_html_e('Advanced Custom Fields detected. ACF fields are available for mapping.', 'schema-markup-generator'); ?>
                 </div>
             <?php endif; ?>
+
+            <!-- Property Details Modal -->
+            <div id="smg-property-modal" class="smg-modal" style="display: none;">
+                <div class="smg-modal-overlay"></div>
+                <div class="smg-modal-content">
+                    <button type="button" class="smg-modal-close">
+                        <span class="dashicons dashicons-no-alt"></span>
+                    </button>
+                    <h3 class="smg-modal-title"></h3>
+                    <div class="smg-modal-body">
+                        <div class="smg-modal-description"></div>
+                        <div class="smg-modal-examples">
+                            <strong><?php esc_html_e('Examples:', 'schema-markup-generator'); ?></strong>
+                            <ul class="smg-examples-list"></ul>
+                        </div>
+                    </div>
+                    <div class="smg-modal-footer">
+                        <a class="smg-modal-link button button-secondary" href="#" target="_blank" rel="noopener">
+                            <span class="dashicons dashicons-external"></span>
+                            <?php esc_html_e('View on schema.org', 'schema-markup-generator'); ?>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
         <?php
     }

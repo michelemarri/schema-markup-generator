@@ -97,6 +97,27 @@
                 }
             });
 
+            // Property name click (open modal)
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.smg-property-name')) {
+                    this.handlePropertyClick(e);
+                }
+            });
+
+            // Modal close button
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.smg-modal-close') || e.target.classList.contains('smg-modal-overlay')) {
+                    this.closePropertyModal();
+                }
+            });
+
+            // Close modal on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.closePropertyModal();
+                }
+            });
+
             // Form submit animation
             if (this.elements.settingsForm) {
                 this.elements.settingsForm.addEventListener('submit', (e) => {
@@ -222,6 +243,112 @@
             } else {
                 this.slideDown(fields);
             }
+        },
+
+        /**
+         * Handle property name click - Opens the property details modal
+         */
+        handlePropertyClick(e) {
+            e.preventDefault();
+            const link = e.target.closest('.smg-property-name');
+            
+            if (!link) return;
+
+            const propertyName = link.dataset.property;
+            const description = link.dataset.description;
+            const example = link.dataset.example;
+            const schemaUrl = link.dataset.schemaUrl;
+
+            this.openPropertyModal({
+                name: propertyName,
+                description: description,
+                example: example,
+                schemaUrl: schemaUrl
+            });
+        },
+
+        /**
+         * Open the property details modal
+         */
+        openPropertyModal(data) {
+            const modal = document.getElementById('smg-property-modal');
+            
+            if (!modal) return;
+
+            // Populate modal content
+            const titleEl = modal.querySelector('.smg-modal-title');
+            const descriptionEl = modal.querySelector('.smg-modal-description');
+            const examplesEl = modal.querySelector('.smg-modal-examples');
+            const examplesList = modal.querySelector('.smg-examples-list');
+            const linkEl = modal.querySelector('.smg-modal-link');
+
+            if (titleEl) {
+                titleEl.textContent = data.name || '';
+            }
+
+            if (descriptionEl) {
+                descriptionEl.textContent = data.description || '';
+            }
+
+            // Handle examples
+            if (examplesList && data.example) {
+                // Split examples by comma and create list items
+                const examples = data.example.split(',').map(ex => ex.trim()).filter(ex => ex);
+                
+                if (examples.length > 0) {
+                    examplesList.innerHTML = examples.map(ex => `<li><code>${this.escapeHtml(ex)}</code></li>`).join('');
+                    if (examplesEl) examplesEl.style.display = 'block';
+                } else {
+                    if (examplesEl) examplesEl.style.display = 'none';
+                }
+            } else {
+                if (examplesEl) examplesEl.style.display = 'none';
+            }
+
+            // Handle schema.org link
+            if (linkEl) {
+                if (data.schemaUrl) {
+                    linkEl.href = data.schemaUrl;
+                    linkEl.style.display = 'inline-flex';
+                } else {
+                    linkEl.style.display = 'none';
+                }
+            }
+
+            // Show modal with animation
+            modal.style.display = 'flex';
+            modal.offsetHeight; // Force reflow
+            modal.classList.add('smg-modal-open');
+
+            // Prevent body scrolling
+            document.body.style.overflow = 'hidden';
+        },
+
+        /**
+         * Close the property details modal
+         */
+        closePropertyModal() {
+            const modal = document.getElementById('smg-property-modal');
+            
+            if (!modal || modal.style.display === 'none') return;
+
+            modal.classList.remove('smg-modal-open');
+
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, this.config.animationDuration);
+
+            // Restore body scrolling
+            document.body.style.overflow = '';
+        },
+
+        /**
+         * Escape HTML special characters
+         */
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         },
 
         /**

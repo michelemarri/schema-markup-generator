@@ -100,6 +100,7 @@ class SchemaPropertiesHandler
         ?>
         <p class="smg-fields-description">
             <?php esc_html_e('Map your custom fields to schema properties for richer structured data.', 'schema-markup-generator'); ?>
+            <span class="smg-fields-hint"><?php esc_html_e('Click on a property name for more details.', 'schema-markup-generator'); ?></span>
         </p>
 
         <table class="smg-mapping-table">
@@ -114,7 +115,14 @@ class SchemaPropertiesHandler
                 <?php foreach ($schemaProps as $propName => $propDef): ?>
                     <tr class="smg-mapping-row smg-animate-fade-in">
                         <td>
-                            <strong><?php echo esc_html($propName); ?></strong>
+                            <a href="#" 
+                               class="smg-property-name" 
+                               data-property="<?php echo esc_attr($propName); ?>"
+                               data-description="<?php echo esc_attr($propDef['description_long'] ?? $propDef['description'] ?? ''); ?>"
+                               data-example="<?php echo esc_attr($propDef['example'] ?? ''); ?>"
+                               data-schema-url="<?php echo esc_attr($propDef['schema_url'] ?? ''); ?>">
+                                <?php echo esc_html($propName); ?>
+                            </a>
                             <br>
                             <small><?php echo esc_html($propDef['description'] ?? ''); ?></small>
                         </td>
@@ -177,6 +185,30 @@ class SchemaPropertiesHandler
                 <?php endforeach; ?>
             </tbody>
         </table>
+
+        <!-- Property Details Modal -->
+        <div id="smg-property-modal" class="smg-modal" style="display: none;">
+            <div class="smg-modal-overlay"></div>
+            <div class="smg-modal-content">
+                <button type="button" class="smg-modal-close">
+                    <span class="dashicons dashicons-no-alt"></span>
+                </button>
+                <h3 class="smg-modal-title"></h3>
+                <div class="smg-modal-body">
+                    <div class="smg-modal-description"></div>
+                    <div class="smg-modal-examples">
+                        <strong><?php esc_html_e('Examples:', 'schema-markup-generator'); ?></strong>
+                        <ul class="smg-examples-list"></ul>
+                    </div>
+                </div>
+                <div class="smg-modal-footer">
+                    <a class="smg-modal-link button button-secondary" href="#" target="_blank" rel="noopener">
+                        <span class="dashicons dashicons-external"></span>
+                        <?php esc_html_e('View on schema.org', 'schema-markup-generator'); ?>
+                    </a>
+                </div>
+            </div>
+        </div>
         <?php
         return ob_get_clean();
     }

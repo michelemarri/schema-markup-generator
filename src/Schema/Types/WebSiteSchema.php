@@ -100,16 +100,25 @@ class WebSiteSchema extends AbstractSchema
             'name' => [
                 'type' => 'text',
                 'description' => __('Site name. Shown in Google Knowledge Panel and search results.', 'schema-markup-generator'),
+                'description_long' => __('The official name of your website. This is displayed in Google\'s Knowledge Panel and can appear as the site name in search results (replacing the domain name).', 'schema-markup-generator'),
+                'example' => __('Acme Corporation, The Daily Tech, My Awesome Blog', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/name',
                 'auto' => 'site_name',
             ],
             'description' => [
                 'type' => 'text',
                 'description' => __('Site tagline/description. Helps define brand identity in search.', 'schema-markup-generator'),
+                'description_long' => __('A brief description or tagline for your website. This helps define your brand identity and helps search engines understand the site\'s overall purpose.', 'schema-markup-generator'),
+                'example' => __('Your trusted source for tech news and reviews, Helping businesses grow since 1995', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/description',
                 'auto' => 'site_description',
             ],
             'enableSearchAction' => [
                 'type' => 'boolean',
                 'description' => __('Enables sitelinks search box in Google results. Shows search field under your listing.', 'schema-markup-generator'),
+                'description_long' => __('When enabled, adds SearchAction schema that can trigger the sitelinks search box in Google. This shows a search field directly in your search result, allowing users to search your site from Google.', 'schema-markup-generator'),
+                'example' => __('true (enable), false (disable)', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/potentialAction',
             ],
         ];
     }

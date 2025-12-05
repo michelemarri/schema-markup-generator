@@ -362,16 +362,25 @@ class CourseSchema extends AbstractSchema
             'name' => [
                 'type' => 'text',
                 'description' => __('Course title. Shown in Google rich results and AI answers.', 'schema-markup-generator'),
+                'description_long' => __('The name of the course. This is the primary text displayed in course rich results and educational search features. Be specific and include key details like the technology or skill taught.', 'schema-markup-generator'),
+                'example' => __('Complete Python Bootcamp, Advanced SEO Masterclass, Introduction to Machine Learning', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/name',
                 'auto' => 'post_title',
             ],
             'description' => [
                 'type' => 'text',
                 'description' => __('Course summary. Used by search engines and LLMs to understand and present your course.', 'schema-markup-generator'),
+                'description_long' => __('A comprehensive description of what the course covers, who it is for, and what students will achieve. This is heavily used by AI and search engines to match courses with user queries.', 'schema-markup-generator'),
+                'example' => __('Master Python programming from scratch. This comprehensive course covers fundamentals to advanced topics including web development, data analysis, and automation.', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/description',
                 'auto' => 'post_excerpt',
             ],
             'provider' => [
                 'type' => 'text',
                 'description' => __('Organization/school offering the course. Builds brand recognition in search results.', 'schema-markup-generator'),
+                'description_long' => __('The organization, school, or platform providing the course. This builds brand recognition and helps establish credibility in search results.', 'schema-markup-generator'),
+                'example' => __('Udemy, Coursera, Harvard University, Your Academy Name', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/provider',
             ],
 
             // ========================================
@@ -380,18 +389,30 @@ class CourseSchema extends AbstractSchema
             'teaches' => [
                 'type' => 'textarea',
                 'description' => __('CRITICAL for AI: List what students will learn (comma-separated). LLMs use this to match courses with user queries.', 'schema-markup-generator'),
+                'description_long' => __('The skills, concepts, or competencies that the course teaches. This is one of the most important properties for AI and LLM matching - be specific and comprehensive. List both broad topics and specific skills.', 'schema-markup-generator'),
+                'example' => __('Python programming, Object-oriented programming, Web scraping, Data visualization, API integration, Django web framework', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/teaches',
             ],
             'about' => [
                 'type' => 'text',
                 'description' => __('Main topics covered (comma-separated). Helps AI understand the course subject area for semantic matching.', 'schema-markup-generator'),
+                'description_long' => __('The main subject areas or topics that the course is about. This helps search engines and AI understand the semantic context of your course.', 'schema-markup-generator'),
+                'example' => __('Software Development, Web Development, Data Science, Digital Marketing', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/about',
             ],
             'keywords' => [
                 'type' => 'text',
                 'description' => __('Keywords for search visibility (comma-separated). Used by search engines and AI for indexing.', 'schema-markup-generator'),
+                'description_long' => __('Keywords and tags that describe the course content. Include both technical terms and common search phrases users might use to find this type of course.', 'schema-markup-generator'),
+                'example' => __('python course, learn programming, coding bootcamp, web development, beginner friendly', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/keywords',
             ],
             'syllabus' => [
                 'type' => 'textarea',
                 'description' => __('Course program/curriculum description. Helps LLMs understand the learning path and structure.', 'schema-markup-generator'),
+                'description_long' => __('A detailed outline of the course curriculum. Include modules, units, or sections with their topics. This helps AI understand the depth and structure of your course.', 'schema-markup-generator'),
+                'example' => __('Module 1: Python Basics (variables, data types, operators). Module 2: Control Flow (if statements, loops). Module 3: Functions and Modules...', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/syllabusSections',
             ],
 
             // ========================================
@@ -400,18 +421,30 @@ class CourseSchema extends AbstractSchema
             'instructor' => [
                 'type' => 'text',
                 'description' => __('Instructor/teacher name. Adds credibility and may appear in rich results.', 'schema-markup-generator'),
+                'description_long' => __('The instructor or teacher delivering the course. Including instructor credentials helps establish E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness).', 'schema-markup-generator'),
+                'example' => __('Dr. John Smith, Jane Doe (Senior Developer at Google), Prof. Maria Garcia', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/instructor',
             ],
             'ratingValue' => [
                 'type' => 'number',
                 'description' => __('Average rating (1-5). Shows star rating in search results - major CTR boost.', 'schema-markup-generator'),
+                'description_long' => __('The average student rating for the course. Star ratings in search results significantly improve click-through rates and help users choose courses.', 'schema-markup-generator'),
+                'example' => __('4.8, 4.5, 4.9', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/ratingValue',
             ],
             'ratingCount' => [
                 'type' => 'number',
                 'description' => __('Number of reviews. Shown alongside rating for social proof.', 'schema-markup-generator'),
+                'description_long' => __('The total number of student ratings. Higher numbers provide stronger social proof and indicate course popularity.', 'schema-markup-generator'),
+                'example' => __('2547, 891, 15420', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/ratingCount',
             ],
             'totalHistoricalEnrollment' => [
                 'type' => 'number',
                 'description' => __('Total students enrolled. Social proof signal used by AI to assess popularity.', 'schema-markup-generator'),
+                'description_long' => __('The total number of students who have ever enrolled in the course. This is a powerful social proof signal that AI systems use to assess course quality and popularity.', 'schema-markup-generator'),
+                'example' => __('15000, 52000, 125000', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/totalHistoricalEnrollment',
             ],
 
             // ========================================
@@ -420,14 +453,23 @@ class CourseSchema extends AbstractSchema
             'price' => [
                 'type' => 'number',
                 'description' => __('Course price. Enables price display in search results. Use 0 for free courses.', 'schema-markup-generator'),
+                'description_long' => __('The price of the course. Use 0 for free courses (this will show "Free" in search results). Price information helps users filter and compare courses.', 'schema-markup-generator'),
+                'example' => __('0 (free), 49.99, 199.00, 499.00', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/price',
             ],
             'priceCurrency' => [
                 'type' => 'text',
                 'description' => __('Currency code (EUR, USD, etc.). Required if price is set.', 'schema-markup-generator'),
+                'description_long' => __('The currency of the course price in ISO 4217 format. Required whenever a price is specified.', 'schema-markup-generator'),
+                'example' => __('EUR, USD, GBP', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/priceCurrency',
             ],
             'availability' => [
                 'type' => 'select',
                 'description' => __('Course availability status. Affects how the course appears in search.', 'schema-markup-generator'),
+                'description_long' => __('The availability status of the course. Use InStock for open enrollment, PreOrder for upcoming courses, or SoldOut if enrollment is closed.', 'schema-markup-generator'),
+                'example' => __('InStock (open enrollment), PreOrder (coming soon)', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/availability',
                 'options' => ['InStock', 'SoldOut', 'PreOrder', 'Discontinued'],
             ],
 
@@ -437,24 +479,39 @@ class CourseSchema extends AbstractSchema
             'duration' => [
                 'type' => 'number',
                 'description' => __('Total course duration in hours. Helps users understand time commitment.', 'schema-markup-generator'),
+                'description_long' => __('The total duration of all course content in hours. This helps students understand the time commitment required to complete the course.', 'schema-markup-generator'),
+                'example' => __('12, 40, 100 (hours)', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/timeRequired',
             ],
             'educationalLevel' => [
                 'type' => 'select',
                 'description' => __('Difficulty level. Helps match courses to appropriate learners.', 'schema-markup-generator'),
+                'description_long' => __('The difficulty or complexity level of the course. This helps users find courses appropriate for their current skill level.', 'schema-markup-generator'),
+                'example' => __('Beginner, Intermediate, Advanced', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/educationalLevel',
                 'options' => ['Beginner', 'Intermediate', 'Advanced', 'Expert'],
             ],
             'courseMode' => [
                 'type' => 'select',
                 'description' => __('Delivery format. Important for users searching specific course types.', 'schema-markup-generator'),
+                'description_long' => __('How the course is delivered: online (fully remote), onsite (in-person), or blended (combination). Important for users with specific delivery preferences.', 'schema-markup-generator'),
+                'example' => __('online, onsite, blended', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/courseMode',
                 'options' => ['online', 'onsite', 'blended'],
             ],
             'inLanguage' => [
                 'type' => 'text',
                 'description' => __('Course language (e.g., "it", "en"). Auto-detected from WordPress if not set.', 'schema-markup-generator'),
+                'description_long' => __('The language in which the course is taught. Use ISO 639-1 codes (e.g., "en" for English, "it" for Italian). Automatically detected from WordPress settings if not specified.', 'schema-markup-generator'),
+                'example' => __('en, it, es, de, fr', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/inLanguage',
             ],
             'numberOfCredits' => [
                 'type' => 'number',
                 'description' => __('Academic credits awarded. Relevant for formal education courses.', 'schema-markup-generator'),
+                'description_long' => __('The number of academic credits (ECTS, credit hours, etc.) awarded upon completion. Relevant for accredited courses or formal education programs.', 'schema-markup-generator'),
+                'example' => __('3, 6, 12 (credits)', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/numberOfCredits',
             ],
 
             // ========================================
@@ -463,10 +520,16 @@ class CourseSchema extends AbstractSchema
             'coursePrerequisites' => [
                 'type' => 'textarea',
                 'description' => __('Required knowledge before starting (text description). Helps users self-assess readiness.', 'schema-markup-generator'),
+                'description_long' => __('A description of knowledge, skills, or experience students should have before taking the course. Helps users assess if they are ready for the course.', 'schema-markup-generator'),
+                'example' => __('Basic understanding of HTML and CSS, familiarity with any programming language, no prior experience required', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/coursePrerequisites',
             ],
             'competencyRequired' => [
                 'type' => 'text',
                 'description' => __('Specific skills needed (comma-separated). More structured than prerequisites for AI matching.', 'schema-markup-generator'),
+                'description_long' => __('Specific competencies or skills required as prerequisites. This is a more structured way to describe prerequisites that helps AI systems match courses to learners.', 'schema-markup-generator'),
+                'example' => __('HTML, CSS, Basic JavaScript, Command line basics', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/competencyRequired',
             ],
 
             // ========================================
@@ -475,10 +538,16 @@ class CourseSchema extends AbstractSchema
             'audience' => [
                 'type' => 'text',
                 'description' => __('Target audience (e.g., "developer", "student", "professional"). Helps AI recommend to right users.', 'schema-markup-generator'),
+                'description_long' => __('The intended audience for the course. Be specific about roles, career stages, or backgrounds that would benefit most from this course.', 'schema-markup-generator'),
+                'example' => __('aspiring web developers, marketing professionals, data analysts, career changers', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/audience',
             ],
             'educationalCredentialAwarded' => [
                 'type' => 'text',
                 'description' => __('Certificate/credential name awarded upon completion. Important for career-focused searches.', 'schema-markup-generator'),
+                'description_long' => __('The credential, certificate, or badge awarded upon successful completion. This is important for users searching for courses that provide recognized credentials.', 'schema-markup-generator'),
+                'example' => __('Google Data Analytics Professional Certificate, AWS Certified Developer, Completion Certificate', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/educationalCredentialAwarded',
             ],
         ];
     }
