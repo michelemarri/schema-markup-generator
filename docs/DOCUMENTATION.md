@@ -74,6 +74,14 @@ In the **Post Types** tab, you can:
 2. **Configure Field Mappings**: Map custom fields to schema properties
 3. **View Available Fields**: See all discoverable fields (ACF, meta, etc.)
 
+#### Auto-Save Feature
+
+All changes in the Post Types tab are **saved automatically** when you:
+- Select a different schema type for a post type
+- Change any field mapping
+
+No "Save Changes" button is required - you'll see a brief visual confirmation (green flash) when your changes are saved. This makes configuration faster and more intuitive.
+
 #### Smart Schema Suggestions
 
 The plugin automatically recommends schema types based on your post type names. For example:

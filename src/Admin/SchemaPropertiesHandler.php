@@ -46,6 +46,9 @@ class SchemaPropertiesHandler
             wp_send_json_error(['message' => __('Invalid post type', 'schema-markup-generator')]);
         }
 
+        // Force fresh read (clear cache)
+        wp_cache_delete('alloptions', 'options');
+        
         // Get current field mappings for this post type
         $fieldMappings = get_option('smg_field_mappings', []);
         $currentFieldMapping = $fieldMappings[$postType] ?? [];

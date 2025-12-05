@@ -8,6 +8,7 @@ use Metodo\SchemaMarkupGenerator\Admin\SettingsPage;
 use Metodo\SchemaMarkupGenerator\Admin\MetaBox;
 use Metodo\SchemaMarkupGenerator\Admin\PreviewHandler;
 use Metodo\SchemaMarkupGenerator\Admin\SchemaPropertiesHandler;
+use Metodo\SchemaMarkupGenerator\Admin\MappingSaveHandler;
 use Metodo\SchemaMarkupGenerator\Discovery\PostTypeDiscovery;
 use Metodo\SchemaMarkupGenerator\Discovery\CustomFieldDiscovery;
 use Metodo\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
@@ -124,6 +125,7 @@ class Plugin
                 $this->services['schema_factory'],
                 $this->services['custom_field_discovery']
             );
+            $this->services['mapping_save_handler'] = new MappingSaveHandler();
         }
     }
 
@@ -184,6 +186,8 @@ class Plugin
             add_action('wp_ajax_smg_preview_schema', [$this->services['preview_handler'], 'handle']);
             add_action('wp_ajax_smg_check_updates', [$this, 'handleCheckUpdates']);
             add_action('wp_ajax_smg_get_schema_properties', [$this->services['schema_properties_handler'], 'handle']);
+            add_action('wp_ajax_smg_save_schema_mapping', [$this->services['mapping_save_handler'], 'handleSaveSchemaMapping']);
+            add_action('wp_ajax_smg_save_field_mapping', [$this->services['mapping_save_handler'], 'handleSaveFieldMapping']);
         }
 
         // Plugin action links
@@ -247,6 +251,10 @@ class Plugin
                 'copied' => __('Copied to clipboard', 'schema-markup-generator'),
                 'copyFailed' => __('Failed to copy', 'schema-markup-generator'),
                 'refreshFailed' => __('Failed to refresh preview', 'schema-markup-generator'),
+                'loading' => __('Loading...', 'schema-markup-generator'),
+                'saved' => __('Saved', 'schema-markup-generator'),
+                'saving' => __('Saving...', 'schema-markup-generator'),
+                'saveFailed' => __('Failed to save', 'schema-markup-generator'),
             ],
         ]);
     }

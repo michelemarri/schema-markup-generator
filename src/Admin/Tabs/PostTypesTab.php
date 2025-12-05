@@ -52,9 +52,13 @@ class PostTypesTab extends AbstractTab
         return 'dashicons-admin-post';
     }
 
+    /**
+     * Return empty string to disable the form wrapper and Save button
+     * Mappings are auto-saved via AJAX
+     */
     public function getSettingsGroup(): string
     {
-        return 'smg_post_types';
+        return '';
     }
 
     public function getRegisteredOptions(): array
@@ -120,6 +124,10 @@ class PostTypesTab extends AbstractTab
     public function render(): void
     {
         $postTypes = $this->postTypeDiscovery->getPostTypes();
+        
+        // Force fresh read (clear alloptions cache)
+        wp_cache_delete('alloptions', 'options');
+        
         $mappings = get_option('smg_post_type_mappings', []);
         $fieldMappings = get_option('smg_field_mappings', []);
         $schemaTypes = $this->schemaFactory->getTypesGrouped();
@@ -157,7 +165,7 @@ class PostTypesTab extends AbstractTab
                             </div>
                             <div class="smg-post-type-schema">
                                 <select name="smg_post_type_mappings[<?php echo esc_attr($postType); ?>]"
-                                        class="smg-select"
+                                        class="smg-select smg-schema-select"
                                         data-post-type="<?php echo esc_attr($postType); ?>"
                                         data-recommended="<?php echo esc_attr($recommendedSchema ?? ''); ?>">
                                     <option value=""><?php esc_html_e('— No Schema —', 'schema-markup-generator'); ?></option>
@@ -235,7 +243,7 @@ class PostTypesTab extends AbstractTab
                                                     </td>
                                                     <td>
                                                         <select name="smg_field_mappings[<?php echo esc_attr($postType); ?>][<?php echo esc_attr($propName); ?>]"
-                                                                class="smg-select">
+                                                                class="smg-select smg-field-select">
                                                             <option value=""><?php esc_html_e('— Select Field —', 'schema-markup-generator'); ?></option>
                                                             <optgroup label="<?php esc_attr_e('WordPress Fields', 'schema-markup-generator'); ?>">
                                                                 <option value="post_title" <?php selected($currentFieldMapping[$propName] ?? '', 'post_title'); ?>>

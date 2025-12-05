@@ -1316,7 +1316,7 @@
   @apply p-4 bg-gray-50 border border-gray-200 rounded-lg;
 }
 
-.smg-modal-examples > strong {
+.smg-modal-examples>strong {
   @apply block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3;
 }
 
@@ -1377,6 +1377,175 @@
 }
 
 /* ========================================
+   Toast Notifications
+   ======================================== */
+
+.smg-toast-container {
+  @apply fixed top-12 right-5 flex flex-col gap-3;
+  z-index: 99999;
+}
+
+.smg-toast {
+  @apply flex items-center gap-3 px-5 py-4 rounded-lg shadow-lg text-sm font-medium min-w-[280px] max-w-[400px];
+  backdrop-filter: blur(8px);
+  animation: slideInRight 0.3s ease-out;
+}
+
+.smg-toast .dashicons {
+  @apply flex-shrink-0;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.smg-toast-success {
+  @apply bg-green-600 text-white;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.smg-toast-success .dashicons {
+  @apply text-green-200;
+}
+
+.smg-toast-error {
+  @apply bg-red-600 text-white;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.smg-toast-error .dashicons {
+  @apply text-red-200;
+}
+
+.smg-toast-info {
+  @apply bg-gray-800 text-white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.smg-toast-info .dashicons {
+  @apply text-gray-300;
+}
+
+.smg-toast-warning {
+  @apply bg-amber-500 text-white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.smg-toast-warning .dashicons {
+  @apply text-amber-200;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ========================================
+   Auto-Save Feedback
+   ======================================== */
+
+/* Saving state for cards */
+.smg-post-type-card.smg-saving {
+  @apply opacity-75 pointer-events-none;
+}
+
+.smg-post-type-card.smg-saving::after {
+  content: '';
+  @apply absolute inset-0 bg-white/50;
+}
+
+/* Saving state for rows */
+.smg-mapping-row.smg-saving,
+tr.smg-saving {
+  @apply opacity-60;
+  transition: opacity 200ms ease;
+}
+
+.smg-mapping-row.smg-saving td:first-child::after,
+tr.smg-saving td:first-child::after {
+  content: '';
+  @apply inline-block w-4 h-4 ml-2 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin;
+}
+
+/* Saved state for rows */
+.smg-mapping-row.smg-saved,
+tr.smg-saved {
+  @apply bg-green-50;
+  transition: background-color 200ms ease;
+}
+
+.smg-mapping-row.smg-saved td:first-child::after,
+tr.smg-saved td:first-child::after {
+  content: '✓';
+  @apply inline-block ml-2 text-green-600 font-bold text-sm;
+}
+
+/* Save indicator badge */
+.smg-save-indicator {
+  @apply inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full ml-auto;
+  animation: fadeInSlide 200ms ease;
+}
+
+.smg-save-success {
+  @apply bg-green-100 text-green-700;
+}
+
+.smg-save-success .dashicons {
+  @apply text-green-500;
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.smg-save-error {
+  @apply bg-red-100 text-red-700;
+}
+
+.smg-save-error .dashicons {
+  @apply text-red-500;
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+/* Fade out animation */
+.smg-fade-out {
+  animation: fadeOut 300ms ease forwards;
+}
+
+/* Select fields inside post type cards - auto-save enabled style */
+.smg-post-type-card .smg-schema-select,
+.smg-post-type-card .smg-field-select {
+  transition: all 200ms ease, box-shadow 200ms ease;
+}
+
+.smg-post-type-card .smg-schema-select:focus,
+.smg-post-type-card .smg-field-select:focus {
+  @apply border-blue-400;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Spinner animation */
+.smg-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================================
    Animations
    ======================================== */
 
@@ -1389,6 +1558,28 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
   }
 }
 

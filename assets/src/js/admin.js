@@ -7,7 +7,7 @@
  * @author  Michele Marri <plugins@metodo.dev>
  */
 
-(function() {
+(function () {
     'use strict';
 
     /**
@@ -62,10 +62,17 @@
                 }
             });
 
-            // Schema type change
+            // Schema type change (auto-save)
             document.addEventListener('change', (e) => {
                 if (e.target.classList.contains('smg-schema-select')) {
                     this.handleSchemaTypeChange(e);
+                }
+            });
+
+            // Field mapping change (auto-save)
+            document.addEventListener('change', (e) => {
+                if (e.target.classList.contains('smg-field-select')) {
+                    this.handleFieldMappingChange(e);
                 }
             });
 
@@ -193,7 +200,7 @@
             cards.forEach((card, index) => {
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(10px)';
-                
+
                 setTimeout(() => {
                     card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
                     card.style.opacity = '1';
@@ -205,7 +212,7 @@
             const schemaItems = document.querySelectorAll('.smg-schema-item');
             schemaItems.forEach((item, index) => {
                 item.style.opacity = '0';
-                
+
                 setTimeout(() => {
                     item.style.transition = 'opacity 0.3s ease';
                     item.style.opacity = '1';
@@ -217,7 +224,7 @@
             pageRows.forEach((row, index) => {
                 row.style.opacity = '0';
                 row.style.transform = 'translateX(-10px)';
-                
+
                 setTimeout(() => {
                     row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
                     row.style.opacity = '1';
@@ -237,7 +244,7 @@
             const isExpanded = button.getAttribute('aria-expanded') === 'true';
 
             button.setAttribute('aria-expanded', !isExpanded);
-            
+
             if (isExpanded) {
                 this.slideUp(fields);
             } else {
@@ -251,7 +258,7 @@
         handlePropertyClick(e) {
             e.preventDefault();
             const link = e.target.closest('.smg-property-name');
-            
+
             if (!link) return;
 
             const propertyName = link.dataset.property;
@@ -272,7 +279,7 @@
          */
         openPropertyModal(data) {
             const modal = document.getElementById('smg-property-modal');
-            
+
             if (!modal) return;
 
             // Populate modal content
@@ -294,7 +301,7 @@
             if (examplesList && data.example) {
                 // Split examples by comma and create list items
                 const examples = data.example.split(',').map(ex => ex.trim()).filter(ex => ex);
-                
+
                 if (examples.length > 0) {
                     examplesList.innerHTML = examples.map(ex => `<li><code>${this.escapeHtml(ex)}</code></li>`).join('');
                     if (examplesEl) examplesEl.style.display = 'block';
@@ -329,7 +336,7 @@
          */
         closePropertyModal() {
             const modal = document.getElementById('smg-property-modal');
-            
+
             if (!modal || modal.style.display === 'none') return;
 
             modal.classList.remove('smg-modal-open');
@@ -354,7 +361,7 @@
         /**
          * Handle schema type change
          * 
-         * Dynamically loads field mappings when schema type changes
+         * Dynamically loads field mappings and auto-saves when schema type changes
          */
         async handleSchemaTypeChange(e) {
             const select = e.target;
@@ -362,7 +369,7 @@
             const schemaType = select.value;
             const card = select.closest('.smg-post-type-card');
             const fieldsContainer = card.querySelector('.smg-field-mappings');
-            
+
             if (!fieldsContainer) return;
 
             // Update mapped state
@@ -371,6 +378,9 @@
             } else {
                 card.classList.remove('smg-mapped');
             }
+
+            // Show loading state on card
+            card.classList.add('smg-saving');
 
             // Show loading state
             fieldsContainer.style.opacity = '0.5';
@@ -382,19 +392,22 @@
             `;
 
             try {
+                // Auto-save the schema mapping
+                await this.saveSchemaMapping(postType, schemaType);
+
                 const response = await this.fetchSchemaProperties(postType, schemaType);
-                
+
                 if (response.success && response.data.html) {
                     // Update the fields container with new HTML
                     fieldsContainer.innerHTML = response.data.html;
                     fieldsContainer.style.opacity = '1';
-                    
+
                     // Animate the new rows
                     const rows = fieldsContainer.querySelectorAll('.smg-mapping-row');
                     rows.forEach((row, index) => {
                         row.style.opacity = '0';
                         row.style.transform = 'translateY(10px)';
-                        
+
                         setTimeout(() => {
                             row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
                             row.style.opacity = '1';
@@ -405,13 +418,21 @@
                     // Auto-expand fields section if collapsed
                     const fieldsSection = card.querySelector('.smg-post-type-fields');
                     const toggleButton = card.querySelector('.smg-toggle-fields');
-                    
+
                     if (fieldsSection && fieldsSection.style.display === 'none' && schemaType) {
                         this.slideDown(fieldsSection);
                         if (toggleButton) {
                             toggleButton.setAttribute('aria-expanded', 'true');
                         }
                     }
+
+                    // Show save success toast notification
+                    this.showToast(
+                        typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saved 
+                            ? smgAdmin.strings.saved 
+                            : 'Saved',
+                        'success'
+                    );
                 } else {
                     fieldsContainer.innerHTML = `
                         <p class="smg-notice">
@@ -422,16 +443,141 @@
                     fieldsContainer.style.opacity = '1';
                 }
             } catch (error) {
-                console.error('Failed to load schema properties:', error);
+                console.error('Failed to save/load schema:', error);
                 fieldsContainer.innerHTML = `
                     <p class="smg-notice">
                         <span class="dashicons dashicons-warning"></span>
-                        Failed to load schema properties. Please try again.
+                        Failed to save. Please try again.
                     </p>
                 `;
                 fieldsContainer.style.opacity = '1';
+                this.showToast(
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saveFailed 
+                        ? smgAdmin.strings.saveFailed 
+                        : 'Failed to save',
+                    'error'
+                );
+            } finally {
+                card.classList.remove('smg-saving');
             }
         },
+
+        /**
+         * Handle field mapping change
+         * 
+         * Auto-saves field mapping when selection changes
+         */
+        async handleFieldMappingChange(e) {
+            const select = e.target;
+            const card = select.closest('.smg-post-type-card');
+            const postType = card?.dataset.postType;
+
+            if (!postType) return;
+
+            // Extract property name from select name attribute
+            // Format: smg_field_mappings[post_type][property_name]
+            const nameMatch = select.name.match(/smg_field_mappings\[([^\]]+)\]\[([^\]]+)\]/);
+            if (!nameMatch) return;
+
+            const property = nameMatch[2];
+            const fieldKey = select.value;
+
+            // Show saving state
+            const row = select.closest('.smg-mapping-row, tr');
+            if (row) {
+                row.classList.add('smg-saving');
+            }
+
+            try {
+                await this.saveFieldMapping(postType, property, fieldKey);
+
+                // Show success feedback
+                if (row) {
+                    row.classList.remove('smg-saving');
+                    row.classList.add('smg-saved');
+                    setTimeout(() => {
+                        row.classList.remove('smg-saved');
+                    }, 1500);
+                }
+                
+                // Show toast notification
+                this.showToast(
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saved 
+                        ? smgAdmin.strings.saved 
+                        : 'Saved',
+                    'success'
+                );
+            } catch (error) {
+                console.error('Failed to save field mapping:', error);
+                if (row) {
+                    row.classList.remove('smg-saving');
+                }
+                this.showToast(
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saveFailed
+                        ? smgAdmin.strings.saveFailed
+                        : 'Failed to save',
+                    'error'
+                );
+            }
+        },
+
+        /**
+         * Save schema mapping via AJAX
+         */
+        saveSchemaMapping(postType, schemaType) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('action', 'smg_save_schema_mapping');
+                formData.append('nonce', typeof smgAdmin !== 'undefined' ? smgAdmin.nonce : '');
+                formData.append('post_type', postType);
+                formData.append('schema_type', schemaType);
+
+                fetch(typeof smgAdmin !== 'undefined' ? smgAdmin.ajaxUrl : ajaxurl, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            resolve(data);
+                        } else {
+                            reject(new Error(data.data?.message || 'Save failed'));
+                        }
+                    })
+                    .catch(error => reject(error));
+            });
+        },
+
+        /**
+         * Save field mapping via AJAX
+         */
+        saveFieldMapping(postType, property, fieldKey) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('action', 'smg_save_field_mapping');
+                formData.append('nonce', typeof smgAdmin !== 'undefined' ? smgAdmin.nonce : '');
+                formData.append('post_type', postType);
+                formData.append('property', property);
+                formData.append('field_key', fieldKey);
+
+                fetch(typeof smgAdmin !== 'undefined' ? smgAdmin.ajaxUrl : ajaxurl, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            resolve(data);
+                        } else {
+                            reject(new Error(data.data?.message || 'Save failed'));
+                        }
+                    })
+                    .catch(error => reject(error));
+            });
+        },
+
 
         /**
          * Fetch schema properties via AJAX
@@ -449,9 +595,9 @@
                     body: formData,
                     credentials: 'same-origin',
                 })
-                .then(response => response.json())
-                .then(data => resolve(data))
-                .catch(error => reject(error));
+                    .then(response => response.json())
+                    .then(data => resolve(data))
+                    .catch(error => reject(error));
             });
         },
 
@@ -471,11 +617,11 @@
             e.preventDefault();
             const button = e.target.closest('.smg-refresh-preview');
             const postIdInput = document.querySelector('input[name="smg_post_id"]');
-            
+
             if (!postIdInput) return;
-            
+
             const postId = postIdInput.value;
-            
+
             // Add loading state
             button.disabled = true;
             button.classList.add('loading');
@@ -483,11 +629,11 @@
 
             try {
                 const response = await this.fetchPreview(postId);
-                
+
                 if (response.success) {
                     this.elements.schemaPreview.textContent = response.data.json;
                     this.showValidation(response.data.validation);
-                    
+
                     // Flash animation
                     this.elements.schemaPreview.style.transition = 'opacity 0.3s ease';
                     this.elements.schemaPreview.style.opacity = '1';
@@ -516,9 +662,9 @@
                     body: formData,
                     credentials: 'same-origin',
                 })
-                .then(response => response.json())
-                .then(data => resolve(data))
-                .catch(error => reject(error));
+                    .then(response => response.json())
+                    .then(data => resolve(data))
+                    .catch(error => reject(error));
             });
         },
 
@@ -527,12 +673,12 @@
          */
         async validateCurrentSchema() {
             const postIdInput = document.querySelector('input[name="smg_post_id"]');
-            
+
             if (!postIdInput || !this.elements.schemaPreview) return;
-            
+
             try {
                 const response = await this.fetchPreview(postIdInput.value);
-                
+
                 if (response.success && response.data.validation) {
                     this.showValidation(response.data.validation);
                 }
@@ -596,7 +742,7 @@
 
             try {
                 await navigator.clipboard.writeText(schema);
-                
+
                 // Visual feedback
                 const originalHtml = button.innerHTML;
                 button.innerHTML = '<span class="dashicons dashicons-yes"></span> ' + smgAdmin.strings.copied;
@@ -655,19 +801,19 @@
             const pageId = button.dataset.pageId;
             const schema = button.dataset.schema;
             const select = document.querySelector(`select[name="smg_page_mappings[${pageId}]"]`);
-            
+
             if (select && schema) {
                 select.value = schema;
-                
+
                 // Visual feedback
                 const row = button.closest('.smg-page-row');
                 row.style.transition = 'background-color 0.3s ease';
                 row.style.backgroundColor = 'var(--smg-success-50)';
-                
+
                 setTimeout(() => {
                     row.style.backgroundColor = '';
                 }, 1000);
-                
+
                 // Replace button with check mark
                 const cell = button.closest('.smg-col-suggestion');
                 cell.innerHTML = `
@@ -675,7 +821,7 @@
                         <span class="dashicons dashicons-yes-alt"></span>
                     </span>
                 `;
-                
+
                 // Trigger change event for any listeners
                 select.dispatchEvent(new Event('change', { bubbles: true }));
             }
@@ -690,7 +836,7 @@
             const baseUrl = input.dataset.baseUrl;
             const page = parseInt(input.value, 10);
             const max = parseInt(input.max, 10);
-            
+
             if (page && page >= 1 && page <= max && baseUrl) {
                 window.location.href = `${baseUrl}&paged=${page}`;
             }
@@ -705,9 +851,9 @@
             const targetId = button.dataset.target;
             const input = document.getElementById(targetId);
             const icon = button.querySelector('.dashicons');
-            
+
             if (!input) return;
-            
+
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.classList.remove('dashicons-visibility');
@@ -724,27 +870,27 @@
          */
         handleRemoveToken(e) {
             e.preventDefault();
-            
+
             if (!confirm('Are you sure you want to remove the GitHub token?')) {
                 return;
             }
-            
+
             const tokenInput = document.getElementById('smg_github_token');
             if (tokenInput) {
                 tokenInput.value = '';
-                
+
                 // Update status
                 const statusElement = document.querySelector('.smg-token-status');
                 if (statusElement) {
                     statusElement.remove();
                 }
-                
+
                 // Hide remove button
                 const removeButton = document.getElementById('smg-remove-token');
                 if (removeButton) {
                     removeButton.style.display = 'none';
                 }
-                
+
                 this.showToast('Token will be removed when you save settings', 'info');
             }
         },
@@ -756,12 +902,12 @@
             e.preventDefault();
             const button = e.target.closest('#smg-check-updates');
             const resultDiv = document.getElementById('smg-update-result');
-            
+
             // Add loading state
             button.disabled = true;
             const originalHtml = button.innerHTML;
             button.innerHTML = '<span class="dashicons dashicons-update smg-spin"></span> Checking...';
-            
+
             if (resultDiv) {
                 resultDiv.style.display = 'none';
             }
@@ -782,7 +928,7 @@
 
                 if (resultDiv) {
                     resultDiv.style.display = 'block';
-                    
+
                     if (data.success) {
                         if (data.data.update_available) {
                             resultDiv.className = 'smg-update-result smg-result-success';
@@ -863,7 +1009,7 @@
             element.style.transition = `height ${this.config.animationDuration}ms ease`;
             element.style.height = '0';
             element.style.overflow = 'hidden';
-            
+
             setTimeout(() => {
                 element.style.display = 'none';
                 element.style.height = '';
@@ -880,11 +1026,11 @@
             element.style.height = '0';
             element.style.overflow = 'hidden';
             element.offsetHeight; // Force reflow
-            
+
             const height = element.scrollHeight;
             element.style.transition = `height ${this.config.animationDuration}ms ease`;
             element.style.height = height + 'px';
-            
+
             setTimeout(() => {
                 element.style.height = '';
                 element.style.overflow = '';

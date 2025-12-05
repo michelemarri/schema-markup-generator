@@ -343,6 +343,56 @@ add_action('smg_after_import', function(array $data) {
 
 ---
 
+### AJAX Actions
+
+#### `wp_ajax_smg_save_schema_mapping`
+
+Auto-saves schema type assignment for a post type.
+
+**POST parameters:**
+- `nonce` - Security nonce (`smg_admin_nonce`)
+- `post_type` - The post type slug
+- `schema_type` - The schema type to assign (or empty to remove)
+
+**Response:**
+```json
+{
+    "success": true,
+    "data": {
+        "message": "Schema mapping saved",
+        "post_type": "product",
+        "schema_type": "Product"
+    }
+}
+```
+
+---
+
+#### `wp_ajax_smg_save_field_mapping`
+
+Auto-saves field mapping for a schema property.
+
+**POST parameters:**
+- `nonce` - Security nonce (`smg_admin_nonce`)
+- `post_type` - The post type slug
+- `property` - The schema property name
+- `field_key` - The field key to map (or empty to remove mapping)
+
+**Response:**
+```json
+{
+    "success": true,
+    "data": {
+        "message": "Field mapping saved",
+        "post_type": "product",
+        "property": "price",
+        "field_key": "product_price"
+    }
+}
+```
+
+---
+
 ## Creating Custom Schema Types
 
 ### Step 1: Create Schema Class

@@ -233,6 +233,13 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.10.0
+- **New**: Auto-save for schema mappings - Schema type and field mappings now save automatically when you make a selection (no Save button needed)
+- **Improved**: Visual feedback on save - Green flash and checkmark indicate successful saves
+- **Improved**: Better UX in Post Types tab - No more form submissions required
+- **Added**: AJAX handlers for `smg_save_schema_mapping` and `smg_save_field_mapping`
+- **Added**: CSS animations for save state feedback
+
 ### 1.9.0
 - **New**: Property information modal - Click on any schema property name to see detailed description, examples, and schema.org documentation link
 - **New**: Smart schema suggestions - Plugin now recommends schema types based on post type names (e.g., "recipes" → Recipe schema, "guides" → LearningResource)
