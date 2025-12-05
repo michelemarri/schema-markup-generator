@@ -158,7 +158,48 @@ abstract class AbstractSchema implements SchemaInterface
     }
 
     /**
+     * Sanitize text by stripping HTML tags and normalizing whitespace
+     * 
+     * Useful for cleaning custom field values that may contain HTML.
+     */
+    protected function sanitizeText(mixed $value): string
+    {
+        if (!is_string($value)) {
+            return '';
+        }
+
+        // Strip all HTML tags
+        $text = wp_strip_all_tags($value);
+        
+        // Decode HTML entities
+        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        
+        // Normalize whitespace
+        $text = preg_replace('/\s+/', ' ', $text);
+        
+        return trim($text);
+    }
+
+    /**
+     * Sanitize array values by stripping HTML from each element
+     */
+    protected function sanitizeArrayValues(array $values): array
+    {
+        return array_values(array_filter(array_map(function ($value) {
+            if (is_string($value)) {
+                return $this->sanitizeText($value);
+            }
+            return null;
+        }, $values), function ($v) {
+            return !empty($v);
+        }));
+    }
+
+    /**
      * Get mapped field value
+     * 
+     * Automatically sanitizes string values by stripping HTML tags.
+     * URLs are preserved. Use the 'smg_sanitize_mapped_value' filter to customize.
      */
     protected function getMappedValue(WP_Post $post, array $mapping, string $property, mixed $default = null): mixed
     {
@@ -167,19 +208,133 @@ abstract class AbstractSchema implements SchemaInterface
         }
 
         $fieldKey = $mapping[$property];
+        $value = null;
 
         // Check ACF first
         if (function_exists('get_field')) {
             $value = get_field($fieldKey, $post->ID);
-            if ($value !== null && $value !== false) {
+        }
+
+        // Fallback to post meta if ACF didn't return a value
+        if ($value === null || $value === false) {
+            $value = get_post_meta($post->ID, $fieldKey, true);
+        }
+
+        // Return default if no value found
+        if ($value === null || $value === false || $value === '') {
+            return $default;
+        }
+
+        // Sanitize the value
+        $value = $this->sanitizeMappedValue($value, $property);
+
+        /**
+         * Filter the sanitized mapped value
+         * 
+         * @param mixed   $value    The sanitized value
+         * @param string  $property The schema property name
+         * @param string  $fieldKey The source field key
+         * @param WP_Post $post     The post object
+         */
+        return apply_filters('smg_sanitize_mapped_value', $value, $property, $fieldKey, $post);
+    }
+
+    /**
+     * Sanitize a mapped value based on its type
+     * 
+     * - Strings: Strip HTML (unless it's a URL)
+     * - Arrays: Recursively sanitize string values
+     * - Other types: Return as-is
+     */
+    protected function sanitizeMappedValue(mixed $value, string $property): mixed
+    {
+        // Handle strings
+        if (is_string($value)) {
+            // Don't sanitize URLs
+            if (filter_var($value, FILTER_VALIDATE_URL)) {
                 return $value;
+            }
+            
+            // Don't sanitize values that look like email addresses
+            if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                return $value;
+            }
+
+            return $this->sanitizeText($value);
+        }
+
+        // Handle arrays
+        if (is_array($value)) {
+            // Skip associative arrays that look like raw meta dumps
+            if ($this->isRawMetaDump($value)) {
+                return null;
+            }
+
+            // Recursively sanitize array values
+            return $this->sanitizeArrayRecursive($value, $property);
+        }
+
+        // Numbers, booleans, etc. - return as-is
+        return $value;
+    }
+
+    /**
+     * Recursively sanitize array values
+     */
+    protected function sanitizeArrayRecursive(array $values, string $property): array
+    {
+        $sanitized = [];
+
+        foreach ($values as $key => $value) {
+            if (is_string($value)) {
+                // Don't sanitize URLs
+                if (filter_var($value, FILTER_VALIDATE_URL)) {
+                    $sanitized[$key] = $value;
+                } else {
+                    $cleanValue = $this->sanitizeText($value);
+                    if (!empty($cleanValue)) {
+                        $sanitized[$key] = $cleanValue;
+                    }
+                }
+            } elseif (is_array($value)) {
+                $cleanValue = $this->sanitizeArrayRecursive($value, $property);
+                if (!empty($cleanValue)) {
+                    $sanitized[$key] = $cleanValue;
+                }
+            } else {
+                $sanitized[$key] = $value;
             }
         }
 
-        // Fallback to post meta
-        $value = get_post_meta($post->ID, $fieldKey, true);
+        return $sanitized;
+    }
 
-        return $value ?: $default;
+    /**
+     * Check if an array looks like a raw WordPress meta dump
+     * 
+     * These contain internal WordPress meta keys that shouldn't be in schema
+     */
+    protected function isRawMetaDump(array $arr): bool
+    {
+        // Common WordPress internal meta keys
+        $internalKeys = [
+            '_edit_lock',
+            '_edit_last',
+            '_thumbnail_id',
+            '_wp_page_template',
+            'rank_math_',
+            '_mepr_',
+        ];
+
+        foreach ($internalKeys as $key) {
+            foreach (array_keys($arr) as $arrKey) {
+                if (str_starts_with((string) $arrKey, $key)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**

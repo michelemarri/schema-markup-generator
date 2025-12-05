@@ -65,13 +65,13 @@ class LearningResourceSchema extends AbstractSchema
         // Teaches - What this resource teaches (very important for LLMs)
         $teaches = $this->getMappedValue($post, $mapping, 'teaches');
         if ($teaches) {
-            $data['teaches'] = is_array($teaches) ? $teaches : [$teaches];
+            $data['teaches'] = $this->sanitizeSkillsList($teaches);
         }
 
         // Assesses - Skills/competencies assessed
         $assesses = $this->getMappedValue($post, $mapping, 'assesses');
         if ($assesses) {
-            $data['assesses'] = is_array($assesses) ? $assesses : [$assesses];
+            $data['assesses'] = $this->sanitizeSkillsList($assesses);
         }
 
         // Educational Level
@@ -656,6 +656,50 @@ class LearningResourceSchema extends AbstractSchema
         }
         
         return 0;
+    }
+
+    /**
+     * Convert skills/competencies to array format
+     * 
+     * Values are already sanitized by getMappedValue().
+     * This method handles comma-separated strings and filters invalid values.
+     */
+    private function sanitizeSkillsList(mixed $value): array
+    {
+        // Null or empty - already filtered by getMappedValue
+        if ($value === null || $value === '') {
+            return [];
+        }
+
+        $items = [];
+
+        if (is_string($value)) {
+            // Split by comma if contains commas
+            if (strpos($value, ',') !== false) {
+                $items = array_map('trim', explode(',', $value));
+            } else {
+                $items = [$value];
+            }
+        } elseif (is_array($value)) {
+            // Flatten array to strings
+            foreach ($value as $item) {
+                if (is_string($item) && !empty(trim($item))) {
+                    $items[] = trim($item);
+                }
+            }
+        }
+
+        // Filter out any remaining invalid values
+        return array_values(array_filter($items, function ($item) {
+            if (empty($item) || mb_strlen($item) < 3) {
+                return false;
+            }
+            // Skip ACF field names and timestamps that might slip through
+            if (preg_match('/^field_[a-f0-9]+$/i', $item) || preg_match('/^\d+:\d+$/', $item)) {
+                return false;
+            }
+            return true;
+        }));
     }
 
     /**

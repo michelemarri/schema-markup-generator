@@ -183,6 +183,35 @@ add_filter('smg_post_type_taxonomies', function(array $taxonomies, string $postT
 
 ### Field Mapping Filters
 
+#### `smg_sanitize_mapped_value`
+
+Customize sanitization of mapped field values. By default, HTML is stripped from all text values.
+
+```php
+add_filter('smg_sanitize_mapped_value', function($value, string $property, string $fieldKey, WP_Post $post) {
+    // Preserve HTML for a specific property
+    if ($property === 'articleBody') {
+        return get_post_meta($post->ID, $fieldKey, true); // Return raw value
+    }
+    return $value;
+}, 10, 4);
+```
+
+**Parameters:**
+- `$value` (mixed) - The sanitized value
+- `$property` (string) - The schema property name (e.g., 'description', 'teaches')
+- `$fieldKey` (string) - The source field key
+- `$post` (WP_Post) - The post object
+
+**Default behavior:**
+- Strings: HTML tags stripped, entities decoded, whitespace normalized
+- URLs: Preserved as-is
+- Emails: Preserved as-is
+- Arrays: Recursively sanitized
+- Raw meta dumps: Filtered out (returns null)
+
+---
+
 #### `smg_mapped_fields`
 
 Filter mapped field data.

@@ -232,6 +232,13 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.13.0
+- **New**: Automatic HTML sanitization for all mapped field values across all schema types
+- **New**: `getMappedValue()` now automatically strips HTML tags from text fields (URLs and emails preserved)
+- **New**: Raw WordPress meta dumps are automatically detected and filtered out
+- **New**: Filter `smg_sanitize_mapped_value` to customize sanitization behavior
+- **Improved**: Cleaner schema output without HTML artifacts from WYSIWYG fields
+
 ### 1.12.0
 - **New**: Schema Example modal - Click the eye icon next to any post type to see a real schema example generated from a random published post
 - **New**: Copy and refresh actions in example modal - Easily copy the JSON-LD or load a different random post
