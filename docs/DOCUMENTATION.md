@@ -194,6 +194,12 @@ The Product schema supports recurring billing for memberships and subscriptions 
 - `billingIncrement` - Time unit: Month, Year, Week, Day
 - `referenceQuantity` - Number of billing periods (optional)
 
+**MemberPress virtual fields:**
+For MemberPress memberships, use these pre-formatted virtual fields for easy mapping:
+- `mepr_eligible_duration` → Maps directly to `eligibleDuration` (e.g., P1M, P1Y)
+- `mepr_billing_duration` → Maps directly to `billingDuration` (e.g., 1, 3, 12)
+- `mepr_billing_increment` → Maps directly to `billingIncrement` (Month, Year, Week, Day)
+
 **Example output for monthly subscription:**
 ```json
 {

@@ -163,6 +163,21 @@ class MemberPressMembershipIntegration
             'type' => 'text',
             'description' => 'ISO 4217 currency code from MemberPress settings (e.g. EUR, USD)',
         ],
+        'mepr_eligible_duration' => [
+            'label' => 'Eligible Duration (ISO 8601)',
+            'type' => 'text',
+            'description' => 'Subscription duration in ISO 8601 format (e.g. P1M for monthly, P1Y for yearly). Maps to schema.org eligibleDuration.',
+        ],
+        'mepr_billing_duration' => [
+            'label' => 'Billing Duration',
+            'type' => 'number',
+            'description' => 'Billing cycle number (e.g. 1 for monthly, 3 for quarterly). Maps to schema.org billingDuration.',
+        ],
+        'mepr_billing_increment' => [
+            'label' => 'Billing Increment',
+            'type' => 'text',
+            'description' => 'Billing time unit in schema.org format (Month, Year, Week, Day). Maps to schema.org billingIncrement.',
+        ],
     ];
 
     /**
@@ -312,6 +327,15 @@ class MemberPressMembershipIntegration
             case 'mepr_currency_code':
                 return $this->getCurrencyCode();
 
+            case 'mepr_eligible_duration':
+                return $this->getEligibleDuration($postId);
+
+            case 'mepr_billing_duration':
+                return $this->getBillingDuration($postId);
+
+            case 'mepr_billing_increment':
+                return $this->getBillingIncrement($postId);
+
             default:
                 return null;
         }
@@ -421,6 +445,91 @@ class MemberPressMembershipIntegration
         }
 
         return '';
+    }
+
+    /**
+     * Get eligible duration in ISO 8601 format for schema.org
+     *
+     * Converts MemberPress period settings to ISO 8601 duration format.
+     * Examples: P1M (1 month), P3M (3 months), P1Y (1 year), P1W (1 week)
+     *
+     * @param int $postId The membership post ID
+     * @return string|null ISO 8601 duration or null for lifetime
+     */
+    public function getEligibleDuration(int $postId): ?string
+    {
+        $period = get_post_meta($postId, '_mepr_product_period', true);
+        $periodType = get_post_meta($postId, '_mepr_product_period_type', true);
+
+        // Lifetime memberships don't have a duration
+        if ($periodType === 'lifetime' || empty($periodType)) {
+            return null;
+        }
+
+        $period = (int) ($period ?: 1);
+
+        // Map MemberPress period types to ISO 8601 duration codes
+        $durationMap = [
+            'days' => 'D',
+            'weeks' => 'W',
+            'months' => 'M',
+            'years' => 'Y',
+        ];
+
+        $durationCode = $durationMap[$periodType] ?? 'M';
+
+        return "P{$period}{$durationCode}";
+    }
+
+    /**
+     * Get billing duration number for schema.org
+     *
+     * Returns the numeric billing period (e.g., 1 for monthly, 3 for quarterly).
+     *
+     * @param int $postId The membership post ID
+     * @return int|null Billing duration number or null for lifetime
+     */
+    public function getBillingDuration(int $postId): ?int
+    {
+        $periodType = get_post_meta($postId, '_mepr_product_period_type', true);
+
+        // Lifetime memberships don't have billing cycles
+        if ($periodType === 'lifetime' || empty($periodType)) {
+            return null;
+        }
+
+        $period = get_post_meta($postId, '_mepr_product_period', true);
+
+        return (int) ($period ?: 1);
+    }
+
+    /**
+     * Get billing increment in schema.org format
+     *
+     * Converts MemberPress period type to schema.org billingIncrement format.
+     * Returns: Month, Year, Week, Day (capitalized singular)
+     *
+     * @param int $postId The membership post ID
+     * @return string|null Billing increment or null for lifetime
+     */
+    public function getBillingIncrement(int $postId): ?string
+    {
+        $periodType = get_post_meta($postId, '_mepr_product_period_type', true);
+
+        // Lifetime memberships don't have billing cycles
+        if ($periodType === 'lifetime' || empty($periodType)) {
+            return null;
+        }
+
+        // Map MemberPress period types to schema.org billingIncrement values
+        $incrementMap = [
+            'days' => 'Day',
+            'weeks' => 'Week',
+            'months' => 'Month',
+            'years' => 'Year',
+        ];
+
+        return $incrementMap[$periodType] ?? null;
     }
 
     /**

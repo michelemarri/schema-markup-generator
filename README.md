@@ -234,6 +234,13 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.19.0
+- **New**: MemberPress virtual fields for schema.org subscription properties
+- **New**: `mepr_eligible_duration` - ISO 8601 duration format (P1M, P1Y, P3M) ready for `eligibleDuration`
+- **New**: `mepr_billing_duration` - Numeric billing period (1, 3, 12) ready for `billingDuration`
+- **New**: `mepr_billing_increment` - Schema.org format (Month, Year, Week, Day) ready for `billingIncrement`
+- **Improved**: MemberPress period types (days, weeks, months, years) now automatically converted to schema.org formats
+
 ### 1.18.0
 - **New**: WooCommerce Integration - exposes `woo_currency_code` and `woo_currency_symbol` as mappable fields
 - **New**: MemberPress currency field `mepr_currency_code` now available for schema mapping
