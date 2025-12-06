@@ -233,6 +233,14 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.16.0
+- **New**: Customizable Organization Info - Override site name, URL, and logo for schema markup
+- **New**: Organization logo uploader - Select a specific logo independent from theme Custom Logo
+- **New**: Fallback system - Empty fields automatically use WordPress defaults (Site Name, Home URL, Custom Logo)
+- **New**: Helper function `smg_get_organization_data()` returns organization data with fallbacks
+- **New**: Filter `smg_organization_data` to customize organization data
+- **Improved**: Organization data now used consistently in all schemas (Article publisher, Organization schema, etc.)
+
 ### 1.15.0
 - **New**: MemberPress Membership integration for `memberpressproduct` post type
 - **New**: 20+ membership-specific fields available for mapping (price, period, trial, benefits, etc.)

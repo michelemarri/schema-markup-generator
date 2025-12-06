@@ -11,10 +11,11 @@ Complete documentation for the Schema Markup Generator WordPress plugin.
 5. [ACF Integration](#acf-integration)
 6. [MemberPress Courses Integration](#memberpress-courses-integration)
 7. [MemberPress Membership Integration](#memberpress-membership-integration)
-8. [Caching](#caching)
-9. [REST API](#rest-api)
-10. [Import/Export](#importexport)
-11. [Troubleshooting](#troubleshooting)
+8. [Advanced Settings](#advanced-settings)
+9. [Caching](#caching)
+10. [REST API](#rest-api)
+11. [Import/Export](#importexport)
+12. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -62,10 +63,14 @@ Navigate to **Settings → Schema Markup** to access the plugin settings.
 
 #### Organization Info
 
-Organization data is automatically pulled from WordPress settings:
-- Site Name (from General Settings)
-- Site URL
-- Logo (from Customizer → Site Identity)
+The General tab shows a read-only summary of your organization info. Click "Edit Organization Info" to customize these settings in the Advanced tab.
+
+Organization data is used in:
+- Organization schema type
+- Publisher info in Article schemas
+- WebSite schema
+
+See [Advanced Settings → Organization Info](#organization-info-advanced) for customization options.
 
 ### Post Type Configuration
 
@@ -602,6 +607,51 @@ The integration uses these filters:
 - `smg_discovered_fields` - Adds membership fields to discovery
 - `smg_resolve_field_value` - Resolves membership field values (sources: `memberpress`, `memberpress_virtual`)
 - `smg_product_schema_data` - Enhances Product schema with offer data
+
+---
+
+## Advanced Settings
+
+### Organization Info (Advanced) {#organization-info-advanced}
+
+Navigate to **Settings → Schema Markup → Advanced** to customize your organization data.
+
+| Field | Custom Setting | Fallback (if empty) |
+|-------|----------------|---------------------|
+| **Organization Name** | Text input | WordPress Site Title |
+| **Organization URL** | URL input | WordPress Home URL |
+| **Organization Logo** | Media Library | Theme Custom Logo (Customizer) |
+
+**Logo Selection:**
+1. Click "Select Logo" to open the WordPress Media Library
+2. Choose an existing image or upload a new one
+3. Click "Use this logo" to confirm
+4. Save settings to apply
+
+**Best Practices for Logo:**
+- Use a square image, at least 112×112 pixels
+- PNG or JPG format recommended
+- Transparent or white background works best for Knowledge Panels
+
+**Helper Function:**
+
+Use `smg_get_organization_data()` to retrieve organization data programmatically:
+
+```php
+$org = \Metodo\SchemaMarkupGenerator\smg_get_organization_data();
+// Returns: ['name' => string, 'url' => string, 'logo' => array|null]
+```
+
+**Filter:**
+
+Customize organization data with the `smg_organization_data` filter:
+
+```php
+add_filter('smg_organization_data', function($data) {
+    $data['name'] = 'Custom Name';
+    return $data;
+});
+```
 
 ---
 

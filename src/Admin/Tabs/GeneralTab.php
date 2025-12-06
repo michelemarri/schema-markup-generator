@@ -97,52 +97,47 @@ class GeneralTab extends AbstractTab
                 }, 'dashicons-editor-code');
                 ?>
 
-                <?php
-                $this->renderCard(__('Organization Info', 'schema-markup-generator'), function () use ($settings) {
-                    ?>
-                    <p class="smg-info">
-                        <?php esc_html_e('Organization info is automatically pulled from WordPress settings.', 'schema-markup-generator'); ?>
-                    </p>
-
-                    <div class="smg-info-grid">
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('Site Name', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value"><?php echo esc_html(get_bloginfo('name')); ?></span>
+                <!-- Organization Info Card with Edit button in header -->
+                <div class="smg-card">
+                    <div class="smg-card-header flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="dashicons dashicons-building"></span>
+                            <h3><?php esc_html_e('Organization Info', 'schema-markup-generator'); ?></h3>
                         </div>
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('Site URL', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value"><?php echo esc_html(home_url('/')); ?></span>
-                        </div>
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('Logo', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value">
-                                <?php
-                                $logoId = get_theme_mod('custom_logo');
-                                if ($logoId) {
-                                    echo '<img src="' . esc_url(wp_get_attachment_image_url($logoId, 'thumbnail')) . '" alt="" style="max-height: 40px;">';
-                                } else {
-                                    esc_html_e('Not set', 'schema-markup-generator');
-                                }
-                                ?>
-                            </span>
-                        </div>
+                        <a href="<?php echo esc_url(admin_url('options-general.php?page=schema-markup-generator&tab=advanced')); ?>" class="smg-btn smg-btn-ghost smg-btn-sm">
+                            <span class="dashicons dashicons-edit"></span>
+                            <?php esc_html_e('Edit', 'schema-markup-generator'); ?>
+                        </a>
                     </div>
-
-                    <div class="smg-note">
-                        <span class="dashicons dashicons-info"></span>
-                        <span>
+                    <div class="smg-card-body">
                         <?php
-                        printf(
-                            /* translators: %s: Customizer link */
-                            esc_html__('To change these settings, go to %s.', 'schema-markup-generator'),
-                            '<a href="' . esc_url(admin_url('customize.php')) . '">' . esc_html__('Customizer', 'schema-markup-generator') . '</a>'
-                        );
+                        // Get organization data with fallbacks
+                        $orgData = \Metodo\SchemaMarkupGenerator\smg_get_organization_data();
                         ?>
-                        </span>
+                        <div class="smg-info-grid">
+                            <div class="smg-info-item">
+                                <span class="smg-info-label"><?php esc_html_e('Name', 'schema-markup-generator'); ?></span>
+                                <span class="smg-info-value"><?php echo esc_html($orgData['name']); ?></span>
+                            </div>
+                            <div class="smg-info-item">
+                                <span class="smg-info-label"><?php esc_html_e('URL', 'schema-markup-generator'); ?></span>
+                                <span class="smg-info-value"><?php echo esc_html($orgData['url']); ?></span>
+                            </div>
+                            <div class="smg-info-item">
+                                <span class="smg-info-label"><?php esc_html_e('Logo', 'schema-markup-generator'); ?></span>
+                                <span class="smg-info-value">
+                                    <?php
+                                    if ($orgData['logo']) {
+                                        echo '<img src="' . esc_url($orgData['logo']['url']) . '" alt="" style="max-height: 40px; border-radius: 4px;">';
+                                    } else {
+                                        esc_html_e('Not set', 'schema-markup-generator');
+                                    }
+                                    ?>
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <?php
-                }, 'dashicons-building');
-                ?>
+                </div>
             </div>
 
             <?php $this->renderSection(

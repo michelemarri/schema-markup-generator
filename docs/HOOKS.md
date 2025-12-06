@@ -284,11 +284,42 @@ add_filter('smg_resolve_field_value', function($value, int $postId, string $fiel
 
 ---
 
+### Organization Data Filters
+
+#### `smg_organization_data`
+
+Modify the base organization data used throughout the plugin. This filter is called by `smg_get_organization_data()` and affects all places where organization info is used (publisher in Article schemas, Organization schema, etc.).
+
+```php
+add_filter('smg_organization_data', function(array $data): array {
+    // Override or extend organization data
+    $data['name'] = 'My Custom Organization Name';
+    $data['url'] = 'https://custom-url.com/';
+    
+    // Add custom logo
+    $data['logo'] = [
+        '@type' => 'ImageObject',
+        'url' => 'https://example.com/logo.png',
+        'width' => 600,
+        'height' => 60,
+    ];
+    
+    return $data;
+});
+```
+
+**Parameters:**
+- `$data` (array) - Organization data with keys: `name`, `url`, `logo`
+
+**Returns:** Array with organization data
+
+---
+
 ### Publisher/Author Filters
 
 #### `smg_publisher_data`
 
-Modify publisher/organization data.
+Modify publisher/organization data. This filter is applied after the base organization data is fetched from settings.
 
 ```php
 add_filter('smg_publisher_data', function(array $publisher): array {

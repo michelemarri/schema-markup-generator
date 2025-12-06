@@ -95,27 +95,21 @@ abstract class AbstractSchema implements SchemaInterface
 
     /**
      * Get publisher/organization data
+     *
+     * Uses plugin settings with fallback to WordPress defaults.
      */
     protected function getPublisher(): array
     {
+        $orgData = \Metodo\SchemaMarkupGenerator\smg_get_organization_data();
+
         $publisher = [
             '@type' => 'Organization',
-            'name' => get_bloginfo('name'),
-            'url' => home_url('/'),
+            'name' => $orgData['name'],
+            'url' => $orgData['url'],
         ];
 
-        // Try to get site logo
-        $customLogoId = get_theme_mod('custom_logo');
-        if ($customLogoId) {
-            $logo = wp_get_attachment_image_src($customLogoId, 'full');
-            if ($logo) {
-                $publisher['logo'] = [
-                    '@type' => 'ImageObject',
-                    'url' => $logo[0],
-                    'width' => $logo[1],
-                    'height' => $logo[2],
-                ];
-            }
+        if ($orgData['logo']) {
+            $publisher['logo'] = $orgData['logo'];
         }
 
         return $publisher;

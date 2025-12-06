@@ -226,6 +226,11 @@ class Plugin
             return;
         }
 
+        // Load media uploader on settings page for logo selection
+        if ($isSettingsPage) {
+            wp_enqueue_media();
+        }
+
         // Enqueue Inter font for modern typography
         wp_enqueue_style(
             'smg-fonts',
@@ -265,6 +270,11 @@ class Plugin
                 'saved' => __('Saved', 'schema-markup-generator'),
                 'saving' => __('Saving...', 'schema-markup-generator'),
                 'saveFailed' => __('Failed to save', 'schema-markup-generator'),
+                'selectLogo' => __('Select Organization Logo', 'schema-markup-generator'),
+                'useLogo' => __('Use this logo', 'schema-markup-generator'),
+                'noLogo' => __('No logo set', 'schema-markup-generator'),
+                'logoSelected' => __('Logo selected. Save settings to apply.', 'schema-markup-generator'),
+                'logoRemoved' => __('Logo removed. Save settings to apply.', 'schema-markup-generator'),
             ],
         ]);
     }

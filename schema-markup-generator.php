@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Plugin Name:       Schema Markup Generator
  * Plugin URI:        https://github.com/michelemarri/schema-markup-generator
  * Description:       Automatic schema markup generation optimized for LLMs. Auto-discovers post types, custom fields, and taxonomies.
- * Version:           1.15.0
+ * Version:           1.16.0
  * Requires at least: 6.0
  * Tested up to:      6.8
  * Requires PHP:      8.2
@@ -28,7 +28,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('SMG_VERSION', '1.15.0');
+define('SMG_VERSION', '1.16.0');
 define('SMG_PLUGIN_FILE', __FILE__);
 define('SMG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SMG_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -67,6 +67,9 @@ function smg_get_settings(string $section): array
             'cache_enabled' => true,
             'cache_ttl' => 3600,
             'debug_mode' => false,
+            'organization_name' => '',
+            'organization_url' => '',
+            'organization_logo' => 0,
         ],
         'integrations' => [
             'rankmath_avoid_duplicates' => true,
@@ -98,6 +101,57 @@ function smg_get_settings(string $section): array
     }
 
     return array_merge($defaults[$section] ?? [], $settings);
+}
+
+/**
+ * Get organization data with fallbacks
+ *
+ * Returns organization info from plugin settings, falling back to WordPress defaults.
+ *
+ * @return array{name: string, url: string, logo: array|null} Organization data
+ */
+function smg_get_organization_data(): array
+{
+    $settings = smg_get_settings('advanced');
+
+    // Name: custom setting → WordPress site name
+    $name = !empty($settings['organization_name'])
+        ? $settings['organization_name']
+        : get_bloginfo('name');
+
+    // URL: custom setting → home URL
+    $url = !empty($settings['organization_url'])
+        ? $settings['organization_url']
+        : home_url('/');
+
+    // Logo: custom setting → custom_logo theme mod → null
+    $logoId = !empty($settings['organization_logo'])
+        ? (int) $settings['organization_logo']
+        : (int) get_theme_mod('custom_logo');
+
+    $logo = null;
+    if ($logoId) {
+        $logoData = wp_get_attachment_image_src($logoId, 'full');
+        if ($logoData) {
+            $logo = [
+                '@type' => 'ImageObject',
+                'url' => $logoData[0],
+                'width' => $logoData[1],
+                'height' => $logoData[2],
+            ];
+        }
+    }
+
+    /**
+     * Filter organization data
+     *
+     * @param array $data Organization data with name, url, and logo
+     */
+    return apply_filters('smg_organization_data', [
+        'name' => $name,
+        'url' => $url,
+        'logo' => $logo,
+    ]);
 }
 
 /**

@@ -181,6 +181,20 @@
                 }
             });
 
+            // General tab: Select logo
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('#smg-select-logo')) {
+                    this.handleSelectLogo(e);
+                }
+            });
+
+            // General tab: Remove logo
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('#smg-remove-logo')) {
+                    this.handleRemoveLogo(e);
+                }
+            });
+
             // View example button click
             document.addEventListener('click', (e) => {
                 if (e.target.closest('.smg-view-example-btn')) {
@@ -1237,6 +1251,104 @@
 
             // Restore body scrolling
             document.body.style.overflow = '';
+        },
+
+        /**
+         * Handle select logo button click
+         * Opens WordPress media library to select organization logo
+         */
+        handleSelectLogo(e) {
+            e.preventDefault();
+
+            // Create media frame if it doesn't exist
+            if (!this.logoMediaFrame) {
+                this.logoMediaFrame = wp.media({
+                    title: typeof smgAdmin !== 'undefined' && smgAdmin.strings?.selectLogo
+                        ? smgAdmin.strings.selectLogo
+                        : 'Select Organization Logo',
+                    button: {
+                        text: typeof smgAdmin !== 'undefined' && smgAdmin.strings?.useLogo
+                            ? smgAdmin.strings.useLogo
+                            : 'Use this logo',
+                    },
+                    library: {
+                        type: 'image',
+                    },
+                    multiple: false,
+                });
+
+                // Handle selection
+                this.logoMediaFrame.on('select', () => {
+                    const attachment = this.logoMediaFrame.state().get('selection').first().toJSON();
+                    this.updateLogoPreview(attachment);
+                });
+            }
+
+            this.logoMediaFrame.open();
+        },
+
+        /**
+         * Handle remove logo button click
+         */
+        handleRemoveLogo(e) {
+            e.preventDefault();
+
+            const preview = document.getElementById('smg-logo-preview');
+            const input = document.getElementById('smg-organization-logo');
+            const removeBtn = document.getElementById('smg-remove-logo');
+
+            if (preview) {
+                preview.innerHTML = '<span class="smg-no-image text-gray-400">' +
+                    (typeof smgAdmin !== 'undefined' && smgAdmin.strings?.noLogo
+                        ? smgAdmin.strings.noLogo
+                        : 'No logo set') +
+                    '</span>';
+            }
+
+            if (input) {
+                input.value = '';
+            }
+
+            if (removeBtn) {
+                removeBtn.classList.add('hidden');
+            }
+
+            this.showToast(
+                typeof smgAdmin !== 'undefined' && smgAdmin.strings?.logoRemoved
+                    ? smgAdmin.strings.logoRemoved
+                    : 'Logo removed. Save settings to apply.',
+                'info'
+            );
+        },
+
+        /**
+         * Update logo preview after selection
+         */
+        updateLogoPreview(attachment) {
+            const preview = document.getElementById('smg-logo-preview');
+            const input = document.getElementById('smg-organization-logo');
+            const removeBtn = document.getElementById('smg-remove-logo');
+
+            if (preview && attachment.url) {
+                // Use thumbnail size if available, otherwise use full
+                const url = attachment.sizes?.thumbnail?.url || attachment.url;
+                preview.innerHTML = `<img src="${url}" alt="" class="max-h-16 rounded border border-gray-200">`;
+            }
+
+            if (input) {
+                input.value = attachment.id;
+            }
+
+            if (removeBtn) {
+                removeBtn.classList.remove('hidden');
+            }
+
+            this.showToast(
+                typeof smgAdmin !== 'undefined' && smgAdmin.strings?.logoSelected
+                    ? smgAdmin.strings.logoSelected
+                    : 'Logo selected. Save settings to apply.',
+                'success'
+            );
         },
 
         /**
