@@ -58,6 +58,7 @@ class IntegrationsTab extends AbstractTab
             'integration_acf_enabled' => !empty($input['integration_acf_enabled']),
             'integration_woocommerce_enabled' => !empty($input['integration_woocommerce_enabled']),
             'integration_memberpress_courses_enabled' => !empty($input['integration_memberpress_courses_enabled']),
+            'integration_memberpress_memberships_enabled' => !empty($input['integration_memberpress_memberships_enabled']),
             // ACF
             'acf_auto_discover' => !empty($input['acf_auto_discover']),
             'acf_include_nested' => !empty($input['acf_include_nested']),
@@ -113,6 +114,14 @@ class IntegrationsTab extends AbstractTab
                     post_type_exists('mpcs-lesson'),
                     'memberpress_courses',
                     __('Link lessons to courses and generate LearningResource schemas with course hierarchy.', 'schema-markup-generator'),
+                    $settings
+                );
+
+                $this->renderIntegrationCard(
+                    'MemberPress Memberships',
+                    post_type_exists('memberpressproduct') || class_exists('MeprProduct') || defined('MEPR_VERSION'),
+                    'memberpress_memberships',
+                    __('Generate Product schemas for MemberPress memberships with pricing, trial info, and registration URLs.', 'schema-markup-generator'),
                     $settings
                 );
                 ?>
@@ -270,6 +279,55 @@ class IntegrationsTab extends AbstractTab
                         </div>
                         <p class="smg-text-muted">
                             <?php esc_html_e('Schema types: Course (mpcs-course) → LearningResource (mpcs-lesson)', 'schema-markup-generator'); ?>
+                        </p>
+                        <?php
+                    }, 'dashicons-info');
+                    ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (post_type_exists('memberpressproduct') || class_exists('MeprProduct') || defined('MEPR_VERSION')): ?>
+                <?php $this->renderSection(
+                    __('MemberPress Memberships Settings', 'schema-markup-generator'),
+                    __('Configure MemberPress Memberships integration for subscription/product content.', 'schema-markup-generator')
+                ); ?>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <?php
+                    $this->renderCard(__('Membership Fields', 'schema-markup-generator'), function () {
+                        ?>
+                        <div class="flex flex-col gap-4">
+                            <p><?php esc_html_e('Available fields for schema mapping:', 'schema-markup-generator'); ?></p>
+                            <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                <li><?php esc_html_e('Price, Period, Period Type', 'schema-markup-generator'); ?></li>
+                                <li><?php esc_html_e('Trial settings (days, amount)', 'schema-markup-generator'); ?></li>
+                                <li><?php esc_html_e('Pricing display options', 'schema-markup-generator'); ?></li>
+                                <li><?php esc_html_e('Benefits list', 'schema-markup-generator'); ?></li>
+                            </ul>
+                            <p class="smg-text-muted text-xs">
+                                <?php esc_html_e('Computed fields: Formatted Price, Billing Description, Registration URL', 'schema-markup-generator'); ?>
+                            </p>
+                        </div>
+                        <?php
+                    }, 'dashicons-list-view');
+
+                    $this->renderCard(__('Integration Status', 'schema-markup-generator'), function () {
+                        $membershipCount = wp_count_posts('memberpressproduct');
+                        ?>
+                        <div class="flex flex-col gap-4">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="dashicons dashicons-yes-alt" style="color: var(--smg-success);"></span>
+                                <span><?php printf(__('%d Memberships detected', 'schema-markup-generator'), $membershipCount->publish ?? 0); ?></span>
+                            </div>
+                            <?php if (class_exists('MeprProduct')): ?>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="dashicons dashicons-yes-alt" style="color: var(--smg-success);"></span>
+                                    <span><?php esc_html_e('MemberPress API available', 'schema-markup-generator'); ?></span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <p class="smg-text-muted mt-4">
+                            <?php esc_html_e('Schema type: Product with Offer (memberpressproduct)', 'schema-markup-generator'); ?>
                         </p>
                         <?php
                     }, 'dashicons-info');

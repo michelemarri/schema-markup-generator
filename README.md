@@ -233,6 +233,12 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.17.0
+- **Fixed**: MemberPress Memberships integration now visible in the Integrations tab
+- **New**: Integration card for MemberPress Memberships with enable/disable toggle
+- **New**: MemberPress Memberships settings section showing detected memberships and available fields
+- **New**: Integration toggle `integration_memberpress_memberships_enabled` for granular control
+
 ### 1.16.0
 - **New**: Customizable Organization Info - Override site name, URL, and logo for schema markup
 - **New**: Organization logo uploader - Select a specific logo independent from theme Custom Logo
