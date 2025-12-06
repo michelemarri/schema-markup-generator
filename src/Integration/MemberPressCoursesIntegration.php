@@ -24,6 +24,32 @@ class MemberPressCoursesIntegration
     public const COURSE_POST_TYPE = 'mpcs-course';
 
     /**
+     * Virtual/computed fields for courses
+     */
+    private const VIRTUAL_FIELDS = [
+        'mpcs_curriculum' => [
+            'label' => 'Course Curriculum',
+            'type' => 'text',
+            'description' => 'Auto-generated course curriculum (sections and lessons). Ideal for mapping to syllabus.',
+        ],
+        'mpcs_curriculum_html' => [
+            'label' => 'Course Curriculum (HTML)',
+            'type' => 'text',
+            'description' => 'Course curriculum formatted as HTML list with sections and lessons.',
+        ],
+        'mpcs_lesson_count' => [
+            'label' => 'Lesson Count',
+            'type' => 'number',
+            'description' => 'Total number of lessons in the course.',
+        ],
+        'mpcs_section_count' => [
+            'label' => 'Section Count',
+            'type' => 'number',
+            'description' => 'Total number of sections in the course.',
+        ],
+    ];
+
+    /**
      * Initialize integration
      */
     public function init(): void
@@ -32,6 +58,12 @@ class MemberPressCoursesIntegration
         // This avoids timing issues with post type registration
         add_filter('smg_learning_resource_parent_course', [$this, 'getParentCourse'], 10, 3);
         add_filter('smg_course_schema_data', [$this, 'enhanceCourseSchema'], 10, 3);
+
+        // Add course fields to discovery
+        add_filter('smg_discovered_fields', [$this, 'addCourseFields'], 10, 2);
+
+        // Resolve course field values
+        add_filter('smg_resolve_field_value', [$this, 'resolveFieldValue'], 10, 4);
     }
 
     /**
@@ -176,6 +208,191 @@ class MemberPressCoursesIntegration
     }
 
     /**
+     * Add course fields to discovered fields for the course post type
+     *
+     * @param array  $fields   Current discovered fields
+     * @param string $postType The post type being queried
+     * @return array Modified fields array
+     */
+    public function addCourseFields(array $fields, string $postType): array
+    {
+        // Only add fields for course post type
+        if ($postType !== self::COURSE_POST_TYPE) {
+            return $fields;
+        }
+
+        // Check availability
+        if (!$this->isAvailable()) {
+            return $fields;
+        }
+
+        // Add virtual/computed fields
+        foreach (self::VIRTUAL_FIELDS as $key => $config) {
+            $fields[] = [
+                'key' => $key,
+                'name' => $key,
+                'label' => $config['label'],
+                'type' => $config['type'],
+                'source' => 'mpcs_virtual',
+                'plugin' => 'memberpress_courses',
+                'plugin_label' => 'MemberPress Courses (Computed)',
+                'plugin_priority' => 15,
+                'description' => $config['description'] ?? '',
+                'virtual' => true,
+            ];
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Resolve course field values
+     *
+     * @param mixed  $value    Current resolved value
+     * @param int    $postId   The post ID
+     * @param string $fieldKey The field key
+     * @param string $source   The field source
+     * @return mixed Resolved value
+     */
+    public function resolveFieldValue(mixed $value, int $postId, string $fieldKey, string $source): mixed
+    {
+        // Only handle mpcs_virtual source
+        if ($source !== 'mpcs_virtual') {
+            return $value;
+        }
+
+        // Check if this is a course post
+        $post = get_post($postId);
+        if (!$post || $post->post_type !== self::COURSE_POST_TYPE) {
+            return $value;
+        }
+
+        // Check availability
+        if (!$this->isAvailable()) {
+            return $value;
+        }
+
+        return match ($fieldKey) {
+            'mpcs_curriculum' => $this->getCurriculumText($postId),
+            'mpcs_curriculum_html' => $this->getCurriculumHtml($postId),
+            'mpcs_lesson_count' => $this->getLessonCount($postId),
+            'mpcs_section_count' => $this->getSectionCount($postId),
+            default => $value,
+        };
+    }
+
+    /**
+     * Get curriculum as plain text for syllabus mapping
+     *
+     * @param int $courseId The course ID
+     * @return string Curriculum text
+     */
+    public function getCurriculumText(int $courseId): string
+    {
+        global $wpdb;
+        $tableName = $wpdb->prefix . 'mpcs_sections';
+
+        $sections = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT id, title, section_order FROM {$tableName} WHERE course_id = %d ORDER BY section_order ASC",
+                $courseId
+            )
+        );
+
+        if (empty($sections)) {
+            return '';
+        }
+
+        $output = [];
+
+        foreach ($sections as $index => $section) {
+            $sectionNum = $index + 1;
+            $sectionTitle = html_entity_decode($section->title, ENT_QUOTES, 'UTF-8');
+            $output[] = "Section {$sectionNum}: {$sectionTitle}";
+
+            // Get lessons in this section
+            $lessons = $this->getLessonsInSection((int) $section->id);
+
+            foreach ($lessons as $lessonIndex => $lesson) {
+                $lessonNum = $lessonIndex + 1;
+                $lessonTitle = html_entity_decode(get_the_title($lesson), ENT_QUOTES, 'UTF-8');
+                $output[] = "  {$sectionNum}.{$lessonNum} {$lessonTitle}";
+            }
+        }
+
+        return implode('. ', $output);
+    }
+
+    /**
+     * Get curriculum as HTML list
+     *
+     * @param int $courseId The course ID
+     * @return string Curriculum HTML
+     */
+    public function getCurriculumHtml(int $courseId): string
+    {
+        global $wpdb;
+        $tableName = $wpdb->prefix . 'mpcs_sections';
+
+        $sections = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT id, title, section_order FROM {$tableName} WHERE course_id = %d ORDER BY section_order ASC",
+                $courseId
+            )
+        );
+
+        if (empty($sections)) {
+            return '';
+        }
+
+        $html = '<ol class="course-curriculum">';
+
+        foreach ($sections as $section) {
+            $sectionTitle = esc_html(html_entity_decode($section->title, ENT_QUOTES, 'UTF-8'));
+            $html .= "<li><strong>{$sectionTitle}</strong>";
+
+            // Get lessons in this section
+            $lessons = $this->getLessonsInSection((int) $section->id);
+
+            if (!empty($lessons)) {
+                $html .= '<ol>';
+                foreach ($lessons as $lesson) {
+                    $lessonTitle = esc_html(html_entity_decode(get_the_title($lesson), ENT_QUOTES, 'UTF-8'));
+                    $html .= "<li>{$lessonTitle}</li>";
+                }
+                $html .= '</ol>';
+            }
+
+            $html .= '</li>';
+        }
+
+        $html .= '</ol>';
+
+        return $html;
+    }
+
+    /**
+     * Get section count for a course
+     *
+     * @param int $courseId The course ID
+     * @return int Section count
+     */
+    public function getSectionCount(int $courseId): int
+    {
+        global $wpdb;
+        $tableName = $wpdb->prefix . 'mpcs_sections';
+
+        $count = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$tableName} WHERE course_id = %d",
+                $courseId
+            )
+        );
+
+        return (int) $count;
+    }
+
+    /**
      * Enhance Course schema with MemberPress Courses data
      *
      * @param array   $data    Current schema data
@@ -194,14 +411,20 @@ class MemberPressCoursesIntegration
             return $data;
         }
 
-        // Add course curriculum (sections and lessons)
-        $curriculum = $this->getCourseCurriculum($post->ID);
+        // Get integration settings
+        $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('integrations');
+        $includeCurriculum = $settings['mpcs_include_curriculum'] ?? false;
 
-        if (!empty($curriculum)) {
-            $data['hasCourseInstance'] = $curriculum;
+        // Add course curriculum (sections and lessons) only if setting is enabled
+        if ($includeCurriculum) {
+            $curriculum = $this->getCourseCurriculum($post->ID);
+
+            if (!empty($curriculum)) {
+                $data['hasCourseInstance'] = $curriculum;
+            }
         }
 
-        // Add lesson count
+        // Add lesson count (always useful, lightweight)
         $lessonCount = $this->getLessonCount($post->ID);
         if ($lessonCount > 0) {
             $data['numberOfLessons'] = $lessonCount;

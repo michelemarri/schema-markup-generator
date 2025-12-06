@@ -483,14 +483,36 @@ When MemberPress Courses is active, the plugin automatically enhances schema gen
    - The course hierarchy (Lesson → Section → Course) is traversed automatically
 
 2. **Course Enhancement**
-   - Courses (`mpcs-course`) include curriculum structure with sections and lessons
+   - Courses (`mpcs-course`) can include curriculum structure with sections and lessons (configurable)
    - Lesson count is automatically calculated
+
+### Configuration
+
+In **Settings → Schema Markup → Integrations**, you can configure:
+
+| Setting | Description |
+|---------|-------------|
+| **Auto-detect Parent Course** | Automatically link lessons to their parent course in the schema (`isPartOf`) |
+| **Include Curriculum in Course Schema** | Add sections and lessons list to Course schema as `hasCourseInstance` (may increase page size) |
+
+### Available Virtual Fields
+
+The following computed fields are available for mapping to Course schema properties:
+
+| Field | Type | Description | Suggested Mapping |
+|-------|------|-------------|-------------------|
+| `mpcs_curriculum` | text | Auto-generated course curriculum (sections and lessons as text) | `syllabus` |
+| `mpcs_curriculum_html` | text | Course curriculum formatted as HTML nested list | - |
+| `mpcs_lesson_count` | number | Total number of lessons in the course | - |
+| `mpcs_section_count` | number | Total number of sections in the course | - |
+
+**Pro Tip:** Map `mpcs_curriculum` to the `syllabus` property for optimal LLM understanding of your course structure.
 
 ### Supported Post Types
 
 | Post Type | Schema Type | Features |
 |-----------|-------------|----------|
-| `mpcs-course` | Course | Curriculum, lesson count, sections |
+| `mpcs-course` | Course | Virtual fields, curriculum, lesson count, sections |
 | `mpcs-lesson` | LearningResource | Parent course auto-detection |
 
 ### Example Output
@@ -509,7 +531,7 @@ When MemberPress Courses is active, the plugin automatically enhances schema gen
 }
 ```
 
-**Course with Curriculum:**
+**Course with Curriculum (when setting is enabled):**
 ```json
 {
   "@type": "Course",
@@ -528,9 +550,15 @@ When MemberPress Courses is active, the plugin automatically enhances schema gen
 }
 ```
 
-### No Configuration Required
-
-The integration works automatically when MemberPress Courses is detected. No additional configuration is needed.
+**Course with Syllabus (mapped from `mpcs_curriculum`):**
+```json
+{
+  "@type": "Course",
+  "name": "Digital Marketing Fundamentals",
+  "numberOfLessons": 12,
+  "syllabus": "Section 1: SEO Basics. 1.1 What is SEO?. 1.2 Keywords Research. Section 2: Content Marketing. 2.1 Content Strategy. 2.2 Writing for the Web."
+}
+```
 
 ---
 

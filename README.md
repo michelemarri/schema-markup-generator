@@ -234,6 +234,15 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.20.0
+- **New**: MemberPress Courses virtual fields for Course schema:
+  - `mpcs_curriculum` - Auto-generated course curriculum text, ideal for mapping to `syllabus`
+  - `mpcs_curriculum_html` - Course curriculum formatted as HTML list
+  - `mpcs_lesson_count` - Total number of lessons in the course
+  - `mpcs_section_count` - Total number of sections in the course
+- **Fixed**: "Include Curriculum in Course Schema" setting now properly controls whether `hasCourseInstance` is added to Course schema
+- **Improved**: Course curriculum fields are now discoverable and mappable like other integration fields
+
 ### 1.19.0
 - **New**: MemberPress virtual fields for schema.org subscription properties
 - **New**: `mepr_eligible_duration` - ISO 8601 duration format (P1M, P1Y, P3M) ready for `eligibleDuration`
