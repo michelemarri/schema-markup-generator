@@ -451,26 +451,64 @@ class Plugin
         }
 
         try {
-            // Force WordPress to check for plugin updates
+            /** @var GitHubUpdater $updater */
+            $updater = $this->services['updater'] ?? null;
+            
+            if (!$updater) {
+                wp_send_json_error(['message' => 'Updater not available']);
+                return;
+            }
+
+            $updateChecker = $updater->getUpdateChecker();
+            
+            if (!$updateChecker) {
+                wp_send_json_error(['message' => 'Update checker not initialized. Check if the GitHub token is configured.']);
+                return;
+            }
+
+            // Force check using Plugin Update Checker directly
+            // This bypasses any WordPress caching
+            $update = $updateChecker->checkForUpdates();
+            
+            // Also refresh WordPress transient
             delete_site_transient('update_plugins');
             wp_update_plugins();
 
-            // Get update info
-            $updatePlugins = get_site_transient('update_plugins');
-            $pluginFile = SMG_PLUGIN_BASENAME;
-
-            if (isset($updatePlugins->response[$pluginFile])) {
-                $update = $updatePlugins->response[$pluginFile];
-                wp_send_json_success([
-                    'update_available' => true,
-                    'new_version' => $update->new_version ?? 'Unknown',
-                    'update_url' => admin_url('plugins.php'),
-                ]);
+            if ($update !== null && isset($update->version)) {
+                // Compare versions
+                if (version_compare($update->version, SMG_VERSION, '>')) {
+                    wp_send_json_success([
+                        'update_available' => true,
+                        'new_version' => $update->version,
+                        'current_version' => SMG_VERSION,
+                        'update_url' => admin_url('plugins.php'),
+                        'download_url' => $update->download_url ?? '',
+                    ]);
+                } else {
+                    wp_send_json_success([
+                        'update_available' => false,
+                        'current_version' => SMG_VERSION,
+                        'latest_version' => $update->version,
+                    ]);
+                }
             } else {
-                wp_send_json_success([
-                    'update_available' => false,
-                    'current_version' => SMG_VERSION,
-                ]);
+                // Fallback to WordPress transient check
+                $updatePlugins = get_site_transient('update_plugins');
+                $pluginFile = SMG_PLUGIN_BASENAME;
+
+                if (isset($updatePlugins->response[$pluginFile])) {
+                    $wpUpdate = $updatePlugins->response[$pluginFile];
+                    wp_send_json_success([
+                        'update_available' => true,
+                        'new_version' => $wpUpdate->new_version ?? 'Unknown',
+                        'update_url' => admin_url('plugins.php'),
+                    ]);
+                } else {
+                    wp_send_json_success([
+                        'update_available' => false,
+                        'current_version' => SMG_VERSION,
+                    ]);
+                }
             }
         } catch (\Exception $e) {
             wp_send_json_error(['message' => $e->getMessage()]);

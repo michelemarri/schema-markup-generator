@@ -2,7 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-purple)](https://php.net)
-[![WordPress Version](https://img.shields.io/badge/WordPress-6.0%2B-blue)](https://wordpress.org)
+[![WordPress Version](https://img.shields.io/badge/WordPress-6.0%2B%20(tested%206.9)-blue)](https://wordpress.org)
 
 Automatic schema.org structured data generation for WordPress, optimized for search engines and LLMs.
 
@@ -232,6 +232,13 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - [Metodo.dev](https://metodo.dev)
 
 ## Changelog
+
+### 1.17.3
+- **Updated**: WordPress compatibility tested up to 6.9
+
+### 1.17.2
+- **Fixed**: Manual update check now works correctly by using Plugin Update Checker directly instead of WordPress standard `wp_update_plugins()`
+- **Improved**: Update check results now show both current and latest version for better clarity
 
 ### 1.17.1
 - **Fixed**: Integration status badges now show correctly: "Not Detected" (grey), "Detected" (amber), "Active" (green)
