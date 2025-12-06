@@ -140,16 +140,6 @@ class UpdateTab extends AbstractTab
                 ?>
             </div>
 
-            <?php $this->renderSection(
-                __('Security Information', 'schema-markup-generator'),
-                __('How your GitHub token is protected.', 'schema-markup-generator')
-            ); ?>
-
-            <?php
-            $this->renderCard(__('Token Security', 'schema-markup-generator'), function () {
-                $this->renderSecurityInfo();
-            }, 'dashicons-shield');
-            ?>
         </div>
         <?php
     }
@@ -259,7 +249,10 @@ class UpdateTab extends AbstractTab
                 <?php esc_html_e('Remove Token', 'schema-markup-generator'); ?>
             </button>
         </div>
-        <?php endif;
+        <?php endif; ?>
+
+        <?php $this->renderSecurityGrid(); ?>
+        <?php
     }
 
     /**
@@ -282,37 +275,41 @@ class UpdateTab extends AbstractTab
     }
 
     /**
-     * Render security information
+     * Render compact security grid
      */
-    private function renderSecurityInfo(): void
+    private function renderSecurityGrid(): void
     {
         ?>
-        <div class="smg-security-info">
-            <ul class="smg-security-list">
-                <li>
-                    <span class="dashicons dashicons-yes"></span>
-                    <strong><?php esc_html_e('AES-256-CBC Encryption', 'schema-markup-generator'); ?></strong>
-                    <span><?php esc_html_e('Your token is encrypted using industry-standard AES-256-CBC encryption before being stored.', 'schema-markup-generator'); ?></span>
-                </li>
-                <li>
-                    <span class="dashicons dashicons-yes"></span>
-                    <strong><?php esc_html_e('Unique Encryption Key', 'schema-markup-generator'); ?></strong>
-                    <span><?php esc_html_e('The encryption uses your WordPress AUTH_KEY, making it unique to your installation.', 'schema-markup-generator'); ?></span>
-                </li>
-                <li>
-                    <span class="dashicons dashicons-yes"></span>
+        <div class="smg-security-grid">
+            <div class="smg-security-grid-item">
+                <span class="dashicons dashicons-shield"></span>
+                <div>
+                    <strong><?php esc_html_e('AES-256-CBC', 'schema-markup-generator'); ?></strong>
+                    <span><?php esc_html_e('Industry-standard encryption', 'schema-markup-generator'); ?></span>
+                </div>
+            </div>
+            <div class="smg-security-grid-item">
+                <span class="dashicons dashicons-admin-network"></span>
+                <div>
+                    <strong><?php esc_html_e('Unique Key', 'schema-markup-generator'); ?></strong>
+                    <span><?php esc_html_e('Uses your WordPress AUTH_KEY', 'schema-markup-generator'); ?></span>
+                </div>
+            </div>
+            <div class="smg-security-grid-item">
+                <span class="dashicons dashicons-hidden"></span>
+                <div>
                     <strong><?php esc_html_e('Never Displayed', 'schema-markup-generator'); ?></strong>
-                    <span><?php esc_html_e('The original token is never displayed after being saved. Only a masked placeholder is shown.', 'schema-markup-generator'); ?></span>
-                </li>
-                <li>
-                    <span class="dashicons dashicons-info"></span>
-                    <strong><?php esc_html_e('Alternative Method', 'schema-markup-generator'); ?></strong>
-                    <span>
-                        <?php esc_html_e('For maximum security, you can define the token in wp-config.php:', 'schema-markup-generator'); ?>
-                        <code>define('SMG_GITHUB_TOKEN', 'your-token');</code>
-                    </span>
-                </li>
-            </ul>
+                    <span><?php esc_html_e('Only masked placeholder shown', 'schema-markup-generator'); ?></span>
+                </div>
+            </div>
+        </div>
+        <div class="smg-security-alt-method">
+            <span class="dashicons dashicons-info-outline"></span>
+            <span>
+                <?php esc_html_e('Alternative:', 'schema-markup-generator'); ?>
+                <code>define('SMG_GITHUB_TOKEN', 'your-token');</code>
+                <?php esc_html_e('in wp-config.php', 'schema-markup-generator'); ?>
+            </span>
         </div>
         <?php
     }

@@ -1018,40 +1018,52 @@
   @apply bg-blue-100 border border-blue-200 text-blue-700;
 }
 
-.smg-security-info {
-  @apply py-2;
+.smg-security-grid {
+  @apply grid grid-cols-3 gap-3 mt-5 pt-5 border-t border-gray-100;
 }
 
-.smg-security-list {
-  @apply list-none m-0 p-0;
+.smg-security-grid-item {
+  @apply flex items-start gap-2 p-3 bg-gray-50 rounded-lg;
 }
 
-.smg-security-list li {
-  @apply flex flex-col gap-1 p-4 border-b border-gray-100;
+.smg-security-grid-item .dashicons {
+  @apply flex-shrink-0 text-green-500 mt-0.5;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
 }
 
-.smg-security-list li:last-child {
-  @apply border-b-0;
+.smg-security-grid-item div {
+  @apply flex flex-col gap-0.5;
 }
 
-.smg-security-list .dashicons {
-  @apply mr-2 text-green-500;
+.smg-security-grid-item strong {
+  @apply text-xs font-semibold text-gray-900;
 }
 
-.smg-security-list .dashicons-info {
-  @apply text-blue-500;
+.smg-security-grid-item span {
+  @apply text-[11px] text-gray-500 leading-tight;
 }
 
-.smg-security-list strong {
-  @apply inline-flex items-center text-sm text-gray-900;
+.smg-security-alt-method {
+  @apply flex items-center gap-2 mt-3 p-2.5 text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded-lg;
 }
 
-.smg-security-list span {
-  @apply text-sm text-gray-500 leading-relaxed pl-7;
+.smg-security-alt-method .dashicons {
+  @apply flex-shrink-0 text-blue-400;
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
 }
 
-.smg-security-list code {
-  @apply block mt-2 px-3 py-2 font-mono text-xs text-gray-900 bg-gray-100 rounded overflow-x-auto;
+.smg-security-alt-method code {
+  @apply px-1.5 py-0.5 font-mono text-[10px] text-gray-700 bg-white border border-blue-200 rounded;
+}
+
+@media (max-width: 782px) {
+  .smg-security-grid {
+    @apply grid-cols-1;
+  }
 }
 
 /* ========================================
