@@ -22,6 +22,7 @@ use Metodo\SchemaMarkupGenerator\Integration\RankMathIntegration;
 use Metodo\SchemaMarkupGenerator\Integration\ACFIntegration;
 use Metodo\SchemaMarkupGenerator\Integration\MemberPressCoursesIntegration;
 use Metodo\SchemaMarkupGenerator\Integration\MemberPressMembershipIntegration;
+use Metodo\SchemaMarkupGenerator\Integration\WooCommerceIntegration;
 use Metodo\SchemaMarkupGenerator\Rest\SchemaEndpoint;
 use Metodo\SchemaMarkupGenerator\Logger\Logger;
 use Metodo\SchemaMarkupGenerator\Updater\GitHubUpdater;
@@ -100,6 +101,7 @@ class Plugin
         $this->services['acf_integration'] = new ACFIntegration();
         $this->services['memberpress_courses_integration'] = new MemberPressCoursesIntegration();
         $this->services['memberpress_membership_integration'] = new MemberPressMembershipIntegration();
+        $this->services['woocommerce_integration'] = new WooCommerceIntegration();
 
         // REST API
         $this->services['rest_endpoint'] = new SchemaEndpoint(
@@ -174,6 +176,7 @@ class Plugin
             'acf_integration' => 'integration_acf_enabled',
             'memberpress_courses_integration' => 'integration_memberpress_courses_enabled',
             'memberpress_membership_integration' => 'integration_memberpress_memberships_enabled',
+            'woocommerce_integration' => 'integration_woocommerce_enabled',
         ];
 
         foreach ($integrations as $serviceKey => $settingKey) {

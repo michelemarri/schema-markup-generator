@@ -14,8 +14,9 @@ Automatic schema.org structured data generation for WordPress, optimized for sea
 - **Property Documentation** - Click any property for detailed description, examples, and schema.org link
 - **ACF Integration** - Full support for Advanced Custom Fields with visual field mapping
 - **Rank Math Compatibility** - Prevents duplicate schemas when Rank Math is active
+- **WooCommerce Integration** - Currency code and symbol from WooCommerce settings available for mapping
 - **MemberPress Courses Integration** - Automatic Course/Lesson hierarchy for LearningResource schemas
-- **MemberPress Membership Integration** - Full support for membership fields (price, period, trial, benefits) with Product schema
+- **MemberPress Membership Integration** - Full support for membership fields (price, period, trial, benefits, currency) with Product schema
 - **Modern Admin UI** - Clean, tabbed interface for easy configuration
 - **Schema Preview** - Real-time preview with validation in the post editor
 - **REST API** - Full REST API for programmatic access
@@ -232,6 +233,13 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - [Metodo.dev](https://metodo.dev)
 
 ## Changelog
+
+### 1.18.0
+- **New**: WooCommerce Integration - exposes `woo_currency_code` and `woo_currency_symbol` as mappable fields
+- **New**: MemberPress currency field `mepr_currency_code` now available for schema mapping
+- **New**: Currency fields automatically use ISO 4217 codes from plugin settings (WooCommerce/MemberPress)
+- **Improved**: Integrations tab shows current currency configuration for WooCommerce and MemberPress
+- **Use case**: Map `woo_currency_code` or `mepr_currency_code` to `priceCurrency` in Product, Course, Event schemas
 
 ### 1.17.3
 - **Updated**: WordPress compatibility tested up to 6.9

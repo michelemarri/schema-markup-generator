@@ -151,7 +151,7 @@ add_filter('smg_product_schema_data', function(array $data, WP_Post $post, array
 When using `smg_resolve_field_value`, membership fields use these sources:
 
 - `memberpress` - Standard meta fields (e.g., `_mepr_product_price`)
-- `memberpress_virtual` - Computed fields (e.g., `mepr_formatted_price`)
+- `memberpress_virtual` - Computed fields (e.g., `mepr_formatted_price`, `mepr_currency_code`)
 
 ```php
 add_filter('smg_resolve_field_value', function($value, int $postId, string $fieldKey, string $source) {
@@ -162,6 +162,38 @@ add_filter('smg_resolve_field_value', function($value, int $postId, string $fiel
     return $value;
 }, 10, 4);
 ```
+
+**Available virtual fields:**
+- `mepr_formatted_price` - Price with currency symbol (e.g., $99.00)
+- `mepr_billing_description` - Human-readable billing (e.g., "$99/month")
+- `mepr_registration_url` - Direct membership signup URL
+- `mepr_currency_code` - ISO 4217 currency code from MemberPress settings
+
+---
+
+### WooCommerce Filters
+
+#### WooCommerce Field Sources
+
+When using `smg_resolve_field_value`, WooCommerce global fields use these sources:
+
+- `woocommerce_virtual` - Global computed fields (e.g., `woo_currency_code`)
+
+```php
+add_filter('smg_resolve_field_value', function($value, int $postId, string $fieldKey, string $source) {
+    if ($source === 'woocommerce_virtual' && $fieldKey === 'woo_currency_code') {
+        // Override currency code
+        return 'USD';
+    }
+    return $value;
+}, 10, 4);
+```
+
+**Available virtual fields:**
+- `woo_currency_code` - ISO 4217 currency code from WooCommerce settings (e.g., EUR, USD)
+- `woo_currency_symbol` - Currency symbol from WooCommerce settings (e.g., €, $)
+
+**Use case:** Map `woo_currency_code` to `priceCurrency` in Product, Course, Event, or any schema with pricing.
 
 ---
 

@@ -295,17 +295,30 @@ class IntegrationsTab extends AbstractTab
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <?php
                     $this->renderCard(__('Membership Fields', 'schema-markup-generator'), function () {
+                        // Get MemberPress currency settings
+                        $currencyCode = 'USD';
+                        $currencySymbol = '$';
+                        if (class_exists('MeprOptions')) {
+                            $options = \MeprOptions::fetch();
+                            $currencyCode = $options->currency_code ?? 'USD';
+                            $currencySymbol = $options->currency_symbol ?? '$';
+                        }
                         ?>
                         <div class="flex flex-col gap-4">
-                            <p><?php esc_html_e('Available fields for schema mapping:', 'schema-markup-generator'); ?></p>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="dashicons dashicons-money-alt" style="color: var(--smg-success);"></span>
+                                <span><?php printf(__('Currency: %s (%s)', 'schema-markup-generator'), esc_html($currencyCode), esc_html($currencySymbol)); ?></span>
+                            </div>
+                            <p class="smg-text-muted text-sm"><?php esc_html_e('Available fields for schema mapping:', 'schema-markup-generator'); ?></p>
                             <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
                                 <li><?php esc_html_e('Price, Period, Period Type', 'schema-markup-generator'); ?></li>
                                 <li><?php esc_html_e('Trial settings (days, amount)', 'schema-markup-generator'); ?></li>
                                 <li><?php esc_html_e('Pricing display options', 'schema-markup-generator'); ?></li>
                                 <li><?php esc_html_e('Benefits list', 'schema-markup-generator'); ?></li>
+                                <li><code>mepr_currency_code</code> - <?php esc_html_e('ISO 4217 code (e.g. EUR, USD)', 'schema-markup-generator'); ?></li>
                             </ul>
                             <p class="smg-text-muted text-xs">
-                                <?php esc_html_e('Computed fields: Formatted Price, Billing Description, Registration URL', 'schema-markup-generator'); ?>
+                                <?php esc_html_e('Computed fields: Formatted Price, Billing Description, Registration URL, Currency Code', 'schema-markup-generator'); ?>
                             </p>
                         </div>
                         <?php
@@ -365,6 +378,29 @@ class IntegrationsTab extends AbstractTab
                             __('Include pricing and availability as Offer schema.', 'schema-markup-generator')
                         );
                     }, 'dashicons-cart');
+
+                    $this->renderCard(__('Currency & Fields', 'schema-markup-generator'), function () {
+                        $currencyCode = function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : get_option('woocommerce_currency', 'EUR');
+                        $currencySymbol = function_exists('get_woocommerce_currency_symbol') ? get_woocommerce_currency_symbol() : '€';
+                        ?>
+                        <div class="flex flex-col gap-4">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="dashicons dashicons-money-alt" style="color: var(--smg-success);"></span>
+                                <span><?php printf(__('Currency: %s (%s)', 'schema-markup-generator'), esc_html($currencyCode), esc_html($currencySymbol)); ?></span>
+                            </div>
+                            <p class="smg-text-muted text-sm">
+                                <?php esc_html_e('Available fields for schema mapping:', 'schema-markup-generator'); ?>
+                            </p>
+                            <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                <li><code>woo_currency_code</code> - <?php esc_html_e('ISO 4217 code (e.g. EUR, USD)', 'schema-markup-generator'); ?></li>
+                                <li><code>woo_currency_symbol</code> - <?php esc_html_e('Currency symbol (e.g. €, $)', 'schema-markup-generator'); ?></li>
+                            </ul>
+                            <p class="smg-text-muted text-xs">
+                                <?php esc_html_e('Map these fields to priceCurrency in your schema mappings.', 'schema-markup-generator'); ?>
+                            </p>
+                        </div>
+                        <?php
+                    }, 'dashicons-info');
                     ?>
                 </div>
             <?php endif; ?>

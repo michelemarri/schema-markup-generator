@@ -158,6 +158,11 @@ class MemberPressMembershipIntegration
             'type' => 'url',
             'description' => 'Direct membership registration URL',
         ],
+        'mepr_currency_code' => [
+            'label' => 'Currency Code',
+            'type' => 'text',
+            'description' => 'ISO 4217 currency code from MemberPress settings (e.g. EUR, USD)',
+        ],
     ];
 
     /**
@@ -303,6 +308,9 @@ class MemberPressMembershipIntegration
 
             case 'mepr_registration_url':
                 return $this->getRegistrationUrl($postId);
+
+            case 'mepr_currency_code':
+                return $this->getCurrencyCode();
 
             default:
                 return null;
