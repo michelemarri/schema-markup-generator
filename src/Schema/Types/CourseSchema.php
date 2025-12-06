@@ -86,24 +86,21 @@ class CourseSchema extends AbstractSchema
             $data['educationalLevel'] = $educationalLevel;
         }
 
-        // Course mode (online, onsite, blended)
+        // Course mode (online, onsite, blended) - default to online
         $courseMode = $this->getMappedValue($post, $mapping, 'courseMode');
-        if ($courseMode) {
-            $data['courseMode'] = $courseMode;
-        }
+        $data['courseMode'] = $courseMode ?: 'online';
 
-        // Language
+        // Language - default to site language
         $inLanguage = $this->getMappedValue($post, $mapping, 'inLanguage');
-        if ($inLanguage) {
-            $data['inLanguage'] = $inLanguage;
-        } else {
-            $data['inLanguage'] = get_bloginfo('language');
-        }
+        $data['inLanguage'] = $inLanguage ?: get_bloginfo('language');
 
-        // Offers (pricing)
-        $offers = $this->buildOffers($post, $mapping);
-        if (!empty($offers)) {
-            $data['offers'] = $offers;
+        // Offers (pricing) - always included, defaults to Free if no price mapped
+        $offersData = $this->buildOffers($post, $mapping);
+        $data['offers'] = $offersData['offer'];
+
+        // isAccessibleForFree - Google recommended property for free courses
+        if ($offersData['isFree']) {
+            $data['isAccessibleForFree'] = true;
         }
 
         // Course instances (specific occurrences)
@@ -270,33 +267,59 @@ class CourseSchema extends AbstractSchema
 
     /**
      * Build offers data
+     * Default: Free course (price=0) with InStock availability
+     *
+     * @return array{offer: array, isFree: bool}
      */
     private function buildOffers(WP_Post $post, array $mapping): array
     {
         $price = $this->getMappedValue($post, $mapping, 'price');
 
-        if ($price === null && $price !== 0 && $price !== '0') {
-            return [];
+        // Default to 0 (Free) if no price is mapped
+        $priceValue = ($price !== null) ? (float) $price : 0.0;
+        $isFree = $priceValue === 0.0;
+
+        // Get currency - check mapped value, then try to get from integrations
+        $currency = $this->getMappedValue($post, $mapping, 'priceCurrency');
+        if (!$currency) {
+            $currency = $this->getDefaultCurrency();
         }
 
-        $offers = [
+        $offer = [
             '@type' => 'Offer',
-            'price' => (float) $price,
-            'priceCurrency' => $this->getMappedValue($post, $mapping, 'priceCurrency') ?: 'EUR',
+            'price' => $priceValue,
+            'priceCurrency' => $currency,
             'url' => $this->getPostUrl($post),
-            'category' => 'Paid',
         ];
 
-        if ((float) $price === 0.0) {
-            $offers['category'] = 'Free';
-        }
-
+        // Availability - default to InStock (always available)
         $availability = $this->getMappedValue($post, $mapping, 'availability');
-        if ($availability) {
-            $offers['availability'] = 'https://schema.org/' . $availability;
+        $offer['availability'] = 'https://schema.org/' . ($availability ?: 'InStock');
+
+        return [
+            'offer' => $offer,
+            'isFree' => $isFree,
+        ];
+    }
+
+    /**
+     * Get default currency from integrations or fallback to EUR
+     */
+    private function getDefaultCurrency(): string
+    {
+        // Try WooCommerce
+        if (function_exists('get_woocommerce_currency')) {
+            return get_woocommerce_currency();
         }
 
-        return $offers;
+        // Try MemberPress
+        if (class_exists('MeprOptions')) {
+            $options = \MeprOptions::fetch();
+            return $options->currency_code ?? 'EUR';
+        }
+
+        // Fallback to EUR
+        return 'EUR';
     }
 
     /**
@@ -381,6 +404,8 @@ class CourseSchema extends AbstractSchema
                 'description_long' => __('The organization, school, or platform providing the course. This builds brand recognition and helps establish credibility in search results.', 'schema-markup-generator'),
                 'example' => __('Udemy, Coursera, Harvard University, Your Academy Name', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/provider',
+                'auto' => 'site_name',
+                'auto_description' => __('Defaults to WordPress site name', 'schema-markup-generator'),
             ],
 
             // ========================================
@@ -406,6 +431,8 @@ class CourseSchema extends AbstractSchema
                 'description_long' => __('Keywords and tags that describe the course content. Include both technical terms and common search phrases users might use to find this type of course.', 'schema-markup-generator'),
                 'example' => __('python course, learn programming, coding bootcamp, web development, beginner friendly', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/keywords',
+                'auto' => 'post_tags',
+                'auto_description' => __('Falls back to post tags if not mapped', 'schema-markup-generator'),
             ],
             'syllabus' => [
                 'type' => 'textarea',
@@ -424,6 +451,8 @@ class CourseSchema extends AbstractSchema
                 'description_long' => __('The instructor or teacher delivering the course. Including instructor credentials helps establish E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness).', 'schema-markup-generator'),
                 'example' => __('Dr. John Smith, Jane Doe (Senior Developer at Google), Prof. Maria Garcia', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/instructor',
+                'auto' => 'author',
+                'auto_description' => __('Defaults to post author', 'schema-markup-generator'),
             ],
             'ratingValue' => [
                 'type' => 'number',
@@ -456,6 +485,8 @@ class CourseSchema extends AbstractSchema
                 'description_long' => __('The price of the course. Use 0 for free courses (this will show "Free" in search results). Price information helps users filter and compare courses.', 'schema-markup-generator'),
                 'example' => __('0 (free), 49.99, 199.00, 499.00', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/price',
+                'auto' => '0 (Free)',
+                'auto_description' => __('Defaults to 0 (Free) if not mapped', 'schema-markup-generator'),
             ],
             'priceCurrency' => [
                 'type' => 'text',
@@ -463,6 +494,8 @@ class CourseSchema extends AbstractSchema
                 'description_long' => __('The currency of the course price in ISO 4217 format. Required whenever a price is specified.', 'schema-markup-generator'),
                 'example' => __('EUR, USD, GBP', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/priceCurrency',
+                'auto' => 'site_currency',
+                'auto_description' => __('Auto-detected from WooCommerce/MemberPress or EUR', 'schema-markup-generator'),
             ],
             'availability' => [
                 'type' => 'select',
@@ -471,6 +504,8 @@ class CourseSchema extends AbstractSchema
                 'example' => __('InStock (open enrollment), PreOrder (coming soon)', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/availability',
                 'options' => ['InStock', 'SoldOut', 'PreOrder', 'Discontinued'],
+                'auto' => 'InStock',
+                'auto_description' => __('Defaults to InStock (always available)', 'schema-markup-generator'),
             ],
 
             // ========================================
@@ -498,6 +533,8 @@ class CourseSchema extends AbstractSchema
                 'example' => __('online, onsite, blended', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/courseMode',
                 'options' => ['online', 'onsite', 'blended'],
+                'auto' => 'online',
+                'auto_description' => __('Defaults to online for e-learning courses', 'schema-markup-generator'),
             ],
             'inLanguage' => [
                 'type' => 'text',
@@ -505,6 +542,8 @@ class CourseSchema extends AbstractSchema
                 'description_long' => __('The language in which the course is taught. Use ISO 639-1 codes (e.g., "en" for English, "it" for Italian). Automatically detected from WordPress settings if not specified.', 'schema-markup-generator'),
                 'example' => __('en, it, es, de, fr', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/inLanguage',
+                'auto' => 'site_language',
+                'auto_description' => __('Auto-detected from WordPress site language', 'schema-markup-generator'),
             ],
             'numberOfCredits' => [
                 'type' => 'number',

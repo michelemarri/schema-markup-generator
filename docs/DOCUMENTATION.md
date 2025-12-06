@@ -381,8 +381,16 @@ These fields are automatically available for every post:
 ### Website Fields
 
 Global site information available for mapping:
-- `site_name` - The site name from WordPress General Settings
-- `site_url` - The home URL of the website
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| `site_name` | Site name from WordPress General Settings | "My Website" |
+| `site_url` | Home URL of the website | "https://example.com" |
+| `site_language` | Full locale from WordPress | "it-IT", "en-US" |
+| `site_language_code` | ISO 639-1 language code | "it", "en" |
+| `site_currency` | Currency code (auto-detected from WooCommerce/MemberPress, or EUR) | "EUR", "USD" |
+
+**Pro Tip:** Use `site_language_code` for the `inLanguage` property and `site_currency` for `priceCurrency`.
 
 ### Custom Fields
 
@@ -505,8 +513,13 @@ The following computed fields are available for mapping to Course schema propert
 | `mpcs_curriculum_html` | text | Course curriculum formatted as HTML nested list | - |
 | `mpcs_lesson_count` | number | Total number of lessons in the course | - |
 | `mpcs_section_count` | number | Total number of sections in the course | - |
+| `mpcs_enrollment_count` | number | Total students enrolled (from user progress table) | `totalHistoricalEnrollment` |
+| `mpcs_course_mode` | text | Default: "online" | `courseMode` |
+| `mpcs_availability` | text | Default: "InStock" (always available) | `availability` |
+| `mpcs_price_free` | number | Default: 0 (free course) | `price` |
+| `mpcs_is_free` | boolean | Default: true | `isAccessibleForFree` |
 
-**Pro Tip:** Map `mpcs_curriculum` to the `syllabus` property for optimal LLM understanding of your course structure.
+**Pro Tip:** The Course schema automatically uses sensible defaults (free, online, always available). Use these virtual fields only if you need to explicitly map them or override the defaults.
 
 ### Supported Post Types
 

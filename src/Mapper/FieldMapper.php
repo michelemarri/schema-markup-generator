@@ -263,8 +263,41 @@ class FieldMapper
             'site_name' => get_bloginfo('name'),
             'site_url' => home_url('/'),
             'site_description' => get_bloginfo('description'),
+            'site_language' => get_bloginfo('language'),
+            'site_language_code' => $this->getLanguageCode(),
+            'site_currency' => $this->getSiteCurrency(),
             default => null,
         };
+    }
+
+    /**
+     * Get ISO 639-1 language code (e.g., "it" from "it-IT")
+     */
+    private function getLanguageCode(): string
+    {
+        $locale = get_bloginfo('language');
+        // Extract just the language part (e.g., "it" from "it-IT")
+        return explode('-', $locale)[0];
+    }
+
+    /**
+     * Get site currency from available sources
+     */
+    private function getSiteCurrency(): string
+    {
+        // Try WooCommerce first
+        if (function_exists('get_woocommerce_currency')) {
+            return get_woocommerce_currency();
+        }
+
+        // Try MemberPress
+        if (class_exists('MeprOptions')) {
+            $options = \MeprOptions::fetch();
+            return $options->currency_code ?? 'EUR';
+        }
+
+        // Default to EUR
+        return 'EUR';
     }
 
     /**

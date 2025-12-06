@@ -161,6 +161,15 @@ class SchemaPropertiesHandler
                                     <option value="site_url" <?php selected($currentFieldMapping[$propName] ?? '', 'site_url'); ?>>
                                         <?php esc_html_e('Site URL', 'schema-markup-generator'); ?>
                                     </option>
+                                    <option value="site_language" <?php selected($currentFieldMapping[$propName] ?? '', 'site_language'); ?>>
+                                        <?php esc_html_e('Site Language (e.g. it-IT)', 'schema-markup-generator'); ?>
+                                    </option>
+                                    <option value="site_language_code" <?php selected($currentFieldMapping[$propName] ?? '', 'site_language_code'); ?>>
+                                        <?php esc_html_e('Language Code (e.g. it)', 'schema-markup-generator'); ?>
+                                    </option>
+                                    <option value="site_currency" <?php selected($currentFieldMapping[$propName] ?? '', 'site_currency'); ?>>
+                                        <?php esc_html_e('Site Currency (EUR, USD...)', 'schema-markup-generator'); ?>
+                                    </option>
                                 </optgroup>
                                 <?php 
                                 // Render field groups by source/plugin

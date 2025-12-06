@@ -234,6 +234,27 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.21.0
+- **New**: Course schema now has sensible defaults with "Auto" badges in UI:
+  - `price` defaults to 0 (Free) if not mapped
+  - `availability` defaults to InStock (always available)
+  - `courseMode` defaults to "online"
+  - `priceCurrency` auto-detected from WooCommerce/MemberPress or defaults to EUR
+  - `inLanguage` auto-detected from WordPress site language
+  - `isAccessibleForFree` automatically set to `true` for free courses (Google recommended)
+- **New**: MemberPress Courses virtual fields for explicit mapping:
+  - `mpcs_enrollment_count` - Total students enrolled (maps to `totalHistoricalEnrollment`)
+  - `mpcs_course_mode` - Default "online" (maps to `courseMode`)
+  - `mpcs_availability` - Default "InStock" (maps to `availability`)
+  - `mpcs_price_free` - Default 0 (maps to `price`)
+  - `mpcs_is_free` - Default true (maps to `isAccessibleForFree`)
+- **New**: Global WordPress fields available for all mappings:
+  - `site_language` - Full locale (e.g. "it-IT")
+  - `site_language_code` - ISO 639-1 code (e.g. "it")
+  - `site_currency` - Currency code from WooCommerce/MemberPress or EUR
+- **Improved**: Course schema properties now show "Auto" badge in UI when auto-populated
+- **Improved**: Course schema `offers` now uses only standard schema.org properties (removed non-standard `category`)
+
 ### 1.20.0
 - **New**: MemberPress Courses virtual fields for Course schema:
   - `mpcs_curriculum` - Auto-generated course curriculum text, ideal for mapping to `syllabus`

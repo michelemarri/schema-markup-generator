@@ -47,6 +47,32 @@ class MemberPressCoursesIntegration
             'type' => 'number',
             'description' => 'Total number of sections in the course.',
         ],
+        'mpcs_enrollment_count' => [
+            'label' => 'Total Enrollment',
+            'type' => 'number',
+            'description' => 'Total number of students enrolled in the course. Maps to totalHistoricalEnrollment.',
+        ],
+        // Default values for Course schema
+        'mpcs_course_mode' => [
+            'label' => 'Course Mode (online)',
+            'type' => 'text',
+            'description' => 'Default course delivery mode: online. Maps to courseMode.',
+        ],
+        'mpcs_availability' => [
+            'label' => 'Availability (InStock)',
+            'type' => 'text',
+            'description' => 'Default availability status: InStock (always available). Maps to availability.',
+        ],
+        'mpcs_price_free' => [
+            'label' => 'Price (Free)',
+            'type' => 'number',
+            'description' => 'Default price: 0 (Free course). Maps to price.',
+        ],
+        'mpcs_is_free' => [
+            'label' => 'Is Free (true)',
+            'type' => 'boolean',
+            'description' => 'Indicates this is a free course. Maps to isAccessibleForFree.',
+        ],
     ];
 
     /**
@@ -277,8 +303,47 @@ class MemberPressCoursesIntegration
             'mpcs_curriculum_html' => $this->getCurriculumHtml($postId),
             'mpcs_lesson_count' => $this->getLessonCount($postId),
             'mpcs_section_count' => $this->getSectionCount($postId),
+            'mpcs_enrollment_count' => $this->getEnrollmentCount($postId),
+            // Default values for Course schema properties
+            'mpcs_course_mode' => 'online',
+            'mpcs_availability' => 'InStock',
+            'mpcs_price_free' => 0,
+            'mpcs_is_free' => true,
             default => $value,
         };
+    }
+
+    /**
+     * Get total enrollment count for a course
+     *
+     * Uses MemberPress Courses user_progress table to count unique users who started the course.
+     *
+     * @param int $courseId The course ID
+     * @return int Enrollment count
+     */
+    public function getEnrollmentCount(int $courseId): int
+    {
+        global $wpdb;
+        $tableName = $wpdb->prefix . 'mpcs_user_progress';
+
+        // Check if table exists
+        $tableExists = $wpdb->get_var(
+            $wpdb->prepare("SHOW TABLES LIKE %s", $tableName)
+        );
+
+        if (!$tableExists) {
+            return 0;
+        }
+
+        // Count unique users who have any progress on this course
+        $count = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(DISTINCT user_id) FROM {$tableName} WHERE course_id = %d",
+                $courseId
+            )
+        );
+
+        return (int) $count;
     }
 
     /**
