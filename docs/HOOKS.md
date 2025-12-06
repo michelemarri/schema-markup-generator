@@ -97,11 +97,11 @@ add_filter('smg_article_schema_data', function(array $data, WP_Post $post, array
 
 ---
 
-### MemberPress Courses Filters
+### MemberPress Filters
 
 #### `smg_learning_resource_parent_course`
 
-Filter the parent course data for LearningResource schemas.
+Filter the parent course data for LearningResource schemas (MemberPress Courses).
 
 ```php
 add_filter('smg_learning_resource_parent_course', function(?array $parentCourse, WP_Post $post, array $mapping): ?array {
@@ -118,6 +118,50 @@ add_filter('smg_learning_resource_parent_course', function(?array $parentCourse,
 - `$parentCourse` (array|null) - Current parent course data
 - `$post` (WP_Post) - The lesson post
 - `$mapping` (array) - Field mapping configuration
+
+---
+
+#### `smg_product_schema_data` (MemberPress Membership)
+
+The Product schema filter is automatically enhanced for `memberpressproduct` posts.
+
+```php
+add_filter('smg_product_schema_data', function(array $data, WP_Post $post, array $mapping): array {
+    // Customize membership product schema
+    if ($post->post_type === 'memberpressproduct') {
+        // Add custom membership data
+        $data['additionalProperty'] = [
+            '@type' => 'PropertyValue',
+            'name' => 'membership_level',
+            'value' => get_post_meta($post->ID, '_level', true),
+        ];
+    }
+    return $data;
+}, 10, 3);
+```
+
+**Auto-enhanced properties for memberships:**
+- `offers` - Automatically populated with price, currency, availability
+- `category` - Set to "Membership"
+
+---
+
+#### MemberPress Membership Field Sources
+
+When using `smg_resolve_field_value`, membership fields use these sources:
+
+- `memberpress` - Standard meta fields (e.g., `_mepr_product_price`)
+- `memberpress_virtual` - Computed fields (e.g., `mepr_formatted_price`)
+
+```php
+add_filter('smg_resolve_field_value', function($value, int $postId, string $fieldKey, string $source) {
+    if ($source === 'memberpress_virtual' && $fieldKey === 'mepr_formatted_price') {
+        // Customize formatted price
+        return '$' . number_format((float)get_post_meta($postId, '_mepr_product_price', true), 0);
+    }
+    return $value;
+}, 10, 4);
+```
 
 ---
 

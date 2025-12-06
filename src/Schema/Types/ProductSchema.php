@@ -10,7 +10,8 @@ use WP_Post;
 /**
  * Product Schema
  *
- * For products and e-commerce items.
+ * For products and e-commerce items, including subscription products.
+ * Supports Offer with PriceSpecification for recurring billing (memberships, subscriptions).
  *
  * @package Metodo\SchemaMarkupGenerator\Schema\Types
  * @author  Michele Marri <plugins@metodo.dev>
@@ -29,7 +30,7 @@ class ProductSchema extends AbstractSchema
 
     public function getDescription(): string
     {
-        return __('For products and e-commerce items. Enables rich results with pricing, availability, and reviews.', 'schema-markup-generator');
+        return __('For products, e-commerce items, and subscription products. Supports recurring billing with PriceSpecification for memberships (MemberPress, WooCommerce Subscriptions).', 'schema-markup-generator');
     }
 
     public function build(WP_Post $post, array $mapping = []): array
@@ -106,13 +107,17 @@ class ProductSchema extends AbstractSchema
 
     /**
      * Build offers data
+     * 
+     * Supports both one-time purchases and recurring subscriptions with PriceSpecification.
      */
     private function buildOffers(WP_Post $post, array $mapping, mixed $price): array
     {
+        $priceCurrency = $this->getMappedValue($post, $mapping, 'priceCurrency') ?: 'EUR';
+
         $offers = [
             '@type' => 'Offer',
             'price' => (float) $price,
-            'priceCurrency' => $this->getMappedValue($post, $mapping, 'priceCurrency') ?: 'EUR',
+            'priceCurrency' => $priceCurrency,
             'url' => $this->getPostUrl($post),
         ];
 
@@ -130,7 +135,95 @@ class ProductSchema extends AbstractSchema
             $offers['priceValidUntil'] = $priceValidUntil;
         }
 
+        // Eligible duration (for subscriptions) - ISO 8601 duration (P1M, P1Y, etc.)
+        $eligibleDuration = $this->getMappedValue($post, $mapping, 'eligibleDuration');
+        if ($eligibleDuration) {
+            $offers['eligibleDuration'] = $this->formatDuration($eligibleDuration);
+        }
+
+        // Price Specification for recurring billing (subscriptions/memberships)
+        $priceSpecification = $this->buildPriceSpecification($post, $mapping, $price, $priceCurrency);
+        if (!empty($priceSpecification)) {
+            $offers['priceSpecification'] = $priceSpecification;
+        }
+
         return $offers;
+    }
+
+    /**
+     * Build PriceSpecification for recurring billing
+     * 
+     * Creates a UnitPriceSpecification with billing details for subscriptions.
+     */
+    private function buildPriceSpecification(WP_Post $post, array $mapping, mixed $price, string $priceCurrency): ?array
+    {
+        $billingDuration = $this->getMappedValue($post, $mapping, 'billingDuration');
+        $billingIncrement = $this->getMappedValue($post, $mapping, 'billingIncrement');
+
+        // Only build if we have billing information
+        if (!$billingDuration && !$billingIncrement) {
+            return null;
+        }
+
+        $priceSpec = [
+            '@type' => 'UnitPriceSpecification',
+            'price' => (float) $price,
+            'priceCurrency' => $priceCurrency,
+        ];
+
+        // Add billing duration (number of units)
+        if ($billingDuration) {
+            $priceSpec['billingDuration'] = (int) $billingDuration;
+        }
+
+        // Add billing increment (time unit: Month, Year, Week, Day)
+        if ($billingIncrement) {
+            // Normalize billing increment
+            $validIncrements = ['Month', 'Year', 'Week', 'Day'];
+            $normalizedIncrement = ucfirst(strtolower($billingIncrement));
+            if (in_array($normalizedIncrement, $validIncrements)) {
+                $priceSpec['billingIncrement'] = $normalizedIncrement;
+            }
+        }
+
+        // Reference quantity (how many billing periods)
+        $referenceQuantity = $this->getMappedValue($post, $mapping, 'referenceQuantity');
+        if ($referenceQuantity) {
+            $priceSpec['referenceQuantity'] = [
+                '@type' => 'QuantitativeValue',
+                'value' => (int) $referenceQuantity,
+            ];
+        }
+
+        return $priceSpec;
+    }
+
+    /**
+     * Format duration to ISO 8601 if not already formatted
+     */
+    private function formatDuration(mixed $duration): string
+    {
+        if (is_string($duration) && str_starts_with(strtoupper($duration), 'P')) {
+            return strtoupper($duration);
+        }
+
+        // If numeric, assume months
+        if (is_numeric($duration)) {
+            return 'P' . (int) $duration . 'M';
+        }
+
+        // Try to parse common formats
+        $duration = strtolower(trim((string) $duration));
+        
+        // Match patterns like "1 month", "12 months", "1 year"
+        if (preg_match('/^(\d+)\s*(month|year|week|day)s?$/i', $duration, $matches)) {
+            $num = (int) $matches[1];
+            $unit = strtoupper(substr($matches[2], 0, 1));
+            return "P{$num}{$unit}";
+        }
+
+        // Return as-is with P prefix if doesn't start with P
+        return 'P' . strtoupper($duration);
     }
 
     /**
@@ -165,7 +258,7 @@ class ProductSchema extends AbstractSchema
 
     public function getRecommendedProperties(): array
     {
-        return ['description', 'brand', 'sku', 'aggregateRating', 'review'];
+        return ['description', 'brand', 'sku', 'aggregateRating', 'review', 'eligibleDuration', 'billingDuration', 'billingIncrement'];
     }
 
     public function getPropertyDefinitions(): array
@@ -250,6 +343,39 @@ class ProductSchema extends AbstractSchema
                 'description_long' => __('The total number of ratings/reviews. Shown alongside the star rating to provide social proof. Higher numbers increase trust and click-through rates.', 'schema-markup-generator'),
                 'example' => __('127, 1543, 89', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/ratingCount',
+            ],
+
+            // ========================================
+            // Subscription / Recurring Billing Properties
+            // ========================================
+            'eligibleDuration' => [
+                'type' => 'text',
+                'description' => __('Subscription duration (ISO 8601: P1M=1 month, P1Y=1 year). For memberships and recurring products.', 'schema-markup-generator'),
+                'description_long' => __('The duration of the subscription or membership period in ISO 8601 format. This tells Google this is a recurring product. Examples: P1M (1 month), P3M (3 months), P1Y (1 year). Used for MemberPress, WooCommerce Subscriptions, etc.', 'schema-markup-generator'),
+                'example' => __('P1M (monthly), P3M (quarterly), P1Y (yearly), P1W (weekly)', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/eligibleDuration',
+            ],
+            'billingDuration' => [
+                'type' => 'number',
+                'description' => __('Billing cycle number (e.g., 1 for monthly, 12 for yearly). Used with billingIncrement.', 'schema-markup-generator'),
+                'description_long' => __('The numeric duration of each billing cycle. Combined with billingIncrement to define the recurring payment schedule. For monthly billing, use 1 with Month increment.', 'schema-markup-generator'),
+                'example' => __('1 (monthly), 3 (quarterly), 12 (yearly)', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/billingDuration',
+            ],
+            'billingIncrement' => [
+                'type' => 'select',
+                'description' => __('Billing time unit (Month, Year, Week, Day). Combined with billingDuration.', 'schema-markup-generator'),
+                'description_long' => __('The time unit for billing cycles. Combined with billingDuration to define the payment schedule. For example, billingDuration=1 + billingIncrement=Month means monthly billing.', 'schema-markup-generator'),
+                'example' => __('Month (monthly), Year (annual), Week (weekly)', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/billingIncrement',
+                'options' => ['Month', 'Year', 'Week', 'Day'],
+            ],
+            'referenceQuantity' => [
+                'type' => 'number',
+                'description' => __('Number of billing periods (optional). For multi-period subscriptions.', 'schema-markup-generator'),
+                'description_long' => __('The reference quantity for the price specification. Use this when pricing covers multiple billing periods or units.', 'schema-markup-generator'),
+                'example' => __('1, 6, 12', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/referenceQuantity',
             ],
         ];
     }

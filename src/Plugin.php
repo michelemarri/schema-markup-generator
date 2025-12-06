@@ -21,6 +21,7 @@ use Metodo\SchemaMarkupGenerator\Cache\TransientCache;
 use Metodo\SchemaMarkupGenerator\Integration\RankMathIntegration;
 use Metodo\SchemaMarkupGenerator\Integration\ACFIntegration;
 use Metodo\SchemaMarkupGenerator\Integration\MemberPressCoursesIntegration;
+use Metodo\SchemaMarkupGenerator\Integration\MemberPressMembershipIntegration;
 use Metodo\SchemaMarkupGenerator\Rest\SchemaEndpoint;
 use Metodo\SchemaMarkupGenerator\Logger\Logger;
 use Metodo\SchemaMarkupGenerator\Updater\GitHubUpdater;
@@ -98,6 +99,7 @@ class Plugin
         $this->services['rankmath_integration'] = new RankMathIntegration();
         $this->services['acf_integration'] = new ACFIntegration();
         $this->services['memberpress_courses_integration'] = new MemberPressCoursesIntegration();
+        $this->services['memberpress_membership_integration'] = new MemberPressMembershipIntegration();
 
         // REST API
         $this->services['rest_endpoint'] = new SchemaEndpoint(
@@ -177,6 +179,7 @@ class Plugin
         $this->services['rankmath_integration']->init();
         $this->services['acf_integration']->init();
         $this->services['memberpress_courses_integration']->init();
+        $this->services['memberpress_membership_integration']->init();
 
         // Initialize updater
         $this->services['updater']->init();

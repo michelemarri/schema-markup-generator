@@ -10,10 +10,11 @@ Complete documentation for the Schema Markup Generator WordPress plugin.
 4. [Field Mapping](#field-mapping)
 5. [ACF Integration](#acf-integration)
 6. [MemberPress Courses Integration](#memberpress-courses-integration)
-7. [Caching](#caching)
-8. [REST API](#rest-api)
-9. [Import/Export](#importexport)
-10. [Troubleshooting](#troubleshooting)
+7. [MemberPress Membership Integration](#memberpress-membership-integration)
+8. [Caching](#caching)
+9. [REST API](#rest-api)
+10. [Import/Export](#importexport)
+11. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -163,7 +164,7 @@ For static pages with automatic type detection:
 
 #### Product
 
-For e-commerce and product pages.
+For e-commerce and product pages, including subscription products.
 
 **Required fields:**
 - `name` - Product name
@@ -175,6 +176,47 @@ For e-commerce and product pages.
 - `brand`
 - `sku`
 - `aggregateRating`
+- `eligibleDuration` (for subscriptions)
+- `billingDuration` + `billingIncrement` (for subscriptions)
+
+##### Subscription Products
+
+The Product schema supports recurring billing for memberships and subscriptions (MemberPress, WooCommerce Subscriptions, etc.).
+
+**Subscription fields:**
+- `eligibleDuration` - ISO 8601 duration (P1M = monthly, P1Y = yearly)
+- `billingDuration` - Number of billing periods (e.g., 1 for monthly)
+- `billingIncrement` - Time unit: Month, Year, Week, Day
+- `referenceQuantity` - Number of billing periods (optional)
+
+**Example output for monthly subscription:**
+```json
+{
+  "@type": "Product",
+  "name": "MenthorQ Pro Membership",
+  "description": "Access to premium features and analytics.",
+  "offers": {
+    "@type": "Offer",
+    "price": 39.00,
+    "priceCurrency": "EUR",
+    "availability": "https://schema.org/InStock",
+    "eligibleDuration": "P1M",
+    "priceSpecification": {
+      "@type": "UnitPriceSpecification",
+      "price": 39.00,
+      "priceCurrency": "EUR",
+      "billingDuration": 1,
+      "billingIncrement": "Month"
+    }
+  }
+}
+```
+
+**Duration format:**
+The plugin accepts multiple formats for `eligibleDuration`:
+- ISO 8601: `P1M`, `P1Y`, `P3M`, `P1W`
+- Numeric (assumed months): `1`, `12`
+- Text: `1 month`, `1 year`, `3 months`
 
 #### Organization / LocalBusiness
 
@@ -436,6 +478,130 @@ When MemberPress Courses is active, the plugin automatically enhances schema gen
 ### No Configuration Required
 
 The integration works automatically when MemberPress Courses is detected. No additional configuration is needed.
+
+---
+
+## MemberPress Membership Integration
+
+When MemberPress is active, the plugin provides comprehensive field mapping for membership products (`memberpressproduct` post type).
+
+### Available Fields
+
+The integration exposes 20+ membership-specific fields:
+
+#### Pricing Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `_mepr_product_price` | number | Membership price |
+| `_mepr_product_period` | number | Billing period (e.g., 1, 3, 12) |
+| `_mepr_product_period_type` | text | Period type: days, weeks, months, years, lifetime |
+
+#### Trial Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `_mepr_product_trial` | boolean | Has trial period |
+| `_mepr_product_trial_days` | number | Trial duration in days |
+| `_mepr_product_trial_amount` | number | Price during trial |
+
+#### Billing Cycle Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `_mepr_product_limit_cycles` | boolean | Whether billing cycles are limited |
+| `_mepr_product_limit_cycles_num` | number | Number of billing cycles |
+| `_mepr_product_limit_cycles_action` | text | Action after cycles complete |
+
+#### Display Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `_mepr_product_is_highlighted` | boolean | Featured/highlighted membership |
+| `_mepr_product_pricing_title` | text | Custom pricing display title |
+| `_mepr_product_pricing_display` | text | Price display format |
+| `_mepr_product_pricing_heading_txt` | text | Pricing table heading |
+| `_mepr_product_pricing_footer_txt` | text | Pricing table footer |
+| `_mepr_product_pricing_button_txt` | text | Signup button text |
+| `_mepr_product_pricing_benefits` | array | List of membership benefits |
+
+#### Access Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `_mepr_product_access_url` | url | URL after successful registration |
+| `_mepr_product_who_can_purchase` | text | Purchase restrictions |
+| `_mepr_product_expire_type` | text | How membership expires |
+| `_mepr_product_expire_after` | number | Expiration period value |
+| `_mepr_product_expire_unit` | text | Expiration period unit |
+
+### Virtual/Computed Fields
+
+In addition to raw meta fields, the integration provides computed fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `mepr_formatted_price` | text | Price with currency symbol (e.g., "$99.00") |
+| `mepr_billing_description` | text | Human-readable billing (e.g., "$99/month") |
+| `mepr_registration_url` | url | Direct membership registration URL |
+
+These fields are automatically calculated from the membership data.
+
+### Product Schema Enhancement
+
+When a `memberpressproduct` post type is assigned the Product schema, the integration automatically:
+
+1. **Adds Offer data** with price, currency, and availability
+2. **Sets category** to "Membership"
+3. **Calculates price validity** based on billing period
+
+### Example Output
+
+**Monthly Membership:**
+```json
+{
+  "@type": "Product",
+  "name": "Pro Membership",
+  "description": "Access to all premium features",
+  "category": "Membership",
+  "offers": {
+    "@type": "Offer",
+    "price": 29.00,
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "url": "https://example.com/membership/pro/?action=signup",
+    "priceValidUntil": "2025-02-15"
+  }
+}
+```
+
+**Lifetime Membership:**
+```json
+{
+  "@type": "Product",
+  "name": "Lifetime Access",
+  "offers": {
+    "@type": "Offer",
+    "price": 299.00,
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  }
+}
+```
+
+### Usage Tips
+
+1. **Assign Product schema** to the `memberpressproduct` post type in Settings → Schema Markup → Post Types
+2. **Map additional fields** like `description`, `image`, `brand` as needed
+3. **Use virtual fields** for human-readable price displays in your templates
+
+### Filters
+
+The integration uses these filters:
+
+- `smg_discovered_fields` - Adds membership fields to discovery
+- `smg_resolve_field_value` - Resolves membership field values (sources: `memberpress`, `memberpress_virtual`)
+- `smg_product_schema_data` - Enhances Product schema with offer data
 
 ---
 

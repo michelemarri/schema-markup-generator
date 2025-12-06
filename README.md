@@ -15,6 +15,7 @@ Automatic schema.org structured data generation for WordPress, optimized for sea
 - **ACF Integration** - Full support for Advanced Custom Fields with visual field mapping
 - **Rank Math Compatibility** - Prevents duplicate schemas when Rank Math is active
 - **MemberPress Courses Integration** - Automatic Course/Lesson hierarchy for LearningResource schemas
+- **MemberPress Membership Integration** - Full support for membership fields (price, period, trial, benefits) with Product schema
 - **Modern Admin UI** - Clean, tabbed interface for easy configuration
 - **Schema Preview** - Real-time preview with validation in the post editor
 - **REST API** - Full REST API for programmatic access
@@ -231,6 +232,28 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - [Metodo.dev](https://metodo.dev)
 
 ## Changelog
+
+### 1.15.0
+- **New**: MemberPress Membership integration for `memberpressproduct` post type
+- **New**: 20+ membership-specific fields available for mapping (price, period, trial, benefits, etc.)
+- **New**: Virtual computed fields: formatted price, billing description, registration URL
+- **New**: Automatic Product schema enhancement with Offer data for memberships
+- **New**: Filter `smg_product_schema_data` now includes membership offer data automatically
+- **New**: Filter `smg_resolve_field_value` supports `memberpress` and `memberpress_virtual` sources
+
+### 1.14.1
+- **Improved**: Custom fields now grouped by source plugin in field mapping dropdown
+- **New**: Auto-detection of plugin source from field prefixes (Rank Math, MemberPress, WooCommerce, Affiliate WP, etc.)
+- **Improved**: ACF fields grouped by their original ACF group name
+- **Improved**: Better organized field selection with separate optgroups per plugin
+
+### 1.14.0
+- **New**: Product schema now supports subscription products with `Offer` + `PriceSpecification`
+- **New**: Added `eligibleDuration` property for subscription duration (ISO 8601: P1M, P1Y)
+- **New**: Added `UnitPriceSpecification` with `billingDuration` and `billingIncrement` for recurring billing
+- **New**: Smart duration parsing - accepts ISO 8601, numbers (assumed months), or text like "1 month"
+- **Improved**: Product schema description updated to mention MemberPress and WooCommerce Subscriptions support
+- **Use case**: Ideal for memberships, SaaS products, subscription boxes, and recurring plans
 
 ### 1.13.0
 - **New**: Automatic HTML sanitization for all mapped field values across all schema types

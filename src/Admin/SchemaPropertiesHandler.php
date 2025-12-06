@@ -57,8 +57,8 @@ class SchemaPropertiesHandler
         $fieldMappings = get_option('smg_field_mappings', []);
         $currentFieldMapping = $fieldMappings[$postType] ?? [];
 
-        // Get available fields for this post type
-        $postTypeFields = $this->customFieldDiscovery->getFieldsForPostType($postType);
+        // Get available fields for this post type, grouped by source
+        $fieldGroups = $this->customFieldDiscovery->getFieldsGroupedBySource($postType);
 
         // If no schema type selected, return empty
         if (empty($schemaType)) {
@@ -85,7 +85,7 @@ class SchemaPropertiesHandler
         }
 
         // Render the mapping table HTML
-        $html = $this->renderMappingTable($postType, $schemaProps, $postTypeFields, $currentFieldMapping);
+        $html = $this->renderMappingTable($postType, $schemaProps, $fieldGroups, $currentFieldMapping);
 
         wp_send_json_success([
             'html' => $html,
@@ -100,7 +100,7 @@ class SchemaPropertiesHandler
     private function renderMappingTable(
         string $postType,
         array $schemaProps,
-        array $postTypeFields,
+        array $fieldGroups,
         array $currentFieldMapping
     ): string {
         ob_start();
@@ -162,16 +162,20 @@ class SchemaPropertiesHandler
                                         <?php esc_html_e('Site URL', 'schema-markup-generator'); ?>
                                     </option>
                                 </optgroup>
-                                <?php if (!empty($postTypeFields)): ?>
-                                    <optgroup label="<?php esc_attr_e('Custom Fields', 'schema-markup-generator'); ?>">
-                                        <?php foreach ($postTypeFields as $field): ?>
+                                <?php 
+                                // Render field groups by source/plugin
+                                foreach ($fieldGroups as $groupKey => $group): 
+                                    if (empty($group['fields'])) continue;
+                                ?>
+                                    <optgroup label="<?php echo esc_attr($group['label']); ?>">
+                                        <?php foreach ($group['fields'] as $field): ?>
                                             <option value="<?php echo esc_attr($field['key']); ?>"
                                                     <?php selected($currentFieldMapping[$propName] ?? '', $field['key']); ?>>
                                                 <?php echo esc_html($field['label']); ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </optgroup>
-                                <?php endif; ?>
+                                <?php endforeach; ?>
                                 <?php
                                 $taxonomies = $this->taxonomyDiscovery->getTaxonomiesForPostType($postType);
                                 if (!empty($taxonomies)):

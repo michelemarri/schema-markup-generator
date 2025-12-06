@@ -9,6 +9,7 @@ namespace Metodo\SchemaMarkupGenerator\Discovery;
  *
  * Discovers custom fields (meta) registered for posts,
  * including support for ACF, native meta, and other popular field plugins.
+ * Fields are automatically categorized by their source plugin.
  *
  * @package Metodo\SchemaMarkupGenerator\Discovery
  * @author  Michele Marri <plugins@metodo.dev>
@@ -19,6 +20,31 @@ class CustomFieldDiscovery
      * Cached fields per post type
      */
     private array $fieldsCache = [];
+
+    /**
+     * Known plugin prefixes for field identification
+     * Format: prefix => [label, priority (lower = first)]
+     */
+    private const PLUGIN_PREFIXES = [
+        'rank_math' => ['Rank Math', 100],
+        'wafp' => ['Affiliate WP', 80],
+        'wpf' => ['WPFunnels', 80],
+        'mpgft' => ['MemberPress Gifting', 70],
+        'mepr' => ['MemberPress', 70],
+        'wc' => ['WooCommerce', 60],
+        'yoast' => ['Yoast SEO', 100],
+        'aioseo' => ['All in One SEO', 100],
+        'jetpack' => ['Jetpack', 90],
+        'elementor' => ['Elementor', 90],
+        'divi' => ['Divi', 90],
+        'learndash' => ['LearnDash', 70],
+        'llms' => ['LifterLMS', 70],
+        'sensei' => ['Sensei LMS', 70],
+        'edd' => ['Easy Digital Downloads', 60],
+        'give' => ['GiveWP', 80],
+        'tribe' => ['The Events Calendar', 80],
+        'et' => ['Elegant Themes', 90],
+    ];
 
     /**
      * Get all custom fields for a post type
@@ -179,16 +205,99 @@ class CustomFieldDiscovery
 
         $fields = [];
         foreach (array_keys($metaKeys) as $key) {
+            $pluginSource = $this->identifyPluginSource($key);
             $fields[] = [
                 'key' => $key,
                 'name' => $key,
                 'label' => $this->humanizeFieldName($key),
                 'type' => 'text',
                 'source' => 'native',
+                'plugin' => $pluginSource['plugin'],
+                'plugin_label' => $pluginSource['label'],
+                'plugin_priority' => $pluginSource['priority'],
             ];
         }
 
         return $fields;
+    }
+
+    /**
+     * Identify the plugin source from field name prefix
+     */
+    private function identifyPluginSource(string $fieldName): array
+    {
+        $normalizedName = strtolower($fieldName);
+        
+        // Remove leading underscore if present
+        if (str_starts_with($normalizedName, '_')) {
+            $normalizedName = substr($normalizedName, 1);
+        }
+
+        foreach (self::PLUGIN_PREFIXES as $prefix => [$label, $priority]) {
+            if (str_starts_with($normalizedName, $prefix . '_')) {
+                return [
+                    'plugin' => $prefix,
+                    'label' => $label,
+                    'priority' => $priority,
+                ];
+            }
+        }
+
+        // No known plugin prefix found
+        return [
+            'plugin' => 'custom',
+            'label' => __('Custom Fields', 'schema-markup-generator'),
+            'priority' => 50,
+        ];
+    }
+
+    /**
+     * Get fields grouped by source/plugin
+     * 
+     * Returns fields organized by their source plugin for better UI organization.
+     *
+     * @param string $postType The post type slug
+     * @return array Array of field groups: ['group_key' => ['label' => '', 'priority' => 0, 'fields' => []]]
+     */
+    public function getFieldsGroupedBySource(string $postType): array
+    {
+        $fields = $this->getFieldsForPostType($postType);
+        $groups = [];
+
+        foreach ($fields as $field) {
+            // Determine group key
+            if ($field['source'] === 'acf') {
+                // ACF fields: group by their ACF group
+                $groupKey = 'acf_' . sanitize_key($field['group'] ?? 'general');
+                $groupLabel = $field['group'] ?? __('ACF Fields', 'schema-markup-generator');
+                $priority = 10; // ACF first
+            } else {
+                // Non-ACF fields: group by plugin
+                $groupKey = $field['plugin'] ?? 'custom';
+                $groupLabel = $field['plugin_label'] ?? __('Custom Fields', 'schema-markup-generator');
+                $priority = $field['plugin_priority'] ?? 50;
+            }
+
+            if (!isset($groups[$groupKey])) {
+                $groups[$groupKey] = [
+                    'label' => $groupLabel,
+                    'priority' => $priority,
+                    'fields' => [],
+                ];
+            }
+
+            $groups[$groupKey]['fields'][] = $field;
+        }
+
+        // Sort groups by priority (lower first), then by label
+        uasort($groups, function ($a, $b) {
+            if ($a['priority'] !== $b['priority']) {
+                return $a['priority'] <=> $b['priority'];
+            }
+            return strcasecmp($a['label'], $b['label']);
+        });
+
+        return $groups;
     }
 
     /**

@@ -148,7 +148,7 @@ class PostTypesTab extends AbstractTab
                     if (empty($currentSchema) && $recommendedSchema) {
                         $currentSchema = $recommendedSchema;
                     }
-                    $postTypeFields = $this->customFieldDiscovery->getFieldsForPostType($postType);
+                    $fieldGroups = $this->customFieldDiscovery->getFieldsGroupedBySource($postType);
                     $currentFieldMapping = $fieldMappings[$postType] ?? [];
                     ?>
                     <div class="smg-post-type-card<?php echo $currentSchema ? ' smg-mapped' : ''; ?>" data-post-type="<?php echo esc_attr($postType); ?>">
@@ -262,16 +262,20 @@ class PostTypesTab extends AbstractTab
                                                                     <?php esc_html_e('Site URL', 'schema-markup-generator'); ?>
                                                                 </option>
                                                             </optgroup>
-                                                            <?php if (!empty($postTypeFields)): ?>
-                                                                <optgroup label="<?php esc_attr_e('Custom Fields', 'schema-markup-generator'); ?>">
-                                                                    <?php foreach ($postTypeFields as $field): ?>
+                                                            <?php 
+                                                            // Render field groups by source/plugin
+                                                            foreach ($fieldGroups as $groupKey => $group): 
+                                                                if (empty($group['fields'])) continue;
+                                                            ?>
+                                                                <optgroup label="<?php echo esc_attr($group['label']); ?>">
+                                                                    <?php foreach ($group['fields'] as $field): ?>
                                                                         <option value="<?php echo esc_attr($field['key']); ?>"
                                                                                 <?php selected($currentFieldMapping[$propName] ?? '', $field['key']); ?>>
                                                                             <?php echo esc_html($field['label']); ?>
                                                                         </option>
                                                                     <?php endforeach; ?>
                                                                 </optgroup>
-                                                            <?php endif; ?>
+                                                            <?php endforeach; ?>
                                                             <?php
                                                             $taxonomies = $this->taxonomyDiscovery->getTaxonomiesForPostType($postType);
                                                             if (!empty($taxonomies)):
