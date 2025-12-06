@@ -552,11 +552,16 @@ class MemberPressMembershipIntegration
             return $data;
         }
 
-        // Add offer data if not already set
-        if (empty($data['offers'])) {
-            $offer = $this->buildOfferData($post->ID);
-            if (!empty($offer)) {
-                $data['offers'] = $offer;
+        // Build full offer data with subscription info
+        $offerData = $this->buildOfferData($post->ID);
+
+        if (!empty($offerData)) {
+            if (empty($data['offers'])) {
+                // No existing offers, use our full offer data
+                $data['offers'] = $offerData;
+            } else {
+                // Merge subscription data into existing offers
+                $data['offers'] = $this->mergeOfferData($data['offers'], $offerData);
             }
         }
 
@@ -567,6 +572,100 @@ class MemberPressMembershipIntegration
         }
 
         return $data;
+    }
+
+    /**
+     * Merge subscription data into existing offer
+     *
+     * Handles price fallback cascade:
+     * 1. Use mapped price (Promo Price) if available
+     * 2. Fallback to referencePrice if price is empty
+     * 3. Fallback to MemberPress _mepr_product_price if both are empty
+     *
+     * @param array $existingOffer Existing offer data
+     * @param array $newOfferData  New offer data with subscription info
+     * @return array Merged offer data
+     */
+    private function mergeOfferData(array $existingOffer, array $newOfferData): array
+    {
+        // Price fallback cascade
+        $existingOffer = $this->applyPriceFallback($existingOffer, $newOfferData);
+
+        // Fields to merge if not already present
+        $subscriptionFields = ['eligibleDuration', 'priceSpecification', 'priceValidUntil'];
+
+        foreach ($subscriptionFields as $field) {
+            if (empty($existingOffer[$field]) && !empty($newOfferData[$field])) {
+                $existingOffer[$field] = $newOfferData[$field];
+            }
+        }
+
+        return $existingOffer;
+    }
+
+    /**
+     * Apply price fallback cascade
+     *
+     * Fallback order:
+     * 1. Mapped price (e.g., Promo Price from ACF)
+     * 2. referencePrice from priceSpecification (Original Price)
+     * 3. MemberPress _mepr_product_price (standard membership price)
+     *
+     * @param array $existingOffer Existing offer data
+     * @param array $newOfferData  MemberPress offer data
+     * @return array Offer with valid price
+     */
+    private function applyPriceFallback(array $existingOffer, array $newOfferData): array
+    {
+        $currentPrice = $existingOffer['price'] ?? null;
+
+        // Check if current price is valid (not empty, not zero)
+        if ($this->isValidPrice($currentPrice)) {
+            return $existingOffer;
+        }
+
+        // Fallback 1: Try referencePrice from priceSpecification
+        $referencePrice = $existingOffer['priceSpecification']['referencePrice']['price'] ?? null;
+        if ($this->isValidPrice($referencePrice)) {
+            $existingOffer['price'] = (float) $referencePrice;
+            // Remove referencePrice since there's no discount anymore
+            unset($existingOffer['priceSpecification']['referencePrice']);
+            // Clean up empty priceSpecification
+            if (empty($existingOffer['priceSpecification']) || 
+                (count($existingOffer['priceSpecification']) === 2 && 
+                 isset($existingOffer['priceSpecification']['@type']) && 
+                 isset($existingOffer['priceSpecification']['priceCurrency']))) {
+                unset($existingOffer['priceSpecification']);
+            }
+            return $existingOffer;
+        }
+
+        // Fallback 2: Use MemberPress standard price
+        $meprPrice = $newOfferData['price'] ?? null;
+        if ($this->isValidPrice($meprPrice)) {
+            $existingOffer['price'] = (float) $meprPrice;
+        }
+
+        return $existingOffer;
+    }
+
+    /**
+     * Check if a price value is valid (not empty, not zero, is numeric)
+     *
+     * @param mixed $price Price value to check
+     * @return bool True if valid price
+     */
+    private function isValidPrice(mixed $price): bool
+    {
+        if ($price === null || $price === '' || $price === false) {
+            return false;
+        }
+
+        if (!is_numeric($price)) {
+            return false;
+        }
+
+        return (float) $price > 0;
     }
 
     /**
@@ -584,19 +683,40 @@ class MemberPressMembershipIntegration
         }
 
         $periodType = get_post_meta($postId, '_mepr_product_period_type', true);
+        $priceCurrency = $this->getCurrencyCode();
 
         $offer = [
             '@type' => 'Offer',
             'price' => (float) $price,
-            'priceCurrency' => $this->getCurrencyCode(),
+            'priceCurrency' => $priceCurrency,
             'availability' => 'https://schema.org/InStock',
             'url' => $this->getRegistrationUrl($postId),
         ];
 
-        // Add price validity for subscriptions
+        // Add subscription data for recurring memberships
         if ($periodType && $periodType !== 'lifetime') {
             $period = get_post_meta($postId, '_mepr_product_period', true);
             $offer['priceValidUntil'] = $this->calculatePriceValidUntil($period, $periodType);
+
+            // Add eligibleDuration (ISO 8601 format)
+            $eligibleDuration = $this->getEligibleDuration($postId);
+            if ($eligibleDuration) {
+                $offer['eligibleDuration'] = $eligibleDuration;
+            }
+
+            // Add PriceSpecification with billing details
+            $billingDuration = $this->getBillingDuration($postId);
+            $billingIncrement = $this->getBillingIncrement($postId);
+
+            if ($billingDuration && $billingIncrement) {
+                $offer['priceSpecification'] = [
+                    '@type' => 'UnitPriceSpecification',
+                    'price' => (float) $price,
+                    'priceCurrency' => $priceCurrency,
+                    'billingDuration' => $billingDuration,
+                    'billingIncrement' => $billingIncrement,
+                ];
+            }
         }
 
         return $offer;

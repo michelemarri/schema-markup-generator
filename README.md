@@ -239,7 +239,13 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - **New**: `mepr_eligible_duration` - ISO 8601 duration format (P1M, P1Y, P3M) ready for `eligibleDuration`
 - **New**: `mepr_billing_duration` - Numeric billing period (1, 3, 12) ready for `billingDuration`
 - **New**: `mepr_billing_increment` - Schema.org format (Month, Year, Week, Day) ready for `billingIncrement`
+- **New**: `referencePrice` property - Map original/list price for discount display (strikethrough price)
+- **New**: `priceValidUntil` property - Set promotion expiration date
+- **New**: Smart price extraction - `referencePrice` accepts text like "$129 / original price" and extracts the numeric value
+- **New**: Price fallback cascade for MemberPress: mapped price → referencePrice → `_mepr_product_price`
 - **Improved**: MemberPress period types (days, weeks, months, years) now automatically converted to schema.org formats
+- **Improved**: Product schema for MemberPress memberships now automatically includes `eligibleDuration` and `priceSpecification` with `billingDuration`/`billingIncrement`
+- **Improved**: Subscription data is now merged into existing offers (no manual mapping required)
 
 ### 1.18.0
 - **New**: WooCommerce Integration - exposes `woo_currency_code` and `woo_currency_symbol` as mappable fields

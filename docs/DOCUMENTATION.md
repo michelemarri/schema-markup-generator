@@ -200,6 +200,48 @@ For MemberPress memberships, use these pre-formatted virtual fields for easy map
 - `mepr_billing_duration` → Maps directly to `billingDuration` (e.g., 1, 3, 12)
 - `mepr_billing_increment` → Maps directly to `billingIncrement` (Month, Year, Week, Day)
 
+**Discount/Promotion fields:**
+- `referencePrice` - Original/list price before discount (creates strikethrough price display)
+- `priceValidUntil` - When the promotional price expires (YYYY-MM-DD format)
+
+**Example output with discount:**
+```json
+{
+  "@type": "Product",
+  "name": "Premium Monthly",
+  "offers": {
+    "@type": "Offer",
+    "price": 59,
+    "priceCurrency": "EUR",
+    "priceValidUntil": "2025-01-31",
+    "priceSpecification": {
+      "@type": "UnitPriceSpecification",
+      "price": 59,
+      "priceCurrency": "EUR",
+      "billingDuration": 1,
+      "billingIncrement": "Month",
+      "referencePrice": {
+        "@type": "PriceSpecification",
+        "price": 129,
+        "priceCurrency": "EUR"
+      }
+    }
+  }
+}
+```
+
+The `referencePrice` field accepts text values like "$129 / original price" - the plugin automatically extracts the numeric value.
+
+**Price fallback cascade (MemberPress):**
+
+When the mapped `price` field is empty (e.g., promo disabled), the plugin automatically falls back:
+
+1. **Mapped price** (e.g., ACF "Promo Price") - if available and > 0
+2. **referencePrice** (e.g., ACF "Original Price") - if price is empty
+3. **`_mepr_product_price`** (MemberPress standard price) - final fallback
+
+This ensures the schema always has a valid price, even when promotions are disabled.
+
 **Example output for monthly subscription:**
 ```json
 {

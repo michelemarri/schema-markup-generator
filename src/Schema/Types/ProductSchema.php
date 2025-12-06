@@ -151,17 +151,19 @@ class ProductSchema extends AbstractSchema
     }
 
     /**
-     * Build PriceSpecification for recurring billing
+     * Build PriceSpecification for recurring billing and/or discounts
      * 
-     * Creates a UnitPriceSpecification with billing details for subscriptions.
+     * Creates a UnitPriceSpecification with billing details for subscriptions
+     * and referencePrice for showing original/list price (strikethrough).
      */
     private function buildPriceSpecification(WP_Post $post, array $mapping, mixed $price, string $priceCurrency): ?array
     {
         $billingDuration = $this->getMappedValue($post, $mapping, 'billingDuration');
         $billingIncrement = $this->getMappedValue($post, $mapping, 'billingIncrement');
+        $referencePrice = $this->getMappedValue($post, $mapping, 'referencePrice');
 
-        // Only build if we have billing information
-        if (!$billingDuration && !$billingIncrement) {
+        // Only build if we have billing information or reference price
+        if (!$billingDuration && !$billingIncrement && !$referencePrice) {
             return null;
         }
 
@@ -195,7 +197,51 @@ class ProductSchema extends AbstractSchema
             ];
         }
 
+        // Reference price (original/list price for showing discount)
+        if ($referencePrice) {
+            // Extract numeric value if it contains text (e.g., "$129 / original price")
+            $numericPrice = $this->extractNumericPrice($referencePrice);
+            if ($numericPrice > 0) {
+                $priceSpec['referencePrice'] = [
+                    '@type' => 'PriceSpecification',
+                    'price' => $numericPrice,
+                    'priceCurrency' => $priceCurrency,
+                ];
+            }
+        }
+
         return $priceSpec;
+    }
+
+    /**
+     * Extract numeric price from a string that may contain text
+     * 
+     * Examples: "$129 / original price" → 129, "€99.50" → 99.50, "129" → 129
+     */
+    private function extractNumericPrice(mixed $value): float
+    {
+        if (is_numeric($value)) {
+            return (float) $value;
+        }
+
+        if (!is_string($value)) {
+            return 0.0;
+        }
+
+        // Remove currency symbols and extract first number
+        $cleaned = preg_replace('/[^\d.,]/', '', $value);
+        
+        // Handle European format (1.234,56) vs US format (1,234.56)
+        if (preg_match('/(\d{1,3}(?:\.\d{3})*),(\d{2})$/', $cleaned, $matches)) {
+            // European format: 1.234,56
+            $cleaned = str_replace('.', '', $matches[0]);
+            $cleaned = str_replace(',', '.', $cleaned);
+        } else {
+            // US format or simple number
+            $cleaned = str_replace(',', '', $cleaned);
+        }
+
+        return (float) $cleaned;
     }
 
     /**
@@ -258,7 +304,7 @@ class ProductSchema extends AbstractSchema
 
     public function getRecommendedProperties(): array
     {
-        return ['description', 'brand', 'sku', 'aggregateRating', 'review', 'eligibleDuration', 'billingDuration', 'billingIncrement'];
+        return ['description', 'brand', 'sku', 'aggregateRating', 'review', 'eligibleDuration', 'billingDuration', 'billingIncrement', 'referencePrice'];
     }
 
     public function getPropertyDefinitions(): array
@@ -376,6 +422,24 @@ class ProductSchema extends AbstractSchema
                 'description_long' => __('The reference quantity for the price specification. Use this when pricing covers multiple billing periods or units.', 'schema-markup-generator'),
                 'example' => __('1, 6, 12', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/referenceQuantity',
+            ],
+
+            // ========================================
+            // Discount / Promotion Properties
+            // ========================================
+            'referencePrice' => [
+                'type' => 'number',
+                'description' => __('Original/list price (before discount). Shows strikethrough price in search results.', 'schema-markup-generator'),
+                'description_long' => __('The original price before any discount is applied. This creates the "was/now" price display in search results (e.g., "Was €129, Now €59"). Can contain text - numeric value will be extracted automatically.', 'schema-markup-generator'),
+                'example' => __('129, 199.99, "$129 / original price"', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/referencePrice',
+            ],
+            'priceValidUntil' => [
+                'type' => 'text',
+                'description' => __('Promotion end date (YYYY-MM-DD). When the discounted price expires.', 'schema-markup-generator'),
+                'description_long' => __('The date after which the price is no longer available. Use ISO 8601 format (YYYY-MM-DD). This is important for limited-time offers and promotions.', 'schema-markup-generator'),
+                'example' => __('2025-12-31, 2025-01-15', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/priceValidUntil',
             ],
         ];
     }
