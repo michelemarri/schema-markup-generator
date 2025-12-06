@@ -232,6 +232,10 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.13.1
+- **Improved**: Token Security UI - Security information now displayed as compact grid below the GitHub token input field
+- **Improved**: Cleaner Update tab layout - Removed separate "Security Information" section, integrated into GitHub Authentication card
+
 ### 1.13.0
 - **New**: Automatic HTML sanitization for all mapped field values across all schema types
 - **New**: `getMappedValue()` now automatically strips HTML tags from text fields (URLs and emails preserved)
