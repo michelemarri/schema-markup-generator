@@ -158,6 +158,35 @@ class Plugin
     }
 
     /**
+     * Initialize integrations based on settings
+     *
+     * Each integration is only initialized if:
+     * 1. The plugin is detected (checked by integration's isAvailable())
+     * 2. The integration is enabled in settings (default: true)
+     */
+    private function initializeIntegrations(): void
+    {
+        $integrationSettings = \Metodo\SchemaMarkupGenerator\smg_get_settings('integrations');
+
+        // Map of integration service keys to their setting keys
+        $integrations = [
+            'rankmath_integration' => 'integration_rankmath_enabled',
+            'acf_integration' => 'integration_acf_enabled',
+            'memberpress_courses_integration' => 'integration_memberpress_courses_enabled',
+            'memberpress_membership_integration' => 'integration_memberpress_memberships_enabled',
+        ];
+
+        foreach ($integrations as $serviceKey => $settingKey) {
+            // Check if integration is enabled (default to true for backwards compatibility)
+            $isEnabled = $integrationSettings[$settingKey] ?? true;
+
+            if ($isEnabled && isset($this->services[$serviceKey])) {
+                $this->services[$serviceKey]->init();
+            }
+        }
+    }
+
+    /**
      * Register WordPress hooks
      */
     private function registerHooks(): void
@@ -175,11 +204,8 @@ class Plugin
         // REST API
         add_action('rest_api_init', [$this->services['rest_endpoint'], 'register']);
 
-        // Initialize integrations
-        $this->services['rankmath_integration']->init();
-        $this->services['acf_integration']->init();
-        $this->services['memberpress_courses_integration']->init();
-        $this->services['memberpress_membership_integration']->init();
+        // Initialize integrations (only if enabled in settings)
+        $this->initializeIntegrations();
 
         // Initialize updater
         $this->services['updater']->init();

@@ -469,6 +469,12 @@
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
+.smg-status-badge.detected {
+  @apply text-amber-700;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+}
+
 /* ========================================
    Alerts & Notices
    ======================================== */
@@ -887,6 +893,10 @@
   @apply border-green-300;
 }
 
+.smg-integration-card.detected {
+  @apply border-amber-300;
+}
+
 .smg-integration-header {
   @apply flex flex-col gap-3 px-6 py-5 border-b border-gray-200;
 }
@@ -897,6 +907,10 @@
 
 .smg-integration-card.inactive .smg-integration-header {
   background: linear-gradient(135deg, #fafafa, #f5f5f5);
+}
+
+.smg-integration-card.detected .smg-integration-header {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
 }
 
 .smg-integration-title {

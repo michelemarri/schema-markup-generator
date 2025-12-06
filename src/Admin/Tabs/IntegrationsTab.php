@@ -127,7 +127,7 @@ class IntegrationsTab extends AbstractTab
                 ?>
             </div>
 
-            <?php if (class_exists('RankMath')): ?>
+            <?php if (class_exists('RankMath') && ($settings['integration_rankmath_enabled'] ?? true)): ?>
                 <?php $this->renderSection(
                     __('Rank Math Settings', 'schema-markup-generator'),
                     __('Configure how Schema Markup Generator interacts with Rank Math.', 'schema-markup-generator')
@@ -178,7 +178,7 @@ class IntegrationsTab extends AbstractTab
                 </div>
             <?php endif; ?>
 
-            <?php if (class_exists('ACF') || function_exists('get_field')): ?>
+            <?php if ((class_exists('ACF') || function_exists('get_field')) && ($settings['integration_acf_enabled'] ?? true)): ?>
                 <?php $this->renderSection(
                     __('ACF Settings', 'schema-markup-generator'),
                     __('Configure Advanced Custom Fields integration.', 'schema-markup-generator')
@@ -226,7 +226,7 @@ class IntegrationsTab extends AbstractTab
                 </div>
             <?php endif; ?>
 
-            <?php if (post_type_exists('mpcs-lesson')): ?>
+            <?php if (post_type_exists('mpcs-lesson') && ($settings['integration_memberpress_courses_enabled'] ?? true)): ?>
                 <?php $this->renderSection(
                     __('MemberPress Courses Settings', 'schema-markup-generator'),
                     __('Configure MemberPress Courses integration for educational content.', 'schema-markup-generator')
@@ -286,7 +286,7 @@ class IntegrationsTab extends AbstractTab
                 </div>
             <?php endif; ?>
 
-            <?php if (post_type_exists('memberpressproduct') || class_exists('MeprProduct') || defined('MEPR_VERSION')): ?>
+            <?php if ((post_type_exists('memberpressproduct') || class_exists('MeprProduct') || defined('MEPR_VERSION')) && ($settings['integration_memberpress_memberships_enabled'] ?? true)): ?>
                 <?php $this->renderSection(
                     __('MemberPress Memberships Settings', 'schema-markup-generator'),
                     __('Configure MemberPress Memberships integration for subscription/product content.', 'schema-markup-generator')
@@ -335,7 +335,7 @@ class IntegrationsTab extends AbstractTab
                 </div>
             <?php endif; ?>
 
-            <?php if (class_exists('WooCommerce')): ?>
+            <?php if (class_exists('WooCommerce') && ($settings['integration_woocommerce_enabled'] ?? true)): ?>
                 <?php $this->renderSection(
                     __('WooCommerce Settings', 'schema-markup-generator'),
                     __('Configure WooCommerce product schema generation.', 'schema-markup-generator')
@@ -375,22 +375,41 @@ class IntegrationsTab extends AbstractTab
 
     /**
      * Render integration card
+     *
+     * @param string $name        Integration display name
+     * @param bool   $detected    Whether the plugin is installed/detected
+     * @param string $slug        Integration slug for settings
+     * @param string $description Integration description
+     * @param array  $settings    Current settings array
      */
-    private function renderIntegrationCard(string $name, bool $active, string $slug, string $description, array $settings): void
+    private function renderIntegrationCard(string $name, bool $detected, string $slug, string $description, array $settings): void
     {
+        $isEnabled = $settings['integration_' . $slug . '_enabled'] ?? true;
+        $isActive = $detected && $isEnabled;
+
+        // Card class: active (green), detected (neutral), inactive (grey)
+        $cardClass = 'inactive';
+        if ($detected) {
+            $cardClass = $isActive ? 'active' : 'detected';
+        }
         ?>
-        <div class="smg-integration-card <?php echo $active ? 'active' : 'inactive'; ?>">
+        <div class="smg-integration-card <?php echo esc_attr($cardClass); ?>">
             <div class="smg-integration-header">
                 <div class="smg-integration-status">
-                    <?php if ($active): ?>
+                    <?php if (!$detected): ?>
+                        <span class="smg-status-badge inactive">
+                            <span class="dashicons dashicons-marker"></span>
+                            <?php esc_html_e('Not Detected', 'schema-markup-generator'); ?>
+                        </span>
+                    <?php elseif ($isActive): ?>
                         <span class="smg-status-badge active">
                             <span class="dashicons dashicons-yes-alt"></span>
                             <?php esc_html_e('Active', 'schema-markup-generator'); ?>
                         </span>
                     <?php else: ?>
-                        <span class="smg-status-badge inactive">
-                            <span class="dashicons dashicons-marker"></span>
-                            <?php esc_html_e('Not Detected', 'schema-markup-generator'); ?>
+                        <span class="smg-status-badge detected">
+                            <span class="dashicons dashicons-visibility"></span>
+                            <?php esc_html_e('Detected', 'schema-markup-generator'); ?>
                         </span>
                     <?php endif; ?>
                 </div>
@@ -399,13 +418,13 @@ class IntegrationsTab extends AbstractTab
             <div class="smg-integration-body">
                 <p><?php echo esc_html($description); ?></p>
             </div>
-            <?php if ($active): ?>
+            <?php if ($detected): ?>
                 <div class="smg-integration-footer">
                     <label class="smg-toggle-inline">
                         <input type="checkbox"
                                name="smg_integrations_settings[integration_<?php echo esc_attr($slug); ?>_enabled]"
                                value="1"
-                               <?php checked($settings['integration_' . $slug . '_enabled'] ?? true); ?>>
+                               <?php checked($isEnabled); ?>>
                         <span class="smg-toggle-slider-small"></span>
                         <?php esc_html_e('Enabled', 'schema-markup-generator'); ?>
                     </label>

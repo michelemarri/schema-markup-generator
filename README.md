@@ -233,6 +233,12 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.17.1
+- **Fixed**: Integration status badges now show correctly: "Not Detected" (grey), "Detected" (amber), "Active" (green)
+- **Fixed**: Integration enable/disable toggles now actually work - disabled integrations don't register hooks
+- **Fixed**: Integration settings sections are hidden when integration is disabled
+- **Improved**: New `initializeIntegrations()` method for cleaner integration management
+
 ### 1.17.0
 - **Fixed**: MemberPress Memberships integration now visible in the Integrations tab
 - **New**: Integration card for MemberPress Memberships with enable/disable toggle
