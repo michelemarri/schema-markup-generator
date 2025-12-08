@@ -175,23 +175,85 @@ add_filter('smg_resolve_field_value', function($value, int $postId, string $fiel
 
 #### WooCommerce Field Sources
 
-When using `smg_resolve_field_value`, WooCommerce global fields use these sources:
+When using `smg_resolve_field_value`, WooCommerce fields use these sources:
 
-- `woocommerce_virtual` - Global computed fields (e.g., `woo_currency_code`)
+- `woocommerce_virtual` - Global computed fields (available for all post types)
+- `woocommerce_product` - Product-specific fields (only for WooCommerce products)
 
 ```php
 add_filter('smg_resolve_field_value', function($value, int $postId, string $fieldKey, string $source) {
+    // Override global currency
     if ($source === 'woocommerce_virtual' && $fieldKey === 'woo_currency_code') {
-        // Override currency code
         return 'USD';
     }
+    
+    // Override product-specific field
+    if ($source === 'woocommerce_product' && $fieldKey === 'woo_stock_status') {
+        // Custom stock status logic
+        return 'InStock';
+    }
+    
     return $value;
 }, 10, 4);
 ```
 
-**Available virtual fields:**
-- `woo_currency_code` - ISO 4217 currency code from WooCommerce settings (e.g., EUR, USD)
-- `woo_currency_symbol` - Currency symbol from WooCommerce settings (e.g., €, $)
+**Global virtual fields (`woocommerce_virtual`):**
+- `woo_currency_code` - ISO 4217 currency code (EUR, USD)
+- `woo_currency_symbol` - Currency symbol (€, $)
+
+**Product virtual fields (`woocommerce_product`):**
+
+| Category | Fields |
+|----------|--------|
+| Pricing | `woo_price`, `woo_regular_price`, `woo_sale_price`, `woo_price_html` |
+| Identifiers | `woo_sku`, `woo_gtin`, `woo_mpn` |
+| Stock | `woo_stock_status`, `woo_stock_status_raw`, `woo_stock_quantity`, `woo_is_in_stock`, `woo_backorders_allowed` |
+| Reviews | `woo_average_rating`, `woo_review_count`, `woo_rating_count` |
+| Promotions | `woo_sale_price_dates_from`, `woo_sale_price_dates_to`, `woo_is_on_sale` |
+| Dimensions | `woo_weight`, `woo_weight_value`, `woo_weight_unit`, `woo_dimensions`, `woo_length`, `woo_width`, `woo_height`, `woo_dimension_unit` |
+| Taxonomies | `woo_product_category`, `woo_product_categories`, `woo_product_tags`, `woo_product_brand` |
+| Images | `woo_main_image`, `woo_gallery_images`, `woo_all_images` |
+| Product Info | `woo_product_type`, `woo_is_virtual`, `woo_is_downloadable`, `woo_is_featured`, `woo_is_sold_individually` |
+| URLs | `woo_product_url`, `woo_add_to_cart_url`, `woo_external_url` |
+| Content | `woo_short_description`, `woo_purchase_note`, `woo_total_sales` |
+| Attributes | `woo_attributes`, `woo_attributes_text` |
+
+---
+
+#### `smg_product_schema_data` (WooCommerce Products)
+
+The Product schema filter automatically enhances WooCommerce products with auto-populated fields.
+
+```php
+add_filter('smg_product_schema_data', function(array $data, WP_Post $post, array $mapping): array {
+    // Customize WooCommerce product schema
+    if ($post->post_type === 'product') {
+        // Add custom property
+        $data['additionalProperty'] = [
+            '@type' => 'PropertyValue',
+            'name' => 'warranty',
+            'value' => '2 years',
+        ];
+        
+        // Override auto-detected brand
+        $data['brand'] = [
+            '@type' => 'Brand',
+            'name' => 'Custom Brand',
+        ];
+    }
+    return $data;
+}, 10, 3);
+```
+
+**Auto-enhanced properties for WooCommerce products:**
+- `sku` - From product SKU
+- `gtin` - Auto-detected from multiple meta fields
+- `mpn` - Auto-detected from meta fields
+- `brand` - Auto-detected from brand taxonomies
+- `offers` - Price, currency, availability, URL, priceValidUntil
+- `aggregateRating` - From WooCommerce reviews
+- `image` - Main image + gallery images
+- `weight` - With UN/CEFACT unit codes
 
 **Use case:** Map `woo_currency_code` to `priceCurrency` in Product, Course, Event, or any schema with pricing.
 

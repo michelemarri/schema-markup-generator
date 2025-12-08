@@ -14,7 +14,7 @@ Automatic schema.org structured data generation for WordPress, optimized for sea
 - **Property Documentation** - Click any property for detailed description, examples, and schema.org link
 - **ACF Integration** - Full support for Advanced Custom Fields with visual field mapping
 - **Rank Math Compatibility** - Prevents duplicate schemas when Rank Math is active
-- **WooCommerce Integration** - Currency code and symbol from WooCommerce settings available for mapping
+- **WooCommerce Integration** - Complete WooCommerce product fields available for mapping (40+ fields)
 - **MemberPress Courses Integration** - Automatic Course/Lesson hierarchy for LearningResource schemas
 - **MemberPress Membership Integration** - Full support for membership fields (price, period, trial, benefits, currency) with Product schema
 - **Modern Admin UI** - Clean, tabbed interface for easy configuration
@@ -233,6 +233,33 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - [Metodo.dev](https://metodo.dev)
 
 ## Changelog
+
+### 1.22.0
+- **New**: Complete WooCommerce Integration - 40+ product fields now available for schema mapping
+- **New**: WooCommerce product fields organized by category:
+  - **Pricing**: `woo_price`, `woo_regular_price`, `woo_sale_price`, `woo_price_html`
+  - **Identifiers**: `woo_sku`, `woo_gtin`, `woo_mpn` (auto-detects from common GTIN plugins)
+  - **Stock**: `woo_stock_status`, `woo_stock_quantity`, `woo_is_in_stock`, `woo_backorders_allowed`
+  - **Reviews**: `woo_average_rating`, `woo_review_count`, `woo_rating_count`
+  - **Promotions**: `woo_sale_price_dates_from`, `woo_sale_price_dates_to`, `woo_is_on_sale`
+  - **Dimensions**: `woo_weight`, `woo_dimensions`, `woo_length`, `woo_width`, `woo_height`
+  - **Taxonomies**: `woo_product_category`, `woo_product_categories`, `woo_product_tags`, `woo_product_brand`
+  - **Images**: `woo_main_image`, `woo_gallery_images`, `woo_all_images`
+  - **Product Info**: `woo_product_type`, `woo_is_virtual`, `woo_is_downloadable`, `woo_is_featured`
+  - **URLs**: `woo_product_url`, `woo_add_to_cart_url`, `woo_external_url`
+  - **Content**: `woo_short_description`, `woo_purchase_note`
+  - **Attributes**: `woo_attributes`, `woo_attributes_text`
+- **New**: Auto-enhancement for WooCommerce Product schema:
+  - SKU, GTIN, MPN auto-populated if not explicitly mapped
+  - Brand auto-detected from common brand taxonomies (WooCommerce Brands, Perfect Brands, YITH)
+  - Offers auto-populated with price, currency, availability, and priceValidUntil
+  - AggregateRating auto-populated from WooCommerce reviews
+  - Product images include gallery images automatically
+  - Weight with proper UN/CEFACT unit codes
+- **New**: Stock status automatically converted to Schema.org values (InStock, OutOfStock, BackOrder, PreOrder)
+- **New**: GTIN auto-detection from multiple plugin formats (WooCommerce GTIN, Yoast, EAN for WooCommerce, etc.)
+- **New**: Brand auto-detection from multiple brand taxonomies and custom fields
+- **Improved**: Global WooCommerce fields (`woo_currency_code`, `woo_currency_symbol`) still available for all post types
 
 ### 1.21.0
 - **New**: Course schema now has sensible defaults with "Auto" badges in UI:

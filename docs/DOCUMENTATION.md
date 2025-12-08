@@ -11,11 +11,12 @@ Complete documentation for the Schema Markup Generator WordPress plugin.
 5. [ACF Integration](#acf-integration)
 6. [MemberPress Courses Integration](#memberpress-courses-integration)
 7. [MemberPress Membership Integration](#memberpress-membership-integration)
-8. [Advanced Settings](#advanced-settings)
-9. [Caching](#caching)
-10. [REST API](#rest-api)
-11. [Import/Export](#importexport)
-12. [Troubleshooting](#troubleshooting)
+8. [WooCommerce Integration](#woocommerce-integration)
+9. [Advanced Settings](#advanced-settings)
+10. [Caching](#caching)
+11. [REST API](#rest-api)
+12. [Import/Export](#importexport)
+13. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -696,6 +697,220 @@ The integration uses these filters:
 - `smg_discovered_fields` - Adds membership fields to discovery
 - `smg_resolve_field_value` - Resolves membership field values (sources: `memberpress`, `memberpress_virtual`)
 - `smg_product_schema_data` - Enhances Product schema with offer data
+
+---
+
+## WooCommerce Integration
+
+When WooCommerce is active, the plugin provides comprehensive field mapping for WooCommerce products with 40+ virtual fields and automatic Product schema enhancement.
+
+### Global Fields (All Post Types)
+
+These fields are available for all post types:
+
+| Field | Type | Description | Use Case |
+|-------|------|-------------|----------|
+| `woo_currency_code` | text | ISO 4217 currency code (EUR, USD) | Map to `priceCurrency` |
+| `woo_currency_symbol` | text | Currency symbol (€, $) | Display purposes |
+
+### Product-Specific Fields
+
+The following fields are available only for the `product` post type:
+
+#### Pricing Fields
+
+| Field | Type | Description | Schema Mapping |
+|-------|------|-------------|----------------|
+| `woo_price` | number | Current active price (sale or regular) | `price` |
+| `woo_regular_price` | number | Regular/list price | `referencePrice` |
+| `woo_sale_price` | number | Discounted price (if on sale) | `price` |
+| `woo_price_html` | text | Formatted price with currency | Display only |
+
+#### Identifier Fields
+
+| Field | Type | Description | Schema Mapping |
+|-------|------|-------------|----------------|
+| `woo_sku` | text | Stock Keeping Unit | `sku` |
+| `woo_gtin` | text | GTIN/EAN/UPC (auto-detected) | `gtin` |
+| `woo_mpn` | text | Manufacturer Part Number | `mpn` |
+
+**GTIN Auto-Detection:** The plugin automatically searches for GTIN in these meta fields:
+- `_wc_gtin`, `_gtin`, `_ean`, `_upc` (generic)
+- `wpseo_global_identifier_gtin` (Yoast SEO)
+- `_alg_wc_ean` (EAN for WooCommerce)
+- `hwp_product_gtin` (other plugins)
+
+#### Stock & Availability Fields
+
+| Field | Type | Description | Schema Mapping |
+|-------|------|-------------|----------------|
+| `woo_stock_status` | text | Schema.org value: InStock, OutOfStock, PreOrder, BackOrder | `availability` |
+| `woo_stock_status_raw` | text | WooCommerce value: instock, outofstock, onbackorder | - |
+| `woo_stock_quantity` | number | Items in stock | - |
+| `woo_is_in_stock` | boolean | In stock status | - |
+| `woo_backorders_allowed` | boolean | Backorders enabled | - |
+
+#### Rating & Review Fields
+
+| Field | Type | Description | Schema Mapping |
+|-------|------|-------------|----------------|
+| `woo_average_rating` | number | Average rating (1-5) | `ratingValue` |
+| `woo_review_count` | number | Number of reviews | `reviewCount` |
+| `woo_rating_count` | number | Number of ratings | `ratingCount` |
+
+#### Promotion/Sale Date Fields
+
+| Field | Type | Description | Schema Mapping |
+|-------|------|-------------|----------------|
+| `woo_sale_price_dates_from` | text | Sale start date (YYYY-MM-DD) | - |
+| `woo_sale_price_dates_to` | text | Sale end date (YYYY-MM-DD) | `priceValidUntil` |
+| `woo_is_on_sale` | boolean | Currently on sale | - |
+
+#### Dimension & Weight Fields
+
+| Field | Type | Description | Schema Mapping |
+|-------|------|-------------|----------------|
+| `woo_weight` | text | Weight with unit (e.g., "2.5 kg") | - |
+| `woo_weight_value` | number | Weight numeric value | `weight.value` |
+| `woo_weight_unit` | text | Weight unit (kg, g, lbs, oz) | `weight.unitCode` |
+| `woo_dimensions` | text | Formatted "L × W × H unit" | - |
+| `woo_length` | number | Product length | `depth` |
+| `woo_width` | number | Product width | `width` |
+| `woo_height` | number | Product height | `height` |
+| `woo_dimension_unit` | text | Dimension unit (cm, m, in) | - |
+
+#### Taxonomy Fields
+
+| Field | Type | Description | Schema Mapping |
+|-------|------|-------------|----------------|
+| `woo_product_category` | text | Primary category name | `category` |
+| `woo_product_categories` | text | All categories (comma-separated) | - |
+| `woo_product_tags` | text | Tags (comma-separated) | `keywords` |
+| `woo_product_brand` | text | Brand name (auto-detected) | `brand` |
+
+**Brand Auto-Detection:** The plugin searches for brand in these taxonomies:
+- `product_brand` (WooCommerce Brands)
+- `pwb-brand` (Perfect WooCommerce Brands)
+- `yith_product_brand` (YITH WooCommerce Brands)
+- `brand` (generic)
+
+And these meta fields: `_brand`, `brand`, `_product_brand`
+
+#### Image Fields
+
+| Field | Type | Description | Schema Mapping |
+|-------|------|-------------|----------------|
+| `woo_main_image` | url | Main product image URL | `image` |
+| `woo_gallery_images` | array | Gallery image URLs | `image` (array) |
+| `woo_all_images` | array | Main + gallery images | `image` (array) |
+
+#### Product Info Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `woo_product_type` | text | simple, variable, grouped, external |
+| `woo_is_virtual` | boolean | Virtual product (no shipping) |
+| `woo_is_downloadable` | boolean | Downloadable product |
+| `woo_is_featured` | boolean | Featured product |
+| `woo_is_sold_individually` | boolean | Only one per order |
+
+#### URL Fields
+
+| Field | Type | Description | Schema Mapping |
+|-------|------|-------------|----------------|
+| `woo_product_url` | url | Product permalink | `url` |
+| `woo_add_to_cart_url` | url | Add to cart URL | - |
+| `woo_external_url` | url | Affiliate/external URL | `url` (for external products) |
+
+#### Content & Stats Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `woo_short_description` | text | Product excerpt |
+| `woo_purchase_note` | text | Post-purchase note |
+| `woo_total_sales` | number | Total sales count |
+
+#### Attribute Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `woo_attributes` | array | Array of {name, value} objects |
+| `woo_attributes_text` | text | Formatted "Color: Red, Size: M" |
+
+### Automatic Product Schema Enhancement
+
+When a WooCommerce product is assigned the Product schema, the plugin automatically populates missing fields:
+
+1. **SKU, GTIN, MPN** - Auto-populated from product data
+2. **Brand** - Auto-detected from brand taxonomies
+3. **Offers** - Auto-populated with:
+   - `price` from current price
+   - `priceCurrency` from WooCommerce settings
+   - `availability` from stock status
+   - `url` from product permalink
+   - `priceValidUntil` from sale end date (if on sale)
+4. **AggregateRating** - Auto-populated if product has reviews
+5. **Images** - Includes gallery images automatically
+6. **Weight** - With proper UN/CEFACT unit codes (KGM, GRM, LBR, ONZ)
+
+### Example Output
+
+**WooCommerce Product with Auto-Enhancement:**
+```json
+{
+  "@type": "Product",
+  "name": "Premium Wireless Headphones",
+  "description": "High-quality noise-cancelling headphones",
+  "sku": "WH-PRO-100",
+  "gtin": "5901234123457",
+  "mpn": "WH-PRO-100-BLK",
+  "brand": {
+    "@type": "Brand",
+    "name": "SoundMax"
+  },
+  "image": [
+    "https://example.com/product-main.jpg",
+    "https://example.com/product-side.jpg",
+    "https://example.com/product-case.jpg"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": 199.99,
+    "priceCurrency": "EUR",
+    "availability": "https://schema.org/InStock",
+    "url": "https://example.com/product/headphones/",
+    "priceValidUntil": "2025-01-31"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": 4.7,
+    "ratingCount": 156,
+    "bestRating": 5,
+    "worstRating": 1
+  },
+  "weight": {
+    "@type": "QuantitativeValue",
+    "value": 0.25,
+    "unitCode": "KGM"
+  }
+}
+```
+
+### Usage Tips
+
+1. **Assign Product schema** to the `product` post type in Settings → Schema Markup → Post Types
+2. **Auto-enhancement is automatic** - No mapping required for basic WooCommerce fields
+3. **Override when needed** - Map custom fields to override auto-detected values
+4. **Use sale dates** - `woo_sale_price_dates_to` is perfect for `priceValidUntil`
+5. **Brand detection** - Install a brand taxonomy plugin for automatic brand population
+
+### Filters
+
+The integration uses these filters:
+
+- `smg_discovered_fields` - Adds WooCommerce fields to discovery (sources: `woocommerce_virtual`, `woocommerce_product`)
+- `smg_resolve_field_value` - Resolves WooCommerce field values
+- `smg_product_schema_data` - Enhances Product schema with WooCommerce data
 
 ---
 
