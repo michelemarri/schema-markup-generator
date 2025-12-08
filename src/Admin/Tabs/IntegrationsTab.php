@@ -376,7 +376,7 @@ class IntegrationsTab extends AbstractTab
             <?php if (class_exists('WooCommerce') && ($settings['integration_woocommerce_enabled'] ?? true)): ?>
                 <?php $this->renderSection(
                     __('WooCommerce Settings', 'schema-markup-generator'),
-                    __('Configure WooCommerce product schema generation.', 'schema-markup-generator')
+                    __('Configure WooCommerce product schema generation. 40+ product fields available for mapping.', 'schema-markup-generator')
                 ); ?>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -385,49 +385,139 @@ class IntegrationsTab extends AbstractTab
                         $this->renderToggle(
                             'smg_integrations_settings[woo_auto_product]',
                             $settings['woo_auto_product'] ?? true,
-                            __('Auto-generate Product Schema', 'schema-markup-generator'),
-                            __('Automatically generate Product schema for WooCommerce products.', 'schema-markup-generator')
+                            __('Auto-enhance Product Schema', 'schema-markup-generator'),
+                            __('Automatically populate SKU, GTIN, brand, offers, and reviews from WooCommerce data.', 'schema-markup-generator')
                         );
 
                         $this->renderToggle(
                             'smg_integrations_settings[woo_include_reviews]',
                             $settings['woo_include_reviews'] ?? true,
-                            __('Include Reviews', 'schema-markup-generator'),
-                            __('Include product reviews in the schema aggregate rating.', 'schema-markup-generator')
+                            __('Include Aggregate Rating', 'schema-markup-generator'),
+                            __('Auto-populate aggregateRating from WooCommerce product reviews.', 'schema-markup-generator')
                         );
 
                         $this->renderToggle(
                             'smg_integrations_settings[woo_include_offers]',
                             $settings['woo_include_offers'] ?? true,
                             __('Include Offers', 'schema-markup-generator'),
-                            __('Include pricing and availability as Offer schema.', 'schema-markup-generator')
+                            __('Auto-populate price, currency, availability, and priceValidUntil.', 'schema-markup-generator')
                         );
                     }, 'dashicons-cart');
 
-                    $this->renderCard(__('Currency & Fields', 'schema-markup-generator'), function () {
-                        $currencyCode = function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : get_option('woocommerce_currency', 'EUR');
-                        $currencySymbol = function_exists('get_woocommerce_currency_symbol') ? get_woocommerce_currency_symbol() : '€';
+                    $currencyCode = function_exists('get_woocommerce_currency') ? get_woocommerce_currency() : get_option('woocommerce_currency', 'EUR');
+                    $currencySymbol = function_exists('get_woocommerce_currency_symbol') ? get_woocommerce_currency_symbol() : '€';
+
+                    $this->renderCard(__('Current Settings', 'schema-markup-generator'), function () use ($currencyCode, $currencySymbol) {
                         ?>
-                        <div class="flex flex-col gap-4">
+                        <div class="flex flex-col gap-3">
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="dashicons dashicons-money-alt" style="color: var(--smg-success);"></span>
                                 <span><?php printf(__('Currency: %s (%s)', 'schema-markup-generator'), esc_html($currencyCode), esc_html($currencySymbol)); ?></span>
                             </div>
-                            <p class="smg-text-muted text-sm">
-                                <?php esc_html_e('Available fields for schema mapping:', 'schema-markup-generator'); ?>
-                            </p>
-                            <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                                <li><code>woo_currency_code</code> - <?php esc_html_e('ISO 4217 code (e.g. EUR, USD)', 'schema-markup-generator'); ?></li>
-                                <li><code>woo_currency_symbol</code> - <?php esc_html_e('Currency symbol (e.g. €, $)', 'schema-markup-generator'); ?></li>
-                            </ul>
-                            <p class="smg-text-muted text-xs">
-                                <?php esc_html_e('Map these fields to priceCurrency in your schema mappings.', 'schema-markup-generator'); ?>
-                            </p>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="dashicons dashicons-weight" style="color: var(--smg-info);"></span>
+                                <span><?php printf(__('Weight: %s', 'schema-markup-generator'), esc_html(get_option('woocommerce_weight_unit', 'kg'))); ?></span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="dashicons dashicons-image-crop" style="color: var(--smg-info);"></span>
+                                <span><?php printf(__('Dimensions: %s', 'schema-markup-generator'), esc_html(get_option('woocommerce_dimension_unit', 'cm'))); ?></span>
+                            </div>
                         </div>
                         <?php
-                    }, 'dashicons-info');
+                    }, 'dashicons-admin-settings');
                     ?>
                 </div>
+
+                <?php $this->renderSection(
+                    __('Available Product Fields', 'schema-markup-generator'),
+                    __('These virtual fields are available for mapping when configuring the Product schema for WooCommerce products.', 'schema-markup-generator')
+                ); ?>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <?php
+                    // Define field groups
+                    $fieldGroups = [
+                        'Pricing' => [
+                            'woo_price' => __('Current active price', 'schema-markup-generator'),
+                            'woo_regular_price' => __('Regular/list price', 'schema-markup-generator'),
+                            'woo_sale_price' => __('Discounted price', 'schema-markup-generator'),
+                        ],
+                        'Identifiers' => [
+                            'woo_sku' => __('Stock Keeping Unit', 'schema-markup-generator'),
+                            'woo_gtin' => __('GTIN/EAN/UPC (auto-detected)', 'schema-markup-generator'),
+                            'woo_mpn' => __('Manufacturer Part Number', 'schema-markup-generator'),
+                        ],
+                        'Stock' => [
+                            'woo_stock_status' => __('Schema.org availability', 'schema-markup-generator'),
+                            'woo_stock_quantity' => __('Items in stock', 'schema-markup-generator'),
+                            'woo_is_in_stock' => __('In stock (boolean)', 'schema-markup-generator'),
+                        ],
+                        'Reviews' => [
+                            'woo_average_rating' => __('Average rating (1-5)', 'schema-markup-generator'),
+                            'woo_review_count' => __('Number of reviews', 'schema-markup-generator'),
+                            'woo_rating_count' => __('Number of ratings', 'schema-markup-generator'),
+                        ],
+                        'Promotions' => [
+                            'woo_is_on_sale' => __('Currently on sale', 'schema-markup-generator'),
+                            'woo_sale_price_dates_to' => __('Sale end date', 'schema-markup-generator'),
+                        ],
+                        'Dimensions' => [
+                            'woo_weight' => __('Weight with unit', 'schema-markup-generator'),
+                            'woo_dimensions' => __('L × W × H formatted', 'schema-markup-generator'),
+                            'woo_length' => __('Product length', 'schema-markup-generator'),
+                        ],
+                        'Taxonomies' => [
+                            'woo_product_category' => __('Primary category', 'schema-markup-generator'),
+                            'woo_product_brand' => __('Brand (auto-detected)', 'schema-markup-generator'),
+                            'woo_product_tags' => __('Product tags', 'schema-markup-generator'),
+                        ],
+                        'Images' => [
+                            'woo_main_image' => __('Main product image', 'schema-markup-generator'),
+                            'woo_gallery_images' => __('Gallery images (array)', 'schema-markup-generator'),
+                            'woo_all_images' => __('All images combined', 'schema-markup-generator'),
+                        ],
+                        'Global' => [
+                            'woo_currency_code' => __('ISO 4217 currency code', 'schema-markup-generator'),
+                            'woo_currency_symbol' => __('Currency symbol', 'schema-markup-generator'),
+                        ],
+                    ];
+
+                    foreach ($fieldGroups as $groupName => $fields): ?>
+                        <div class="smg-field-group-card">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                                <?php
+                                $icon = match ($groupName) {
+                                    'Pricing' => 'dashicons-tag',
+                                    'Identifiers' => 'dashicons-admin-network',
+                                    'Stock' => 'dashicons-archive',
+                                    'Reviews' => 'dashicons-star-filled',
+                                    'Promotions' => 'dashicons-megaphone',
+                                    'Dimensions' => 'dashicons-image-crop',
+                                    'Taxonomies' => 'dashicons-category',
+                                    'Images' => 'dashicons-format-gallery',
+                                    'Global' => 'dashicons-admin-site-alt3',
+                                    default => 'dashicons-list-view',
+                                };
+                                ?>
+                                <span class="dashicons <?php echo esc_attr($icon); ?>" style="font-size: 16px; width: 16px; height: 16px;"></span>
+                                <?php echo esc_html($groupName); ?>
+                            </h4>
+                            <ul class="text-xs text-gray-600 space-y-1">
+                                <?php foreach ($fields as $fieldKey => $fieldDesc): ?>
+                                    <li class="flex flex-col">
+                                        <code class="text-xs bg-gray-100 px-1 rounded"><?php echo esc_html($fieldKey); ?></code>
+                                        <span class="text-gray-500 text-xs"><?php echo esc_html($fieldDesc); ?></span>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <p class="smg-text-muted text-sm mt-4">
+                    <span class="dashicons dashicons-info" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                    <?php esc_html_e('Product-specific fields are only available for the "product" post type. Global fields are available for all post types.', 'schema-markup-generator'); ?>
+                </p>
             <?php endif; ?>
 
         </div>

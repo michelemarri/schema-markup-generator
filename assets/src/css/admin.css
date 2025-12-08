@@ -1177,14 +1177,6 @@
 }
 
 /* ========================================
-   ACF Notice
-   ======================================== */
-
-.smg-acf-notice {
-  @apply mt-4 p-4 text-sm text-blue-800 bg-blue-50 border border-blue-200 rounded-lg;
-}
-
-/* ========================================
    Utility Classes
    ======================================== */
 
@@ -1707,6 +1699,30 @@ tr.smg-saved td:first-child::after {
 
 .smg-wrap :focus-visible {
   @apply outline-2 outline-gray-900 outline-offset-2;
+}
+
+/* ========================================
+   Field Group Cards (Integrations)
+   ======================================== */
+
+.smg-field-group-card {
+  @apply bg-gray-50 rounded-lg p-4 border border-gray-200;
+}
+
+.smg-field-group-card h4 {
+  @apply text-gray-700 border-b border-gray-200 pb-2 mb-3;
+}
+
+.smg-field-group-card ul {
+  @apply space-y-2;
+}
+
+.smg-field-group-card li {
+  @apply flex flex-col gap-0.5;
+}
+
+.smg-field-group-card code {
+  @apply text-xs bg-white px-1.5 py-0.5 rounded border border-gray-200 font-mono text-gray-700;
 }
 
 /* ========================================
