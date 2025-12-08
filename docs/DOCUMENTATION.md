@@ -8,7 +8,7 @@ Complete documentation for the Schema Markup Generator WordPress plugin.
 2. [Configuration](#configuration)
 3. [Schema Types](#schema-types)
 4. [Field Mapping](#field-mapping)
-5. [ACF Integration](#acf-integration)
+5. [Custom Fields Integration](#custom-fields-integration)
 6. [MemberPress Courses Integration](#memberpress-courses-integration)
 7. [MemberPress Membership Integration](#memberpress-membership-integration)
 8. [WooCommerce Integration](#woocommerce-integration)
@@ -445,11 +445,21 @@ brand.name → product_brand
 
 ---
 
-## ACF Integration
+## Custom Fields Integration
+
+The plugin supports both **Advanced Custom Fields (ACF)** and **Secure Custom Fields (SCF)**. Both plugins share the same API and are fully supported.
+
+### Detection
+
+The plugin automatically detects which custom fields plugin is installed:
+- **ACF** (Advanced Custom Fields) - Free and Pro versions
+- **SCF** (Secure Custom Fields) - Community fork of ACF
+
+All features work identically with either plugin.
 
 ### Supported Field Types
 
-| ACF Type | Schema Type |
+| Field Type | Schema Type |
 |----------|-------------|
 | text, textarea, wysiwyg | text |
 | number, range | number |
@@ -475,7 +485,7 @@ Configure the repeater sub-fields to match schema property names.
 
 ### Image Fields
 
-ACF image fields are automatically resolved:
+Image fields are automatically resolved:
 - Returns URL if return format is URL
 - Extracts URL from array if return format is Array
 

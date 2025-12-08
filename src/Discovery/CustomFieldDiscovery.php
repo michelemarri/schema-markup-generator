@@ -267,12 +267,12 @@ class CustomFieldDiscovery
         foreach ($fields as $field) {
             // Determine group key
             if ($field['source'] === 'acf') {
-                // ACF fields: group by their ACF group
+                // ACF/SCF fields: group by their field group
                 $groupKey = 'acf_' . sanitize_key($field['group'] ?? 'general');
-                $groupLabel = $field['group'] ?? __('ACF Fields', 'schema-markup-generator');
-                $priority = 10; // ACF first
+                $groupLabel = $field['group'] ?? __('Custom Fields', 'schema-markup-generator');
+                $priority = 10; // Custom fields first
             } else {
-                // Non-ACF fields: group by plugin
+                // Other fields: group by plugin
                 $groupKey = $field['plugin'] ?? 'custom';
                 $groupLabel = $field['plugin_label'] ?? __('Custom Fields', 'schema-markup-generator');
                 $priority = $field['plugin_priority'] ?? 50;

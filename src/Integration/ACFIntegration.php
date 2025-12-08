@@ -7,7 +7,8 @@ namespace Metodo\SchemaMarkupGenerator\Integration;
 /**
  * ACF Integration
  *
- * Integration with Advanced Custom Fields for field mapping.
+ * Integration with Advanced Custom Fields (ACF) or Secure Custom Fields (SCF) for field mapping.
+ * Both plugins share the same API and are functionally equivalent.
  *
  * @package Metodo\SchemaMarkupGenerator\Integration
  * @author  Michele Marri <plugins@metodo.dev>
@@ -18,6 +19,11 @@ class ACFIntegration
      * Cached field groups
      */
     private array $fieldGroupsCache = [];
+
+    /**
+     * Detected plugin name (ACF or SCF)
+     */
+    private ?string $detectedPlugin = null;
 
     /**
      * Initialize integration
@@ -36,7 +42,7 @@ class ACFIntegration
     }
 
     /**
-     * Check if ACF is active
+     * Check if ACF or SCF is active
      */
     public function isAvailable(): bool
     {
@@ -49,6 +55,52 @@ class ACFIntegration
     public function isProActive(): bool
     {
         return class_exists('ACF') && defined('ACF_PRO');
+    }
+
+    /**
+     * Get the name of the detected custom fields plugin
+     *
+     * @return string|null Plugin name (ACF, SCF) or null if not available
+     */
+    public function getDetectedPluginName(): ?string
+    {
+        if (!$this->isAvailable()) {
+            return null;
+        }
+
+        if ($this->detectedPlugin !== null) {
+            return $this->detectedPlugin;
+        }
+
+        // Check for SCF (Secure Custom Fields) - it defines its own constant
+        if (defined('SCF_VERSION') || defined('SCF_MAJOR_VERSION')) {
+            $this->detectedPlugin = 'SCF';
+            return $this->detectedPlugin;
+        }
+
+        // Check for ACF
+        if (class_exists('ACF') || defined('ACF_VERSION')) {
+            $this->detectedPlugin = 'ACF';
+            return $this->detectedPlugin;
+        }
+
+        // Generic fallback - the API is available but we can't determine the exact plugin
+        $this->detectedPlugin = 'Custom Fields';
+        return $this->detectedPlugin;
+    }
+
+    /**
+     * Get user-friendly plugin label
+     *
+     * @return string Human-readable plugin name
+     */
+    public function getPluginLabel(): string
+    {
+        return match ($this->getDetectedPluginName()) {
+            'ACF' => 'Advanced Custom Fields',
+            'SCF' => 'Secure Custom Fields',
+            default => 'Custom Fields',
+        };
     }
 
     /**

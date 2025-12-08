@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
 
+use Metodo\SchemaMarkupGenerator\Integration\ACFIntegration;
+
 /**
  * Integrations Tab
  *
@@ -14,6 +16,18 @@ namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
  */
 class IntegrationsTab extends AbstractTab
 {
+    private ?ACFIntegration $acfIntegration = null;
+
+    /**
+     * Get ACF Integration instance (lazy loaded)
+     */
+    private function getAcfIntegration(): ACFIntegration
+    {
+        if ($this->acfIntegration === null) {
+            $this->acfIntegration = new ACFIntegration();
+        }
+        return $this->acfIntegration;
+    }
     public function getTitle(): string
     {
         return __('Integrations', 'schema-markup-generator');
@@ -93,11 +107,12 @@ class IntegrationsTab extends AbstractTab
                     $settings
                 );
 
+                $acfIntegration = $this->getAcfIntegration();
                 $this->renderIntegrationCard(
-                    'Advanced Custom Fields',
-                    class_exists('ACF') || function_exists('get_field'),
+                    $acfIntegration->isAvailable() ? $acfIntegration->getPluginLabel() : __('Custom Fields', 'schema-markup-generator'),
+                    $acfIntegration->isAvailable(),
                     'acf',
-                    __('Map ACF fields to schema properties for dynamic content generation.', 'schema-markup-generator'),
+                    __('Map custom fields to schema properties for dynamic content generation.', 'schema-markup-generator'),
                     $settings
                 );
 
@@ -178,10 +193,16 @@ class IntegrationsTab extends AbstractTab
                 </div>
             <?php endif; ?>
 
-            <?php if ((class_exists('ACF') || function_exists('get_field')) && ($settings['integration_acf_enabled'] ?? true)): ?>
+            <?php
+            $acfIntegration = $this->getAcfIntegration();
+            if ($acfIntegration->isAvailable() && ($settings['integration_acf_enabled'] ?? true)):
+                $pluginLabel = $acfIntegration->getPluginLabel();
+            ?>
                 <?php $this->renderSection(
-                    __('ACF Settings', 'schema-markup-generator'),
-                    __('Configure Advanced Custom Fields integration.', 'schema-markup-generator')
+                    /* translators: %s: plugin name (ACF/SCF) */
+                    sprintf(__('%s Settings', 'schema-markup-generator'), $acfIntegration->getDetectedPluginName()),
+                    /* translators: %s: plugin name (Advanced Custom Fields/Secure Custom Fields) */
+                    sprintf(__('Configure %s integration.', 'schema-markup-generator'), $pluginLabel)
                 ); ?>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -190,8 +211,8 @@ class IntegrationsTab extends AbstractTab
                         $this->renderToggle(
                             'smg_integrations_settings[acf_auto_discover]',
                             $settings['acf_auto_discover'] ?? true,
-                            __('Auto-discover ACF Fields', 'schema-markup-generator'),
-                            __('Automatically include ACF fields in the field mapping dropdown.', 'schema-markup-generator')
+                            __('Auto-discover Custom Fields', 'schema-markup-generator'),
+                            __('Automatically include custom fields in the field mapping dropdown.', 'schema-markup-generator')
                         );
 
                         $this->renderToggle(
@@ -202,22 +223,26 @@ class IntegrationsTab extends AbstractTab
                         );
                     }, 'dashicons-list-view');
 
-                    $isAcfPro = class_exists('ACF') && defined('ACF_PRO');
-                    $this->renderCard(__('ACF Version', 'schema-markup-generator'), function () use ($isAcfPro) {
+                    $isProVersion = $acfIntegration->isProActive();
+                    $detectedName = $acfIntegration->getDetectedPluginName();
+                    $this->renderCard(__('Plugin Version', 'schema-markup-generator'), function () use ($isProVersion, $detectedName, $pluginLabel) {
                         ?>
                         <div class="flex flex-col gap-4">
-                            <?php if ($isAcfPro): ?>
+                            <?php if ($isProVersion): ?>
                                 <div class="smg-badge smg-badge-success">
                                     <span class="dashicons dashicons-star-filled"></span>
-                                    <?php esc_html_e('ACF Pro', 'schema-markup-generator'); ?>
+                                    <?php
+                                    /* translators: %s: plugin name (ACF/SCF) */
+                                    printf(esc_html__('%s Pro', 'schema-markup-generator'), esc_html($detectedName));
+                                    ?>
                                 </div>
                                 <p><?php esc_html_e('Full support for all field types including repeaters, flexible content, and galleries.', 'schema-markup-generator'); ?></p>
                             <?php else: ?>
                                 <div class="smg-badge smg-badge-info">
                                     <span class="dashicons dashicons-yes"></span>
-                                    <?php esc_html_e('ACF Free', 'schema-markup-generator'); ?>
+                                    <?php echo esc_html($pluginLabel); ?>
                                 </div>
-                                <p><?php esc_html_e('Basic field types are supported. Upgrade to ACF Pro for advanced field support.', 'schema-markup-generator'); ?></p>
+                                <p><?php esc_html_e('Basic field types are supported. Upgrade to Pro for advanced field support.', 'schema-markup-generator'); ?></p>
                             <?php endif; ?>
                         </div>
                         <?php

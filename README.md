@@ -12,7 +12,7 @@ Automatic schema.org structured data generation for WordPress, optimized for sea
 - **16 Schema Types** - Article, Product, Organization, Person, FAQ, HowTo, Event, Recipe, Review, Course, LearningResource and more
 - **Smart Schema Suggestions** - Recommends schema types based on post type names
 - **Property Documentation** - Click any property for detailed description, examples, and schema.org link
-- **ACF Integration** - Full support for Advanced Custom Fields with visual field mapping
+- **Custom Fields Integration** - Full support for ACF and Secure Custom Fields (SCF) with visual field mapping
 - **Rank Math Compatibility** - Prevents duplicate schemas when Rank Math is active
 - **WooCommerce Integration** - Complete WooCommerce product fields available for mapping (40+ fields)
 - **MemberPress Courses Integration** - Automatic Course/Lesson hierarchy for LearningResource schemas
@@ -233,6 +233,12 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - [Metodo.dev](https://metodo.dev)
 
 ## Changelog
+
+### 1.22.1
+- **Improved**: Generic support for ACF and SCF (Secure Custom Fields) - both plugins are now recognized
+- **Improved**: Integration labels adapt to the detected plugin (ACF or SCF)
+- **Removed**: ACF detection notice from Post Types tab (not needed)
+- **Improved**: All UI labels now use generic "Custom Fields" terminology
 
 ### 1.22.0
 - **New**: Complete WooCommerce Integration - 40+ product fields now available for schema mapping

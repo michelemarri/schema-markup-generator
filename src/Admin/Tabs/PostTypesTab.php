@@ -336,13 +336,6 @@ class PostTypesTab extends AbstractTab
                 <?php endforeach; ?>
             </div>
 
-            <?php if ($this->acfIntegration->isAvailable()): ?>
-                <div class="smg-acf-notice">
-                    <span class="dashicons dashicons-yes-alt"></span>
-                    <?php esc_html_e('Advanced Custom Fields detected. ACF fields are available for mapping.', 'schema-markup-generator'); ?>
-                </div>
-            <?php endif; ?>
-
             <!-- Property Details Modal -->
             <div id="smg-property-modal" class="smg-modal" style="display: none;">
                 <div class="smg-modal-overlay"></div>
