@@ -23,13 +23,62 @@ abstract class AbstractSchema implements SchemaInterface
 
     /**
      * Build base schema structure
+     *
+     * Includes additionalType support if mapped. Google, Bing and LLMs require
+     * additionalType to be a full Schema.org URL (e.g., https://schema.org/SomeType).
      */
-    protected function buildBase(WP_Post $post): array
+    protected function buildBase(WP_Post $post, array $mapping = []): array
     {
-        return [
+        $base = [
             '@context' => self::CONTEXT,
             '@type' => $this->getType(),
         ];
+
+        // Add additionalType if mapped (must be full Schema.org URL)
+        $additionalType = $this->getMappedValue($post, $mapping, 'additionalType');
+        if ($additionalType) {
+            // Ensure it's a valid Schema.org URL
+            $additionalType = $this->normalizeAdditionalType($additionalType);
+            if ($additionalType) {
+                $base['additionalType'] = $additionalType;
+            }
+        }
+
+        return $base;
+    }
+
+    /**
+     * Normalize additionalType to a full Schema.org URL
+     *
+     * Google, Bing and LLMs only recognize additionalType when it's a full URL
+     * pointing to a Schema.org type (e.g., https://schema.org/SomeType).
+     *
+     * @param string $value The additionalType value (can be just type name or full URL)
+     * @return string|null The normalized URL or null if invalid
+     */
+    protected function normalizeAdditionalType(string $value): ?string
+    {
+        $value = trim($value);
+
+        if (empty($value)) {
+            return null;
+        }
+
+        // Already a full Schema.org URL
+        if (str_starts_with($value, 'https://schema.org/') || str_starts_with($value, 'http://schema.org/')) {
+            return $value;
+        }
+
+        // Just the type name - convert to full URL
+        // Remove any leading slash
+        $value = ltrim($value, '/');
+
+        // Validate: type names should be PascalCase and contain only letters
+        if (!preg_match('/^[A-Z][a-zA-Z0-9]*$/', $value)) {
+            return null;
+        }
+
+        return 'https://schema.org/' . $value;
     }
 
     /**
@@ -479,10 +528,35 @@ abstract class AbstractSchema implements SchemaInterface
 
     /**
      * Get default property definitions
+     *
+     * Returns base properties available to all schemas.
+     * Child classes should merge their specific properties with parent::getPropertyDefinitions().
      */
     public function getPropertyDefinitions(): array
     {
         return [];
+    }
+
+    /**
+     * Get the additionalType property definition
+     *
+     * This is available to all schema types. additionalType allows specifying
+     * a more specific type from Schema.org vocabulary.
+     *
+     * @return array The additionalType property definition
+     */
+    public static function getAdditionalTypeDefinition(): array
+    {
+        return [
+            'additionalType' => [
+                'type' => 'text',
+                'description' => __('Additional Schema.org type for more specific classification.', 'schema-markup-generator'),
+                'description_long' => __('Specifies an additional, more specific Schema.org type. Google, Bing, and LLMs require this to be a full URL (e.g., https://schema.org/MobileApplication). You can enter just the type name (e.g., MobileApplication) and it will be automatically converted to the full URL.', 'schema-markup-generator'),
+                'example' => __('MobileApplication, EducationalOccupationalProgram, TechArticle, HowToDirection', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/additionalType',
+                'placeholder' => 'https://schema.org/TypeName',
+            ],
+        ];
     }
 }
 

@@ -20,6 +20,7 @@ use Metodo\SchemaMarkupGenerator\Schema\Types\VideoObjectSchema;
 use Metodo\SchemaMarkupGenerator\Schema\Types\CourseSchema;
 use Metodo\SchemaMarkupGenerator\Schema\Types\LearningResourceSchema;
 use Metodo\SchemaMarkupGenerator\Schema\Types\SoftwareAppSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\WebApplicationSchema;
 
 /**
  * Schema Factory
@@ -104,6 +105,7 @@ class SchemaFactory
 
             // Technical
             'SoftwareApplication' => SoftwareAppSchema::class,
+            'WebApplication' => WebApplicationSchema::class,
         ];
 
         foreach ($defaultTypes as $type => $class) {
@@ -239,6 +241,7 @@ class SchemaFactory
             ],
             __('Technical', 'schema-markup-generator') => [
                 'SoftwareApplication' => __('Software Application', 'schema-markup-generator'),
+                'WebApplication' => __('Web Application', 'schema-markup-generator'),
                 'WebSite' => __('Website', 'schema-markup-generator'),
                 'BreadcrumbList' => __('Breadcrumb', 'schema-markup-generator'),
             ],

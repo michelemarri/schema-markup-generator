@@ -34,7 +34,7 @@ class VideoObjectSchema extends AbstractSchema
 
     public function build(WP_Post $post, array $mapping = []): array
     {
-        $data = $this->buildBase($post);
+        $data = $this->buildBase($post, $mapping);
 
         // Core properties
         $data['name'] = html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8');
@@ -362,7 +362,7 @@ class VideoObjectSchema extends AbstractSchema
 
     public function getPropertyDefinitions(): array
     {
-        return [
+        return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
                 'description' => __('Video title. Required for video rich results in Google Search.', 'schema-markup-generator'),
@@ -464,7 +464,7 @@ class VideoObjectSchema extends AbstractSchema
                 'example' => __('true (paid), false (free)', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/requiresSubscription',
             ],
-        ];
+        ]);
     }
 }
 

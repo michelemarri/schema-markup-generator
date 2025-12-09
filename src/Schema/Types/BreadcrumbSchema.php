@@ -34,7 +34,7 @@ class BreadcrumbSchema extends AbstractSchema
 
     public function build(WP_Post $post, array $mapping = []): array
     {
-        $data = $this->buildBase($post);
+        $data = $this->buildBase($post, $mapping);
 
         // Build breadcrumb items
         $data['itemListElement'] = $this->buildBreadcrumbTrail($post);
@@ -258,7 +258,7 @@ class BreadcrumbSchema extends AbstractSchema
 
     public function getPropertyDefinitions(): array
     {
-        return [
+        return array_merge(self::getAdditionalTypeDefinition(), [
             'itemListElement' => [
                 'type' => 'auto',
                 'description' => __('Auto-generated navigation path. Shows clickable breadcrumb trail in Google search results.', 'schema-markup-generator'),

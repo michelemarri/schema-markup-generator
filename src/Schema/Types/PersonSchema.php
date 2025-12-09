@@ -34,7 +34,7 @@ class PersonSchema extends AbstractSchema
 
     public function build(WP_Post $post, array $mapping = []): array
     {
-        $data = $this->buildBase($post);
+        $data = $this->buildBase($post, $mapping);
 
         // Core properties
         $data['name'] = $this->getMappedValue($post, $mapping, 'name')
@@ -168,7 +168,7 @@ class PersonSchema extends AbstractSchema
 
     public function getPropertyDefinitions(): array
     {
-        return [
+        return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
                 'description' => __('Full name. Displayed in author knowledge panels and bylines.', 'schema-markup-generator'),
@@ -241,7 +241,7 @@ class PersonSchema extends AbstractSchema
                 'example' => __('MIT, Harvard Business School, Stanford University, Oxford University', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/alumniOf',
             ],
-        ];
+        ]);
     }
 }
 

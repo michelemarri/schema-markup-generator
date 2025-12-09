@@ -272,6 +272,21 @@
                     }
                 }
             });
+
+            // Open integration settings modal
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.smg-open-integration-modal')) {
+                    this.handleOpenIntegrationModal(e);
+                }
+            });
+
+            // Close integration modal
+            document.addEventListener('click', (e) => {
+                const integrationModal = e.target.closest('.smg-integration-modal');
+                if (integrationModal && (e.target.closest('.smg-modal-close') || e.target.classList.contains('smg-modal-overlay'))) {
+                    this.closeIntegrationModal(integrationModal);
+                }
+            });
         },
 
         /**
@@ -1760,6 +1775,45 @@
                 clearTimeout(timeout);
                 timeout = setTimeout(later, wait);
             };
+        },
+
+        /**
+         * Handle open integration settings modal
+         */
+        handleOpenIntegrationModal(e) {
+            e.preventDefault();
+            const button = e.target.closest('.smg-open-integration-modal');
+            const integration = button?.dataset.integration;
+
+            if (!integration) return;
+
+            const modal = document.getElementById(`smg-integration-modal-${integration}`);
+
+            if (!modal) return;
+
+            // Show modal with animation
+            modal.style.display = 'flex';
+            modal.offsetHeight; // Force reflow
+            modal.classList.add('smg-modal-open');
+
+            // Prevent body scrolling
+            document.body.style.overflow = 'hidden';
+        },
+
+        /**
+         * Close integration modal
+         */
+        closeIntegrationModal(modal) {
+            if (!modal || modal.style.display === 'none') return;
+
+            modal.classList.remove('smg-modal-open');
+
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, this.config.animationDuration);
+
+            // Restore body scrolling
+            document.body.style.overflow = '';
         },
     };
 

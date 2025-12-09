@@ -9,7 +9,8 @@ Automatic schema.org structured data generation for WordPress, optimized for sea
 ## Features
 
 - **Auto-Discovery** - Automatically detects all post types, custom fields, and taxonomies
-- **16 Schema Types** - Article, Product, Organization, Person, FAQ, HowTo, Event, Recipe, Review, Course, LearningResource and more
+- **17 Schema Types** - Article, Product, Organization, Person, FAQ, HowTo, Event, Recipe, Review, Course, LearningResource, WebApplication and more
+- **additionalType Support** - Add more specific Schema.org types to any schema (e.g., add "MobileApplication" to SoftwareApplication)
 - **Smart Schema Suggestions** - Recommends schema types based on post type names
 - **Property Documentation** - Click any property for detailed description, examples, and schema.org link
 - **Custom Fields Integration** - Full support for ACF and Secure Custom Fields (SCF) with visual field mapping
@@ -62,7 +63,7 @@ composer install
 | People & Reviews | Person, Review |
 | Instructional | FAQPage, HowTo, Recipe, Course, LearningResource |
 | Media & Events | Event, VideoObject |
-| Technical | SoftwareApplication, WebSite, BreadcrumbList |
+| Technical | SoftwareApplication, WebApplication, WebSite, BreadcrumbList |
 
 ## Configuration
 
@@ -233,6 +234,18 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - [Metodo.dev](https://metodo.dev)
 
 ## Changelog
+
+### 1.27.0
+- **New**: WebApplication schema type - for web-based applications, SaaS platforms, and online tools
+- **New**: `additionalType` property available on ALL schema types - allows specifying more specific Schema.org types
+- **Note**: `additionalType` is automatically normalized to full Schema.org URL (e.g., "MobileApplication" becomes "https://schema.org/MobileApplication")
+- **Note**: Google, Bing, and LLMs only recognize `additionalType` when it's a full URL pointing to Schema.org
+
+### 1.26.0
+- **New**: Integration settings now accessible via modal dialogs
+- **New**: "Settings" button on each integration card opens a modal with all configuration options
+- **Improved**: Cleaner integrations page - settings are no longer displayed inline below cards
+- **Improved**: Better UX with modal dialogs for Rank Math, ACF/SCF, WooCommerce, and MemberPress Courses settings
 
 ### 1.25.0
 - **New**: Option to completely disable all Rank Math schema output

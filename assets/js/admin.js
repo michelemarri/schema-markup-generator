@@ -1,58 +1,1438 @@
-(()=>{(function(){"use strict";let g={config:{animationDuration:200,toastDuration:3e3,debounceDelay:300},elements:{},init(){this.cacheElements(),this.bindEvents(),this.initComponents(),this.initAnimations()},cacheElements(){this.elements={settingsForm:document.getElementById("smg-settings-form"),tabsNav:document.querySelector(".smg-tabs-nav"),tabContent:document.querySelector(".smg-tab-content"),schemaPreview:document.getElementById("smg-schema-preview"),validationStatus:document.getElementById("smg-validation-status")}},bindEvents(){document.addEventListener("click",e=>{e.target.closest(".smg-toggle-fields")&&this.handleToggleFields(e)}),document.addEventListener("change",e=>{e.target.classList.contains("smg-schema-select")&&this.handleSchemaTypeChange(e)}),document.addEventListener("change",e=>{e.target.classList.contains("smg-schema-type-select")&&this.handleMetaBoxSchemaTypeChange(e)}),document.addEventListener("change",e=>{e.target.classList.contains("smg-field-select")&&this.handleFieldMappingChange(e)}),document.addEventListener("click",e=>{e.target.closest(".smg-toggle-overrides")&&this.handleToggleOverrides(e)}),document.addEventListener("change",e=>{e.target.classList.contains("smg-override-type-radio")&&this.handleOverrideTypeChange(e)}),document.addEventListener("change",e=>{(e.target.classList.contains("smg-override-select")||e.target.classList.contains("smg-override-input")||e.target.classList.contains("smg-override-textarea"))&&this.handleOverrideValueChange(e)}),document.addEventListener("click",e=>{e.target.closest(".smg-open-preview-modal")&&this.handleOpenPreviewModal(e)}),document.addEventListener("click",e=>{let s=document.getElementById("smg-preview-modal");s&&(e.target.closest(".smg-modal-close")||e.target.classList.contains("smg-modal-overlay"))&&s.contains(e.target)&&this.closePreviewModal()}),document.addEventListener("click",e=>{e.target.closest(".smg-refresh-preview")&&this.handleRefreshPreview(e)}),document.addEventListener("click",e=>{e.target.closest(".smg-copy-schema")&&this.handleCopySchema(e)}),document.addEventListener("click",e=>{(e.target.id==="smg-test-google"||e.target.closest("#smg-test-google"))&&this.handleGoogleTest(e)}),document.addEventListener("click",e=>{(e.target.id==="smg-validate-schema"||e.target.closest("#smg-validate-schema"))&&this.handleSchemaValidator(e)}),document.addEventListener("click",e=>{e.target.closest(".smg-property-name")&&this.handlePropertyClick(e)}),document.addEventListener("click",e=>{(e.target.closest(".smg-modal-close")||e.target.classList.contains("smg-modal-overlay"))&&this.closePropertyModal()}),document.addEventListener("keydown",e=>{e.key==="Escape"&&this.closePropertyModal()}),this.elements.settingsForm&&this.elements.settingsForm.addEventListener("submit",e=>{this.handleFormSubmit(e)}),document.addEventListener("change",e=>{e.target.closest(".smg-toggle input")&&this.animateToggle(e.target)}),document.addEventListener("click",e=>{e.target.closest(".smg-apply-suggestion")&&this.handleApplySuggestion(e)}),document.addEventListener("keypress",e=>{e.target.classList.contains("smg-pagination-input")&&e.key==="Enter"&&this.handlePaginationInput(e)}),document.addEventListener("change",e=>{e.target.classList.contains("smg-pagination-input")&&this.handlePaginationInput(e)}),document.addEventListener("click",e=>{e.target.closest(".smg-toggle-password")&&this.handleTogglePassword(e)}),document.addEventListener("click",e=>{e.target.closest("#smg-remove-token")&&this.handleRemoveToken(e)}),document.addEventListener("click",e=>{e.target.closest("#smg-check-updates")&&this.handleCheckUpdates(e)}),document.addEventListener("click",e=>{e.target.closest("#smg-select-logo")&&this.handleSelectLogo(e)}),document.addEventListener("click",e=>{e.target.closest("#smg-remove-logo")&&this.handleRemoveLogo(e)}),document.addEventListener("click",e=>{e.target.closest(".smg-view-example-btn")&&this.handleViewExample(e)}),document.addEventListener("click",e=>{e.target.closest(".smg-copy-example")&&this.handleCopyExample(e)}),document.addEventListener("click",e=>{e.target.closest(".smg-refresh-example")&&this.handleRefreshExample(e)}),document.addEventListener("click",e=>{let s=document.getElementById("smg-example-modal");s&&(e.target.closest(".smg-modal-close")||e.target.classList.contains("smg-modal-overlay"))&&s.contains(e.target)&&this.closeExampleModal()})},initComponents(){this.initPreview(),this.initTooltips(),this.initCollapsibles()},initAnimations(){document.querySelectorAll(".smg-card, .smg-post-type-card, .smg-integration-card, .smg-step").forEach((t,n)=>{t.style.opacity="0",t.style.transform="translateY(10px)",setTimeout(()=>{t.style.transition="opacity 0.3s ease, transform 0.3s ease",t.style.opacity="1",t.style.transform="translateY(0)"},50*n)}),document.querySelectorAll(".smg-schema-item").forEach((t,n)=>{t.style.opacity="0",setTimeout(()=>{t.style.transition="opacity 0.3s ease",t.style.opacity="1"},30*n)}),document.querySelectorAll(".smg-page-row").forEach((t,n)=>{t.style.opacity="0",t.style.transform="translateX(-10px)",setTimeout(()=>{t.style.transition="opacity 0.3s ease, transform 0.3s ease",t.style.opacity="1",t.style.transform="translateX(0)"},30*n)})},handleToggleFields(e){e.preventDefault();let s=e.target.closest(".smg-toggle-fields"),t=s.closest(".smg-post-type-card").querySelector(".smg-post-type-fields"),n=s.getAttribute("aria-expanded")==="true";s.setAttribute("aria-expanded",!n),n?this.slideUp(t):this.slideDown(t)},handlePropertyClick(e){e.preventDefault();let s=e.target.closest(".smg-property-name");if(!s)return;let o=s.dataset.property,t=s.dataset.description,n=s.dataset.example,a=s.dataset.schemaUrl;this.openPropertyModal({name:o,description:t,example:n,schemaUrl:a})},openPropertyModal(e){let s=document.getElementById("smg-property-modal");if(!s)return;let o=s.querySelector(".smg-modal-title"),t=s.querySelector(".smg-modal-description"),n=s.querySelector(".smg-modal-examples"),a=s.querySelector(".smg-examples-list"),i=s.querySelector(".smg-modal-link");if(o&&(o.textContent=e.name||""),t&&(t.textContent=e.description||""),a&&e.example){let r=e.example.split(",").map(l=>l.trim()).filter(l=>l);r.length>0?(a.innerHTML=r.map(l=>`<li><code>${this.escapeHtml(l)}</code></li>`).join(""),n&&(n.style.display="block")):n&&(n.style.display="none")}else n&&(n.style.display="none");i&&(e.schemaUrl?(i.href=e.schemaUrl,i.style.display="inline-flex"):i.style.display="none"),s.style.display="flex",s.offsetHeight,s.classList.add("smg-modal-open"),document.body.style.overflow="hidden"},closePropertyModal(){let e=document.getElementById("smg-property-modal");!e||e.style.display==="none"||(e.classList.remove("smg-modal-open"),setTimeout(()=>{e.style.display="none"},this.config.animationDuration),document.body.style.overflow="")},escapeHtml(e){let s=document.createElement("div");return s.textContent=e,s.innerHTML},async handleSchemaTypeChange(e){let s=e.target,o=s.dataset.postType,t=s.value,n=s.closest(".smg-post-type-card"),a=n.querySelector(".smg-field-mappings");if(a){t?n.classList.add("smg-mapped"):n.classList.remove("smg-mapped"),n.classList.add("smg-saving"),a.style.opacity="0.5",a.innerHTML=`
+(() => {
+  // assets/src/js/admin.js
+  (function() {
+    "use strict";
+    const SMGAdmin = {
+      /**
+       * Configuration
+       */
+      config: {
+        animationDuration: 200,
+        toastDuration: 3e3,
+        debounceDelay: 300
+      },
+      /**
+       * DOM elements cache
+       */
+      elements: {},
+      /**
+       * Initialize the module
+       */
+      init() {
+        this.cacheElements();
+        this.bindEvents();
+        this.initComponents();
+        this.initAnimations();
+      },
+      /**
+       * Cache frequently used DOM elements
+       */
+      cacheElements() {
+        this.elements = {
+          settingsForm: document.getElementById("smg-settings-form"),
+          tabsNav: document.querySelector(".smg-tabs-nav"),
+          tabContent: document.querySelector(".smg-tab-content"),
+          schemaPreview: document.getElementById("smg-schema-preview"),
+          validationStatus: document.getElementById("smg-validation-status")
+        };
+      },
+      /**
+       * Bind event handlers
+       */
+      bindEvents() {
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-toggle-fields")) {
+            this.handleToggleFields(e);
+          }
+        });
+        document.addEventListener("change", (e) => {
+          if (e.target.classList.contains("smg-schema-select")) {
+            this.handleSchemaTypeChange(e);
+          }
+        });
+        document.addEventListener("change", (e) => {
+          if (e.target.classList.contains("smg-schema-type-select")) {
+            this.handleMetaBoxSchemaTypeChange(e);
+          }
+        });
+        document.addEventListener("change", (e) => {
+          if (e.target.classList.contains("smg-field-select")) {
+            this.handleFieldMappingChange(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-toggle-overrides")) {
+            this.handleToggleOverrides(e);
+          }
+        });
+        document.addEventListener("change", (e) => {
+          if (e.target.classList.contains("smg-override-type-radio")) {
+            this.handleOverrideTypeChange(e);
+          }
+        });
+        document.addEventListener("change", (e) => {
+          if (e.target.classList.contains("smg-override-select") || e.target.classList.contains("smg-override-input") || e.target.classList.contains("smg-override-textarea")) {
+            this.handleOverrideValueChange(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-open-preview-modal")) {
+            this.handleOpenPreviewModal(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          const previewModal = document.getElementById("smg-preview-modal");
+          if (previewModal && (e.target.closest(".smg-modal-close") || e.target.classList.contains("smg-modal-overlay"))) {
+            if (previewModal.contains(e.target)) {
+              this.closePreviewModal();
+            }
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-refresh-preview")) {
+            this.handleRefreshPreview(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-copy-schema")) {
+            this.handleCopySchema(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.id === "smg-test-google" || e.target.closest("#smg-test-google")) {
+            this.handleGoogleTest(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.id === "smg-validate-schema" || e.target.closest("#smg-validate-schema")) {
+            this.handleSchemaValidator(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-property-name")) {
+            this.handlePropertyClick(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-modal-close") || e.target.classList.contains("smg-modal-overlay")) {
+            this.closePropertyModal();
+          }
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") {
+            this.closePropertyModal();
+          }
+        });
+        if (this.elements.settingsForm) {
+          this.elements.settingsForm.addEventListener("submit", (e) => {
+            this.handleFormSubmit(e);
+          });
+        }
+        document.addEventListener("change", (e) => {
+          if (e.target.closest(".smg-toggle input")) {
+            this.animateToggle(e.target);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-apply-suggestion")) {
+            this.handleApplySuggestion(e);
+          }
+        });
+        document.addEventListener("keypress", (e) => {
+          if (e.target.classList.contains("smg-pagination-input") && e.key === "Enter") {
+            this.handlePaginationInput(e);
+          }
+        });
+        document.addEventListener("change", (e) => {
+          if (e.target.classList.contains("smg-pagination-input")) {
+            this.handlePaginationInput(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-toggle-password")) {
+            this.handleTogglePassword(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest("#smg-remove-token")) {
+            this.handleRemoveToken(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest("#smg-check-updates")) {
+            this.handleCheckUpdates(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest("#smg-select-logo")) {
+            this.handleSelectLogo(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest("#smg-remove-logo")) {
+            this.handleRemoveLogo(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-view-example-btn")) {
+            this.handleViewExample(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-copy-example")) {
+            this.handleCopyExample(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-refresh-example")) {
+            this.handleRefreshExample(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          const modal = document.getElementById("smg-example-modal");
+          if (modal && (e.target.closest(".smg-modal-close") || e.target.classList.contains("smg-modal-overlay"))) {
+            if (modal.contains(e.target)) {
+              this.closeExampleModal();
+            }
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (e.target.closest(".smg-open-integration-modal")) {
+            this.handleOpenIntegrationModal(e);
+          }
+        });
+        document.addEventListener("click", (e) => {
+          const integrationModal = e.target.closest(".smg-integration-modal");
+          if (integrationModal && (e.target.closest(".smg-modal-close") || e.target.classList.contains("smg-modal-overlay"))) {
+            this.closeIntegrationModal(integrationModal);
+          }
+        });
+      },
+      /**
+       * Initialize UI components
+       */
+      initComponents() {
+        this.initPreview();
+        this.initTooltips();
+        this.initCollapsibles();
+      },
+      /**
+       * Initialize staggered animations for list items
+       */
+      initAnimations() {
+        const cards = document.querySelectorAll(".smg-card, .smg-post-type-card, .smg-integration-card, .smg-step");
+        cards.forEach((card, index) => {
+          card.style.opacity = "0";
+          card.style.transform = "translateY(10px)";
+          setTimeout(() => {
+            card.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+            card.style.opacity = "1";
+            card.style.transform = "translateY(0)";
+          }, 50 * index);
+        });
+        const schemaItems = document.querySelectorAll(".smg-schema-item");
+        schemaItems.forEach((item, index) => {
+          item.style.opacity = "0";
+          setTimeout(() => {
+            item.style.transition = "opacity 0.3s ease";
+            item.style.opacity = "1";
+          }, 30 * index);
+        });
+        const pageRows = document.querySelectorAll(".smg-page-row");
+        pageRows.forEach((row, index) => {
+          row.style.opacity = "0";
+          row.style.transform = "translateX(-10px)";
+          setTimeout(() => {
+            row.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+            row.style.opacity = "1";
+            row.style.transform = "translateX(0)";
+          }, 30 * index);
+        });
+      },
+      /**
+       * Handle toggle fields button click
+       */
+      handleToggleFields(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-toggle-fields");
+        const card = button.closest(".smg-post-type-card");
+        const fields = card.querySelector(".smg-post-type-fields");
+        const isExpanded = button.getAttribute("aria-expanded") === "true";
+        button.setAttribute("aria-expanded", !isExpanded);
+        if (isExpanded) {
+          this.slideUp(fields);
+        } else {
+          this.slideDown(fields);
+        }
+      },
+      /**
+       * Handle property name click - Opens the property details modal
+       */
+      handlePropertyClick(e) {
+        e.preventDefault();
+        const link = e.target.closest(".smg-property-name");
+        if (!link)
+          return;
+        const propertyName = link.dataset.property;
+        const description = link.dataset.description;
+        const example = link.dataset.example;
+        const schemaUrl = link.dataset.schemaUrl;
+        this.openPropertyModal({
+          name: propertyName,
+          description,
+          example,
+          schemaUrl
+        });
+      },
+      /**
+       * Open the property details modal
+       */
+      openPropertyModal(data) {
+        const modal = document.getElementById("smg-property-modal");
+        if (!modal)
+          return;
+        const titleEl = modal.querySelector(".smg-modal-title");
+        const descriptionEl = modal.querySelector(".smg-modal-description");
+        const examplesEl = modal.querySelector(".smg-modal-examples");
+        const examplesList = modal.querySelector(".smg-examples-list");
+        const linkEl = modal.querySelector(".smg-modal-link");
+        if (titleEl) {
+          titleEl.textContent = data.name || "";
+        }
+        if (descriptionEl) {
+          descriptionEl.textContent = data.description || "";
+        }
+        if (examplesList && data.example) {
+          const examples = data.example.split(",").map((ex) => ex.trim()).filter((ex) => ex);
+          if (examples.length > 0) {
+            examplesList.innerHTML = examples.map((ex) => `<li><code>${this.escapeHtml(ex)}</code></li>`).join("");
+            if (examplesEl)
+              examplesEl.style.display = "block";
+          } else {
+            if (examplesEl)
+              examplesEl.style.display = "none";
+          }
+        } else {
+          if (examplesEl)
+            examplesEl.style.display = "none";
+        }
+        if (linkEl) {
+          if (data.schemaUrl) {
+            linkEl.href = data.schemaUrl;
+            linkEl.style.display = "inline-flex";
+          } else {
+            linkEl.style.display = "none";
+          }
+        }
+        modal.style.display = "flex";
+        modal.offsetHeight;
+        modal.classList.add("smg-modal-open");
+        document.body.style.overflow = "hidden";
+      },
+      /**
+       * Close the property details modal
+       */
+      closePropertyModal() {
+        const modal = document.getElementById("smg-property-modal");
+        if (!modal || modal.style.display === "none")
+          return;
+        modal.classList.remove("smg-modal-open");
+        setTimeout(() => {
+          modal.style.display = "none";
+        }, this.config.animationDuration);
+        document.body.style.overflow = "";
+      },
+      /**
+       * Escape HTML special characters
+       */
+      escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      },
+      /**
+       * Handle schema type change
+       * 
+       * Dynamically loads field mappings and auto-saves when schema type changes
+       */
+      async handleSchemaTypeChange(e) {
+        const select = e.target;
+        const postType = select.dataset.postType;
+        const schemaType = select.value;
+        const card = select.closest(".smg-post-type-card");
+        const fieldsContainer = card.querySelector(".smg-field-mappings");
+        if (!fieldsContainer)
+          return;
+        if (schemaType) {
+          card.classList.add("smg-mapped");
+        } else {
+          card.classList.remove("smg-mapped");
+        }
+        card.classList.add("smg-saving");
+        fieldsContainer.style.opacity = "0.5";
+        fieldsContainer.innerHTML = `
                 <div class="smg-loading-fields">
                     <span class="dashicons dashicons-update smg-spin"></span>
-                    ${typeof smgAdmin<"u"&&smgAdmin.strings?.loading?smgAdmin.strings.loading:"Loading..."}
+                    ${typeof smgAdmin !== "undefined" && smgAdmin.strings?.loading ? smgAdmin.strings.loading : "Loading..."}
                 </div>
-            `;try{await this.saveSchemaMapping(o,t);let i=await this.fetchSchemaProperties(o,t);if(i.success&&i.data.html){a.innerHTML=i.data.html,a.style.opacity="1",a.querySelectorAll(".smg-mapping-row").forEach((m,c)=>{m.style.opacity="0",m.style.transform="translateY(10px)",setTimeout(()=>{m.style.transition="opacity 0.3s ease, transform 0.3s ease",m.style.opacity="1",m.style.transform="translateY(0)"},50*c)});let l=n.querySelector(".smg-post-type-fields"),d=n.querySelector(".smg-toggle-fields");l&&l.style.display==="none"&&t&&(this.slideDown(l),d&&d.setAttribute("aria-expanded","true")),this.showToast(typeof smgAdmin<"u"&&smgAdmin.strings?.saved?smgAdmin.strings.saved:"Saved","success")}else a.innerHTML=`
+            `;
+        try {
+          await this.saveSchemaMapping(postType, schemaType);
+          const response = await this.fetchSchemaProperties(postType, schemaType);
+          if (response.success && response.data.html) {
+            fieldsContainer.innerHTML = response.data.html;
+            fieldsContainer.style.opacity = "1";
+            const rows = fieldsContainer.querySelectorAll(".smg-mapping-row");
+            rows.forEach((row, index) => {
+              row.style.opacity = "0";
+              row.style.transform = "translateY(10px)";
+              setTimeout(() => {
+                row.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+                row.style.opacity = "1";
+                row.style.transform = "translateY(0)";
+              }, 50 * index);
+            });
+            const fieldsSection = card.querySelector(".smg-post-type-fields");
+            const toggleButton = card.querySelector(".smg-toggle-fields");
+            if (fieldsSection && fieldsSection.style.display === "none" && schemaType) {
+              this.slideDown(fieldsSection);
+              if (toggleButton) {
+                toggleButton.setAttribute("aria-expanded", "true");
+              }
+            }
+            this.showToast(
+              typeof smgAdmin !== "undefined" && smgAdmin.strings?.saved ? smgAdmin.strings.saved : "Saved",
+              "success"
+            );
+          } else {
+            fieldsContainer.innerHTML = `
                         <p class="smg-notice">
                             <span class="dashicons dashicons-warning"></span>
-                            ${i.data?.message||"Failed to load schema properties"}
+                            ${response.data?.message || "Failed to load schema properties"}
                         </p>
-                    `,a.style.opacity="1"}catch(i){console.error("Failed to save/load schema:",i),a.innerHTML=`
+                    `;
+            fieldsContainer.style.opacity = "1";
+          }
+        } catch (error) {
+          console.error("Failed to save/load schema:", error);
+          fieldsContainer.innerHTML = `
                     <p class="smg-notice">
                         <span class="dashicons dashicons-warning"></span>
                         Failed to save. Please try again.
                     </p>
-                `,a.style.opacity="1",this.showToast(typeof smgAdmin<"u"&&smgAdmin.strings?.saveFailed?smgAdmin.strings.saveFailed:"Failed to save","error")}finally{n.classList.remove("smg-saving")}}},async handleFieldMappingChange(e){let s=e.target,t=s.closest(".smg-post-type-card")?.dataset.postType;if(!t)return;let n=s.name.match(/smg_field_mappings\[([^\]]+)\]\[([^\]]+)\]/);if(!n)return;let a=n[2],i=s.value,r=s.closest(".smg-mapping-row, tr");r&&r.classList.add("smg-saving");try{await this.saveFieldMapping(t,a,i),r&&(r.classList.remove("smg-saving"),r.classList.add("smg-saved"),setTimeout(()=>{r.classList.remove("smg-saved")},1500)),this.showToast(typeof smgAdmin<"u"&&smgAdmin.strings?.saved?smgAdmin.strings.saved:"Saved","success")}catch(l){console.error("Failed to save field mapping:",l),r&&r.classList.remove("smg-saving"),this.showToast(typeof smgAdmin<"u"&&smgAdmin.strings?.saveFailed?smgAdmin.strings.saveFailed:"Failed to save","error")}},saveSchemaMapping(e,s){return new Promise((o,t)=>{let n=new FormData;n.append("action","smg_save_schema_mapping"),n.append("nonce",typeof smgAdmin<"u"?smgAdmin.nonce:""),n.append("post_type",e),n.append("schema_type",s),fetch(typeof smgAdmin<"u"?smgAdmin.ajaxUrl:ajaxurl,{method:"POST",body:n,credentials:"same-origin"}).then(a=>a.json()).then(a=>{a.success?o(a):t(new Error(a.data?.message||"Save failed"))}).catch(a=>t(a))})},saveFieldMapping(e,s,o){return new Promise((t,n)=>{let a=new FormData;a.append("action","smg_save_field_mapping"),a.append("nonce",typeof smgAdmin<"u"?smgAdmin.nonce:""),a.append("post_type",e),a.append("property",s),a.append("field_key",o),fetch(typeof smgAdmin<"u"?smgAdmin.ajaxUrl:ajaxurl,{method:"POST",body:a,credentials:"same-origin"}).then(i=>i.json()).then(i=>{i.success?t(i):n(new Error(i.data?.message||"Save failed"))}).catch(i=>n(i))})},fetchSchemaProperties(e,s){return new Promise((o,t)=>{let n=new FormData;n.append("action","smg_get_schema_properties"),n.append("nonce",typeof smgAdmin<"u"?smgAdmin.nonce:""),n.append("post_type",e),n.append("schema_type",s),fetch(typeof smgAdmin<"u"?smgAdmin.ajaxUrl:ajaxurl,{method:"POST",body:n,credentials:"same-origin"}).then(a=>a.json()).then(a=>o(a)).catch(a=>t(a))})},initPreview(){this.elements.schemaPreview&&typeof smgAdmin<"u"&&this.validateCurrentSchema()},async handleRefreshPreview(e){e.preventDefault();let s=e.target.closest(".smg-refresh-preview"),o=document.querySelector('input[name="smg_post_id"]');if(!o)return;let t=o.value;s.disabled=!0,s.classList.add("loading"),this.elements.schemaPreview.style.opacity="0.5";try{let n=await this.fetchPreview(t);n.success&&(this.elements.schemaPreview.textContent=n.data.json,this.showValidation(n.data.validation),this.elements.schemaPreview.style.transition="opacity 0.3s ease",this.elements.schemaPreview.style.opacity="1")}catch(n){console.error("Preview refresh failed:",n),this.showToast("Failed to refresh preview","error")}finally{s.disabled=!1,s.classList.remove("loading")}},fetchPreview(e){return new Promise((s,o)=>{let t=new FormData;t.append("action","smg_preview_schema"),t.append("nonce",smgAdmin.nonce),t.append("post_id",e),fetch(smgAdmin.ajaxUrl,{method:"POST",body:t,credentials:"same-origin"}).then(n=>n.json()).then(n=>s(n)).catch(n=>o(n))})},async validateCurrentSchema(){let e=document.querySelector('input[name="smg_post_id"]');if(!(!e||!this.elements.schemaPreview))try{let s=await this.fetchPreview(e.value);s.success&&s.data.validation&&this.showValidation(s.data.validation)}catch(s){console.error("Validation failed:",s)}},showValidation(e){if(!e||!this.elements.validationStatus)return;let s="";e.valid?s=`
+                `;
+          fieldsContainer.style.opacity = "1";
+          this.showToast(
+            typeof smgAdmin !== "undefined" && smgAdmin.strings?.saveFailed ? smgAdmin.strings.saveFailed : "Failed to save",
+            "error"
+          );
+        } finally {
+          card.classList.remove("smg-saving");
+        }
+      },
+      /**
+       * Handle field mapping change
+       * 
+       * Auto-saves field mapping when selection changes
+       */
+      async handleFieldMappingChange(e) {
+        const select = e.target;
+        const card = select.closest(".smg-post-type-card");
+        const postType = card?.dataset.postType;
+        if (!postType)
+          return;
+        const nameMatch = select.name.match(/smg_field_mappings\[([^\]]+)\]\[([^\]]+)\]/);
+        if (!nameMatch)
+          return;
+        const property = nameMatch[2];
+        const fieldKey = select.value;
+        const row = select.closest(".smg-mapping-row, tr");
+        if (row) {
+          row.classList.add("smg-saving");
+        }
+        try {
+          await this.saveFieldMapping(postType, property, fieldKey);
+          if (row) {
+            row.classList.remove("smg-saving");
+            row.classList.add("smg-saved");
+            setTimeout(() => {
+              row.classList.remove("smg-saved");
+            }, 1500);
+          }
+          this.showToast(
+            typeof smgAdmin !== "undefined" && smgAdmin.strings?.saved ? smgAdmin.strings.saved : "Saved",
+            "success"
+          );
+        } catch (error) {
+          console.error("Failed to save field mapping:", error);
+          if (row) {
+            row.classList.remove("smg-saving");
+          }
+          this.showToast(
+            typeof smgAdmin !== "undefined" && smgAdmin.strings?.saveFailed ? smgAdmin.strings.saveFailed : "Failed to save",
+            "error"
+          );
+        }
+      },
+      /**
+       * Save schema mapping via AJAX
+       */
+      saveSchemaMapping(postType, schemaType) {
+        return new Promise((resolve, reject) => {
+          const formData = new FormData();
+          formData.append("action", "smg_save_schema_mapping");
+          formData.append("nonce", typeof smgAdmin !== "undefined" ? smgAdmin.nonce : "");
+          formData.append("post_type", postType);
+          formData.append("schema_type", schemaType);
+          fetch(typeof smgAdmin !== "undefined" ? smgAdmin.ajaxUrl : ajaxurl, {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+          }).then((response) => response.json()).then((data) => {
+            if (data.success) {
+              resolve(data);
+            } else {
+              reject(new Error(data.data?.message || "Save failed"));
+            }
+          }).catch((error) => reject(error));
+        });
+      },
+      /**
+       * Save field mapping via AJAX
+       */
+      saveFieldMapping(postType, property, fieldKey) {
+        return new Promise((resolve, reject) => {
+          const formData = new FormData();
+          formData.append("action", "smg_save_field_mapping");
+          formData.append("nonce", typeof smgAdmin !== "undefined" ? smgAdmin.nonce : "");
+          formData.append("post_type", postType);
+          formData.append("property", property);
+          formData.append("field_key", fieldKey);
+          fetch(typeof smgAdmin !== "undefined" ? smgAdmin.ajaxUrl : ajaxurl, {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+          }).then((response) => response.json()).then((data) => {
+            if (data.success) {
+              resolve(data);
+            } else {
+              reject(new Error(data.data?.message || "Save failed"));
+            }
+          }).catch((error) => reject(error));
+        });
+      },
+      /**
+       * Fetch schema properties via AJAX
+       */
+      fetchSchemaProperties(postType, schemaType) {
+        return new Promise((resolve, reject) => {
+          const formData = new FormData();
+          formData.append("action", "smg_get_schema_properties");
+          formData.append("nonce", typeof smgAdmin !== "undefined" ? smgAdmin.nonce : "");
+          formData.append("post_type", postType);
+          formData.append("schema_type", schemaType);
+          fetch(typeof smgAdmin !== "undefined" ? smgAdmin.ajaxUrl : ajaxurl, {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+          }).then((response) => response.json()).then((data) => resolve(data)).catch((error) => reject(error));
+        });
+      },
+      /**
+       * Initialize preview functionality
+       */
+      initPreview() {
+        if (this.elements.schemaPreview && typeof smgAdmin !== "undefined") {
+          this.validateCurrentSchema();
+        }
+      },
+      /**
+       * Handle refresh preview
+       */
+      async handleRefreshPreview(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-refresh-preview");
+        const postIdInput = document.querySelector('input[name="smg_post_id"]');
+        if (!postIdInput)
+          return;
+        const postId = postIdInput.value;
+        button.disabled = true;
+        button.classList.add("loading");
+        this.elements.schemaPreview.style.opacity = "0.5";
+        try {
+          const response = await this.fetchPreview(postId);
+          if (response.success) {
+            this.elements.schemaPreview.textContent = response.data.json;
+            this.showValidation(response.data.validation);
+            this.elements.schemaPreview.style.transition = "opacity 0.3s ease";
+            this.elements.schemaPreview.style.opacity = "1";
+          }
+        } catch (error) {
+          console.error("Preview refresh failed:", error);
+          this.showToast("Failed to refresh preview", "error");
+        } finally {
+          button.disabled = false;
+          button.classList.remove("loading");
+        }
+      },
+      /**
+       * Fetch preview via AJAX
+       */
+      fetchPreview(postId) {
+        return new Promise((resolve, reject) => {
+          const formData = new FormData();
+          formData.append("action", "smg_preview_schema");
+          formData.append("nonce", smgAdmin.nonce);
+          formData.append("post_id", postId);
+          fetch(smgAdmin.ajaxUrl, {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+          }).then((response) => response.json()).then((data) => resolve(data)).catch((error) => reject(error));
+        });
+      },
+      /**
+       * Validate current schema
+       */
+      async validateCurrentSchema() {
+        const postIdInput = document.querySelector('input[name="smg_post_id"]');
+        if (!postIdInput || !this.elements.schemaPreview)
+          return;
+        try {
+          const response = await this.fetchPreview(postIdInput.value);
+          if (response.success && response.data.validation) {
+            this.showValidation(response.data.validation);
+          }
+        } catch (error) {
+          console.error("Validation failed:", error);
+        }
+      },
+      /**
+       * Show validation status
+       */
+      showValidation(validation) {
+        if (!validation || !this.elements.validationStatus)
+          return;
+        let html = "";
+        if (validation.valid) {
+          html = `
                     <div class="smg-validation-status valid smg-animate-fade-in">
                         <span class="dashicons dashicons-yes-alt"></span>
                         ${smgAdmin.strings.valid}
                     </div>
-                `:s=`
+                `;
+        } else {
+          html = `
                     <div class="smg-validation-status invalid smg-animate-fade-in">
                         <span class="dashicons dashicons-warning"></span>
                         ${smgAdmin.strings.invalid}
-                        ${e.errors&&e.errors.length?`
+                        ${validation.errors && validation.errors.length ? `
                             <ul>
-                                ${e.errors.map(o=>`<li>${o}</li>`).join("")}
+                                ${validation.errors.map((error) => `<li>${error}</li>`).join("")}
                             </ul>
-                        `:""}
+                        ` : ""}
                     </div>
-                `,e.warnings&&e.warnings.length&&(s+=`
+                `;
+        }
+        if (validation.warnings && validation.warnings.length) {
+          html += `
                     <div class="smg-validation-warnings smg-animate-fade-in">
                         <strong>Warnings:</strong>
                         <ul>
-                            ${e.warnings.map(o=>`<li>${o}</li>`).join("")}
+                            ${validation.warnings.map((warning) => `<li>${warning}</li>`).join("")}
                         </ul>
                     </div>
-                `),this.elements.validationStatus.innerHTML=s},async handleCopySchema(e){e.preventDefault();let s=e.target.closest(".smg-copy-schema"),o=this.elements.schemaPreview?.textContent;if(o)try{await navigator.clipboard.writeText(o);let t=s.innerHTML;s.innerHTML='<span class="dashicons dashicons-yes"></span> '+smgAdmin.strings.copied,s.classList.add("smg-btn-success"),setTimeout(()=>{s.innerHTML=t,s.classList.remove("smg-btn-success")},2e3),this.showToast(smgAdmin.strings.copied,"success")}catch(t){console.error("Copy failed:",t),this.showToast("Failed to copy","error")}},handleGoogleTest(e){e.preventDefault();let o=document.getElementById("smg-test-url")?.value||window.location.origin,t=`https://search.google.com/test/rich-results?url=${encodeURIComponent(o)}`;window.open(t,"_blank","noopener,noreferrer")},handleSchemaValidator(e){e.preventDefault();let o=document.getElementById("smg-validate-url")?.value||window.location.origin,t=`https://validator.schema.org/?url=${encodeURIComponent(o)}`;window.open(t,"_blank","noopener,noreferrer")},handleFormSubmit(e){let s=this.elements.settingsForm.querySelector('[type="submit"]');s&&s.classList.add("loading")},handleApplySuggestion(e){e.preventDefault();let s=e.target.closest(".smg-apply-suggestion"),o=s.dataset.pageId,t=s.dataset.schema,n=document.querySelector(`select[name="smg_page_mappings[${o}]"]`);if(n&&t){n.value=t;let a=s.closest(".smg-page-row");a.style.transition="background-color 0.3s ease",a.style.backgroundColor="var(--smg-success-50)",setTimeout(()=>{a.style.backgroundColor=""},1e3);let i=s.closest(".smg-col-suggestion");i.innerHTML=`
+                `;
+        }
+        this.elements.validationStatus.innerHTML = html;
+      },
+      /**
+       * Handle copy schema
+       */
+      async handleCopySchema(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-copy-schema");
+        const schema = this.elements.schemaPreview?.textContent;
+        if (!schema)
+          return;
+        try {
+          await navigator.clipboard.writeText(schema);
+          const originalHtml = button.innerHTML;
+          button.innerHTML = '<span class="dashicons dashicons-yes"></span> ' + smgAdmin.strings.copied;
+          button.classList.add("smg-btn-success");
+          setTimeout(() => {
+            button.innerHTML = originalHtml;
+            button.classList.remove("smg-btn-success");
+          }, 2e3);
+          this.showToast(smgAdmin.strings.copied, "success");
+        } catch (error) {
+          console.error("Copy failed:", error);
+          this.showToast("Failed to copy", "error");
+        }
+      },
+      /**
+       * Handle Google test
+       */
+      handleGoogleTest(e) {
+        e.preventDefault();
+        const urlInput = document.getElementById("smg-test-url");
+        const url = urlInput?.value || window.location.origin;
+        const testUrl = `https://search.google.com/test/rich-results?url=${encodeURIComponent(url)}`;
+        window.open(testUrl, "_blank", "noopener,noreferrer");
+      },
+      /**
+       * Handle Schema validator
+       */
+      handleSchemaValidator(e) {
+        e.preventDefault();
+        const urlInput = document.getElementById("smg-validate-url");
+        const url = urlInput?.value || window.location.origin;
+        const testUrl = `https://validator.schema.org/?url=${encodeURIComponent(url)}`;
+        window.open(testUrl, "_blank", "noopener,noreferrer");
+      },
+      /**
+       * Handle form submit
+       */
+      handleFormSubmit(e) {
+        const submitBtn = this.elements.settingsForm.querySelector('[type="submit"]');
+        if (submitBtn) {
+          submitBtn.classList.add("loading");
+        }
+      },
+      /**
+       * Handle apply suggestion button click (Pages tab)
+       */
+      handleApplySuggestion(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-apply-suggestion");
+        const pageId = button.dataset.pageId;
+        const schema = button.dataset.schema;
+        const select = document.querySelector(`select[name="smg_page_mappings[${pageId}]"]`);
+        if (select && schema) {
+          select.value = schema;
+          const row = button.closest(".smg-page-row");
+          row.style.transition = "background-color 0.3s ease";
+          row.style.backgroundColor = "var(--smg-success-50)";
+          setTimeout(() => {
+            row.style.backgroundColor = "";
+          }, 1e3);
+          const cell = button.closest(".smg-col-suggestion");
+          cell.innerHTML = `
                     <span class="smg-suggestion-applied">
                         <span class="dashicons dashicons-yes-alt"></span>
                     </span>
-                `,n.dispatchEvent(new Event("change",{bubbles:!0}))}},handlePaginationInput(e){e.preventDefault();let s=e.target,o=s.dataset.baseUrl,t=parseInt(s.value,10),n=parseInt(s.max,10);t&&t>=1&&t<=n&&o&&(window.location.href=`${o}&paged=${t}`)},handleTogglePassword(e){e.preventDefault();let s=e.target.closest(".smg-toggle-password"),o=s.dataset.target,t=document.getElementById(o),n=s.querySelector(".dashicons");t&&(t.type==="password"?(t.type="text",n.classList.remove("dashicons-visibility"),n.classList.add("dashicons-hidden")):(t.type="password",n.classList.remove("dashicons-hidden"),n.classList.add("dashicons-visibility")))},handleRemoveToken(e){if(e.preventDefault(),!confirm("Are you sure you want to remove the GitHub token?"))return;let s=document.getElementById("smg_github_token");if(s){s.value="";let o=document.querySelector(".smg-token-status");o&&o.remove();let t=document.getElementById("smg-remove-token");t&&(t.style.display="none"),this.showToast("Token will be removed when you save settings","info")}},async handleCheckUpdates(e){e.preventDefault();let s=e.target.closest("#smg-check-updates"),o=document.getElementById("smg-update-result");s.disabled=!0;let t=s.innerHTML;s.innerHTML='<span class="dashicons dashicons-update smg-spin"></span> Checking...',o&&(o.style.display="none");try{let n=new FormData;n.append("action","smg_check_updates"),n.append("nonce",typeof smgAdmin<"u"?smgAdmin.nonce:"");let i=await(await fetch(typeof smgAdmin<"u"?smgAdmin.ajaxUrl:ajaxurl,{method:"POST",body:n,credentials:"same-origin"})).json();o&&(o.style.display="block",i.success?i.data.update_available?(o.className="smg-update-result smg-result-success",o.innerHTML=`
+                `;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      },
+      /**
+       * Handle pagination input (Pages tab)
+       */
+      handlePaginationInput(e) {
+        e.preventDefault();
+        const input = e.target;
+        const baseUrl = input.dataset.baseUrl;
+        const page = parseInt(input.value, 10);
+        const max = parseInt(input.max, 10);
+        if (page && page >= 1 && page <= max && baseUrl) {
+          window.location.href = `${baseUrl}&paged=${page}`;
+        }
+      },
+      /**
+       * Handle toggle password visibility (Update tab)
+       */
+      handleTogglePassword(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-toggle-password");
+        const targetId = button.dataset.target;
+        const input = document.getElementById(targetId);
+        const icon = button.querySelector(".dashicons");
+        if (!input)
+          return;
+        if (input.type === "password") {
+          input.type = "text";
+          icon.classList.remove("dashicons-visibility");
+          icon.classList.add("dashicons-hidden");
+        } else {
+          input.type = "password";
+          icon.classList.remove("dashicons-hidden");
+          icon.classList.add("dashicons-visibility");
+        }
+      },
+      /**
+       * Handle remove token (Update tab)
+       */
+      handleRemoveToken(e) {
+        e.preventDefault();
+        if (!confirm("Are you sure you want to remove the GitHub token?")) {
+          return;
+        }
+        const tokenInput = document.getElementById("smg_github_token");
+        if (tokenInput) {
+          tokenInput.value = "";
+          const statusElement = document.querySelector(".smg-token-status");
+          if (statusElement) {
+            statusElement.remove();
+          }
+          const removeButton = document.getElementById("smg-remove-token");
+          if (removeButton) {
+            removeButton.style.display = "none";
+          }
+          this.showToast("Token will be removed when you save settings", "info");
+        }
+      },
+      /**
+       * Handle check for updates (Update tab)
+       */
+      async handleCheckUpdates(e) {
+        e.preventDefault();
+        const button = e.target.closest("#smg-check-updates");
+        const resultDiv = document.getElementById("smg-update-result");
+        button.disabled = true;
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<span class="dashicons dashicons-update smg-spin"></span> Checking...';
+        if (resultDiv) {
+          resultDiv.style.display = "none";
+        }
+        try {
+          const formData = new FormData();
+          formData.append("action", "smg_check_updates");
+          formData.append("nonce", typeof smgAdmin !== "undefined" ? smgAdmin.nonce : "");
+          const response = await fetch(typeof smgAdmin !== "undefined" ? smgAdmin.ajaxUrl : ajaxurl, {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+          });
+          const data = await response.json();
+          if (resultDiv) {
+            resultDiv.style.display = "block";
+            if (data.success) {
+              if (data.data.update_available) {
+                resultDiv.className = "smg-update-result smg-result-success";
+                resultDiv.innerHTML = `
                                 <span class="dashicons dashicons-yes-alt"></span>
-                                New version available: <strong>${i.data.new_version}</strong>
-                                <a href="${i.data.update_url}" class="smg-btn smg-btn-sm smg-btn-primary" style="margin-left: 10px;">Update Now</a>
-                            `):(o.className="smg-update-result smg-result-info",o.innerHTML=`
+                                New version available: <strong>${data.data.new_version}</strong>
+                                <a href="${data.data.update_url}" class="smg-btn smg-btn-sm smg-btn-primary" style="margin-left: 10px;">Update Now</a>
+                            `;
+              } else {
+                resultDiv.className = "smg-update-result smg-result-info";
+                resultDiv.innerHTML = `
                                 <span class="dashicons dashicons-yes"></span>
                                 You have the latest version installed.
-                            `):(o.className="smg-update-result smg-result-error",o.innerHTML=`
+                            `;
+              }
+            } else {
+              resultDiv.className = "smg-update-result smg-result-error";
+              resultDiv.innerHTML = `
                             <span class="dashicons dashicons-warning"></span>
-                            ${i.data?.message||"Could not check for updates."}
-                        `))}catch(n){console.error("Update check failed:",n),o&&(o.style.display="block",o.className="smg-update-result smg-result-error",o.innerHTML=`
+                            ${data.data?.message || "Could not check for updates."}
+                        `;
+            }
+          }
+        } catch (error) {
+          console.error("Update check failed:", error);
+          if (resultDiv) {
+            resultDiv.style.display = "block";
+            resultDiv.className = "smg-update-result smg-result-error";
+            resultDiv.innerHTML = `
                         <span class="dashicons dashicons-warning"></span>
                         Failed to check for updates. Please try again.
-                    `)}finally{s.disabled=!1,s.innerHTML=t}},animateToggle(e){let s=e.closest(".smg-toggle");s&&(s.style.transform="scale(0.95)",setTimeout(()=>{s.style.transform="scale(1)"},100))},initTooltips(){},initCollapsibles(){document.querySelectorAll(".smg-meta-box-panel-header").forEach(e=>{e.addEventListener("click",()=>{e.closest(".smg-meta-box-panel").classList.toggle("collapsed")})})},slideUp(e){e.style.height=e.scrollHeight+"px",e.offsetHeight,e.style.transition=`height ${this.config.animationDuration}ms ease`,e.style.height="0",e.style.overflow="hidden",setTimeout(()=>{e.style.display="none",e.style.height="",e.style.overflow="",e.style.transition=""},this.config.animationDuration)},slideDown(e){e.style.display="block",e.style.height="0",e.style.overflow="hidden",e.offsetHeight;let s=e.scrollHeight;e.style.transition=`height ${this.config.animationDuration}ms ease`,e.style.height=s+"px",setTimeout(()=>{e.style.height="",e.style.overflow="",e.style.transition=""},this.config.animationDuration)},async handleViewExample(e){e.preventDefault();let s=e.target.closest(".smg-view-example-btn"),o=s.dataset.postType,a=s.closest(".smg-post-type-card")?.querySelector(".smg-schema-select")?.value||"";this.currentExamplePostType=o,this.currentExampleSchemaType=a,await this.loadAndShowExample(o,a)},async loadAndShowExample(e,s){let o=document.getElementById("smg-example-modal");if(!o)return;let t=o.querySelector(".smg-example-schema"),n=o.querySelector(".smg-example-post-title"),a=o.querySelector(".smg-example-edit-link"),i=o.querySelector(".smg-example-view-link"),r=o.querySelector(".smg-example-info");t.textContent=typeof smgAdmin<"u"&&smgAdmin.strings?.loading?smgAdmin.strings.loading:"Loading...",n.textContent="",a.style.display="none",i.style.display="none",r.classList.add("smg-loading"),o.style.display="flex",o.offsetHeight,o.classList.add("smg-modal-open"),document.body.style.overflow="hidden";try{let l=await this.fetchRandomExample(e,s);l.success?(t.textContent=l.data.json,n.textContent=l.data.post_title,l.data.edit_url&&(a.href=l.data.edit_url,a.style.display="inline-flex"),l.data.view_url&&(i.href=l.data.view_url,i.style.display="inline-flex")):t.textContent=l.data?.message||"Failed to load example"}catch(l){console.error("Failed to load example:",l),t.textContent="Failed to load example. Please try again."}finally{r.classList.remove("smg-loading")}},fetchRandomExample(e,s){return new Promise((o,t)=>{let n=new FormData;n.append("action","smg_get_random_example"),n.append("nonce",typeof smgAdmin<"u"?smgAdmin.nonce:""),n.append("post_type",e),n.append("schema_type",s),fetch(typeof smgAdmin<"u"?smgAdmin.ajaxUrl:ajaxurl,{method:"POST",body:n,credentials:"same-origin"}).then(a=>a.json()).then(a=>o(a)).catch(a=>t(a))})},async handleCopyExample(e){e.preventDefault();let s=e.target.closest(".smg-copy-example"),t=document.getElementById("smg-example-modal")?.querySelector(".smg-example-schema")?.textContent;if(t)try{await navigator.clipboard.writeText(t);let n=s.innerHTML;s.innerHTML='<span class="dashicons dashicons-yes"></span> '+(typeof smgAdmin<"u"&&smgAdmin.strings?.copied?smgAdmin.strings.copied:"Copied"),s.classList.add("smg-btn-success"),setTimeout(()=>{s.innerHTML=n,s.classList.remove("smg-btn-success")},2e3),this.showToast(typeof smgAdmin<"u"&&smgAdmin.strings?.copied?smgAdmin.strings.copied:"Copied to clipboard","success")}catch(n){console.error("Copy failed:",n),this.showToast("Failed to copy","error")}},async handleRefreshExample(e){e.preventDefault();let s=e.target.closest(".smg-refresh-example");s.disabled=!0;let o=s.innerHTML;s.innerHTML='<span class="dashicons dashicons-update smg-spin"></span>';try{await this.loadAndShowExample(this.currentExamplePostType,this.currentExampleSchemaType)}finally{s.disabled=!1,s.innerHTML=o}},closeExampleModal(){let e=document.getElementById("smg-example-modal");!e||e.style.display==="none"||(e.classList.remove("smg-modal-open"),setTimeout(()=>{e.style.display="none"},this.config.animationDuration),document.body.style.overflow="")},async handleMetaBoxSchemaTypeChange(e){let s=e.target,o=s.closest(".smg-meta-box");if(!o)return;let t=o.dataset.postId,n=o.dataset.postType,a=s.value;a||(a=(typeof smgAdmin<"u"&&smgAdmin.postTypeMappings?smgAdmin.postTypeMappings:{})[n]||"");let i=document.getElementById("smg_current_schema_type");i&&(i.value=a);let r=o.querySelector(".smg-field-overrides-section");if(r)if(a){r.style.display="";let l=r.querySelector(".smg-field-overrides-container");l&&l.style.display!=="none"&&await this.loadMetaBoxFieldOverrides(t,a,l)}else r.style.display="none"},async handleToggleOverrides(e){e.preventDefault(),console.log("SMG: Toggle overrides clicked");let s=e.target.closest(".smg-toggle-overrides"),t=s.closest(".smg-field-overrides-section").querySelector(".smg-field-overrides-container"),n=s.getAttribute("aria-expanded")==="true",a=s.querySelector(".smg-toggle-text");if(console.log("SMG: isExpanded =",n),s.setAttribute("aria-expanded",!n),n)this.slideUp(t),a&&(a.textContent=typeof smgAdmin<"u"&&smgAdmin.strings?.show?smgAdmin.strings.show:"Show");else{this.slideDown(t),a&&(a.textContent=typeof smgAdmin<"u"&&smgAdmin.strings?.hide?smgAdmin.strings.hide:"Hide");let i=t.querySelector(".smg-field-overrides-content");if(console.log("SMG: content element",i),console.log("SMG: content.innerHTML.trim()",i?.innerHTML?.trim()),i&&!i.innerHTML.trim()){let r=s.closest(".smg-meta-box"),l=r?.dataset.postId,d=r?.dataset.postType;console.log("SMG: postId =",l,"postType =",d);let m=document.getElementById("smg_current_schema_type")?.value||"";if(console.log("SMG: schemaType from hidden field =",m),!m){let c=document.getElementById("smg_schema_type");console.log("SMG: select element",c,"value",c?.value),c&&!c.value&&(m=typeof smgAdmin<"u"&&smgAdmin.postTypeMappings?.[d]?smgAdmin.postTypeMappings[d]:"",console.log("SMG: schemaType from mappings =",m))}if(console.log("SMG: Final schemaType =",m),l&&m)await this.loadMetaBoxFieldOverrides(l,m,t);else if(l){console.log("SMG: No schema type, showing message"),i.innerHTML='<p class="smg-notice"><span class="dashicons dashicons-info"></span> Select a schema type to configure field overrides.</p>';let c=t.querySelector(".smg-field-overrides-loading");c&&(c.style.display="none")}}else console.log("SMG: Content already loaded or element not found")}},async loadMetaBoxFieldOverrides(e,s,o){console.log("SMG: Loading field overrides",{postId:e,schemaType:s});let t=o.querySelector(".smg-field-overrides-loading"),n=o.querySelector(".smg-field-overrides-content");t&&(t.style.display="flex"),n&&(n.innerHTML="");try{let i=document.querySelector(".smg-meta-box")?.dataset.postType||"post";console.log("SMG: AJAX request params",{postId:e,postType:i,schemaType:s});let r=new FormData;r.append("action","smg_get_metabox_properties"),r.append("nonce",typeof smgAdmin<"u"?smgAdmin.nonce:""),r.append("post_id",e),r.append("post_type",i),r.append("schema_type",s);let d=await(await fetch(typeof smgAdmin<"u"?smgAdmin.ajaxUrl:ajaxurl,{method:"POST",body:r,credentials:"same-origin"})).json();console.log("SMG: AJAX response",d),d.success&&d.data.html?n&&(n.innerHTML=d.data.html,console.log("SMG: Loaded",n.querySelectorAll(".smg-field-override-row").length,"field rows"),n.querySelectorAll(".smg-field-override-row").forEach((c,p)=>{c.style.opacity="0",c.style.transform="translateY(10px)",setTimeout(()=>{c.style.transition="opacity 0.3s ease, transform 0.3s ease",c.style.opacity="1",c.style.transform="translateY(0)"},30*p)})):(console.warn("SMG: AJAX returned no HTML or error",d),n&&(n.innerHTML=`<p class="smg-notice"><span class="dashicons dashicons-warning"></span> ${d.data?.message||"Failed to load fields"}</p>`))}catch(a){console.error("SMG: Failed to load field overrides:",a),n&&(n.innerHTML='<p class="smg-notice"><span class="dashicons dashicons-warning"></span> Failed to load fields</p>')}finally{t&&(t.style.display="none")}},handleOverrideTypeChange(e){let s=e.target,o=s.closest(".smg-field-override-row"),t=o?.dataset.property,n=s.value;if(!o||!t)return;let a=o.querySelector(".smg-override-field-select"),i=o.querySelector(".smg-override-custom-input");a&&(a.style.display=n==="field"?"":"none"),i&&(i.style.display=n==="custom"?"":"none"),this.updateOverridesJson()},handleOverrideValueChange(e){this.updateOverridesJson()},updateOverridesJson(){let e=document.getElementById("smg_field_overrides_json");if(!e)return;let s={};document.querySelectorAll(".smg-field-override-row").forEach(t=>{let n=t.dataset.property;if(!n)return;let i=t.querySelector(".smg-override-type-radio:checked")?.value||"auto";if(i==="auto")return;let r="";if(i==="field")r=t.querySelector(".smg-override-select")?.value||"";else if(i==="custom"){let l=t.querySelector(".smg-override-input"),d=t.querySelector(".smg-override-textarea");r=l?.value||d?.value||""}r&&(s[n]={type:i,value:r})}),e.value=JSON.stringify(s)},async handleOpenPreviewModal(e){e.preventDefault();let s=document.getElementById("smg-preview-modal");if(!s)return;let t=document.querySelector(".smg-meta-box")?.dataset.postId;if(!t)return;let n=s.querySelector(".smg-schema-preview-modal");n&&(n.textContent=typeof smgAdmin<"u"&&smgAdmin.strings?.loading?smgAdmin.strings.loading:"Loading..."),s.style.display="flex",s.offsetHeight,s.classList.add("smg-modal-open"),document.body.style.overflow="hidden";try{let a=await this.fetchPreview(t);a.success&&n&&(n.textContent=a.data.json,a.data.validation&&this.showValidation(a.data.validation))}catch(a){console.error("Failed to load preview:",a),n&&(n.textContent="Failed to load preview")}},closePreviewModal(){let e=document.getElementById("smg-preview-modal");!e||e.style.display==="none"||(e.classList.remove("smg-modal-open"),setTimeout(()=>{e.style.display="none"},this.config.animationDuration),document.body.style.overflow="")},handleSelectLogo(e){e.preventDefault(),this.logoMediaFrame||(this.logoMediaFrame=wp.media({title:typeof smgAdmin<"u"&&smgAdmin.strings?.selectLogo?smgAdmin.strings.selectLogo:"Select Organization Logo",button:{text:typeof smgAdmin<"u"&&smgAdmin.strings?.useLogo?smgAdmin.strings.useLogo:"Use this logo"},library:{type:"image"},multiple:!1}),this.logoMediaFrame.on("select",()=>{let s=this.logoMediaFrame.state().get("selection").first().toJSON();this.updateLogoPreview(s)})),this.logoMediaFrame.open()},handleRemoveLogo(e){e.preventDefault();let s=document.getElementById("smg-logo-preview"),o=document.getElementById("smg-organization-logo"),t=document.getElementById("smg-remove-logo");s&&(s.innerHTML='<span class="smg-no-image text-gray-400">'+(typeof smgAdmin<"u"&&smgAdmin.strings?.noLogo?smgAdmin.strings.noLogo:"No logo set")+"</span>"),o&&(o.value=""),t&&t.classList.add("hidden"),this.showToast(typeof smgAdmin<"u"&&smgAdmin.strings?.logoRemoved?smgAdmin.strings.logoRemoved:"Logo removed. Save settings to apply.","info")},updateLogoPreview(e){let s=document.getElementById("smg-logo-preview"),o=document.getElementById("smg-organization-logo"),t=document.getElementById("smg-remove-logo");if(s&&e.url){let n=e.sizes?.thumbnail?.url||e.url;s.innerHTML=`<img src="${n}" alt="" class="max-h-16 rounded border border-gray-200">`}o&&(o.value=e.id),t&&t.classList.remove("hidden"),this.showToast(typeof smgAdmin<"u"&&smgAdmin.strings?.logoSelected?smgAdmin.strings.logoSelected:"Logo selected. Save settings to apply.","success")},showToast(e,s="info"){let o=document.createElement("div");o.className=`smg-toast smg-toast-${s} smg-animate-slide-in-right`,o.innerHTML=`
-                <span class="dashicons dashicons-${s==="success"?"yes-alt":s==="error"?"warning":"info"}"></span>
-                ${e}
-            `;let t=document.querySelector(".smg-toast-container");t||(t=document.createElement("div"),t.className="smg-toast-container",t.style.cssText="position: fixed; top: 50px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;",document.body.appendChild(t)),t.appendChild(o),setTimeout(()=>{o.style.opacity="0",o.style.transform="translateX(20px)",setTimeout(()=>o.remove(),300)},this.config.toastDuration)},debounce(e,s){let o;return function(...n){let a=()=>{clearTimeout(o),e(...n)};clearTimeout(o),o=setTimeout(a,s)}}};document.readyState==="loading"?document.addEventListener("DOMContentLoaded",()=>g.init()):g.init(),window.SMGAdmin=g})();})();
+                    `;
+          }
+        } finally {
+          button.disabled = false;
+          button.innerHTML = originalHtml;
+        }
+      },
+      /**
+       * Animate toggle switch
+       */
+      animateToggle(input) {
+        const toggle = input.closest(".smg-toggle");
+        if (toggle) {
+          toggle.style.transform = "scale(0.95)";
+          setTimeout(() => {
+            toggle.style.transform = "scale(1)";
+          }, 100);
+        }
+      },
+      /**
+       * Initialize tooltips
+       */
+      initTooltips() {
+      },
+      /**
+       * Initialize collapsible panels
+       */
+      initCollapsibles() {
+        document.querySelectorAll(".smg-meta-box-panel-header").forEach((header) => {
+          header.addEventListener("click", () => {
+            const panel = header.closest(".smg-meta-box-panel");
+            panel.classList.toggle("collapsed");
+          });
+        });
+      },
+      /**
+       * Slide up animation
+       */
+      slideUp(element) {
+        element.style.height = element.scrollHeight + "px";
+        element.offsetHeight;
+        element.style.transition = `height ${this.config.animationDuration}ms ease`;
+        element.style.height = "0";
+        element.style.overflow = "hidden";
+        setTimeout(() => {
+          element.style.display = "none";
+          element.style.height = "";
+          element.style.overflow = "";
+          element.style.transition = "";
+        }, this.config.animationDuration);
+      },
+      /**
+       * Slide down animation
+       */
+      slideDown(element) {
+        element.style.display = "block";
+        element.style.height = "0";
+        element.style.overflow = "hidden";
+        element.offsetHeight;
+        const height = element.scrollHeight;
+        element.style.transition = `height ${this.config.animationDuration}ms ease`;
+        element.style.height = height + "px";
+        setTimeout(() => {
+          element.style.height = "";
+          element.style.overflow = "";
+          element.style.transition = "";
+        }, this.config.animationDuration);
+      },
+      /**
+       * Handle view example button click
+       */
+      async handleViewExample(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-view-example-btn");
+        const postType = button.dataset.postType;
+        const card = button.closest(".smg-post-type-card");
+        const schemaSelect = card?.querySelector(".smg-schema-select");
+        const schemaType = schemaSelect?.value || "";
+        this.currentExamplePostType = postType;
+        this.currentExampleSchemaType = schemaType;
+        await this.loadAndShowExample(postType, schemaType);
+      },
+      /**
+       * Load and show schema example
+       */
+      async loadAndShowExample(postType, schemaType) {
+        const modal = document.getElementById("smg-example-modal");
+        if (!modal)
+          return;
+        const schemaPreview = modal.querySelector(".smg-example-schema");
+        const postTitleEl = modal.querySelector(".smg-example-post-title");
+        const editLink = modal.querySelector(".smg-example-edit-link");
+        const viewLink = modal.querySelector(".smg-example-view-link");
+        const infoEl = modal.querySelector(".smg-example-info");
+        schemaPreview.textContent = typeof smgAdmin !== "undefined" && smgAdmin.strings?.loading ? smgAdmin.strings.loading : "Loading...";
+        postTitleEl.textContent = "";
+        editLink.style.display = "none";
+        viewLink.style.display = "none";
+        infoEl.classList.add("smg-loading");
+        modal.style.display = "flex";
+        modal.offsetHeight;
+        modal.classList.add("smg-modal-open");
+        document.body.style.overflow = "hidden";
+        try {
+          const response = await this.fetchRandomExample(postType, schemaType);
+          if (response.success) {
+            schemaPreview.textContent = response.data.json;
+            postTitleEl.textContent = response.data.post_title;
+            if (response.data.edit_url) {
+              editLink.href = response.data.edit_url;
+              editLink.style.display = "inline-flex";
+            }
+            if (response.data.view_url) {
+              viewLink.href = response.data.view_url;
+              viewLink.style.display = "inline-flex";
+            }
+          } else {
+            schemaPreview.textContent = response.data?.message || "Failed to load example";
+          }
+        } catch (error) {
+          console.error("Failed to load example:", error);
+          schemaPreview.textContent = "Failed to load example. Please try again.";
+        } finally {
+          infoEl.classList.remove("smg-loading");
+        }
+      },
+      /**
+       * Fetch random example via AJAX
+       */
+      fetchRandomExample(postType, schemaType) {
+        return new Promise((resolve, reject) => {
+          const formData = new FormData();
+          formData.append("action", "smg_get_random_example");
+          formData.append("nonce", typeof smgAdmin !== "undefined" ? smgAdmin.nonce : "");
+          formData.append("post_type", postType);
+          formData.append("schema_type", schemaType);
+          fetch(typeof smgAdmin !== "undefined" ? smgAdmin.ajaxUrl : ajaxurl, {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+          }).then((response) => response.json()).then((data) => resolve(data)).catch((error) => reject(error));
+        });
+      },
+      /**
+       * Handle copy example schema
+       */
+      async handleCopyExample(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-copy-example");
+        const modal = document.getElementById("smg-example-modal");
+        const schema = modal?.querySelector(".smg-example-schema")?.textContent;
+        if (!schema)
+          return;
+        try {
+          await navigator.clipboard.writeText(schema);
+          const originalHtml = button.innerHTML;
+          button.innerHTML = '<span class="dashicons dashicons-yes"></span> ' + (typeof smgAdmin !== "undefined" && smgAdmin.strings?.copied ? smgAdmin.strings.copied : "Copied");
+          button.classList.add("smg-btn-success");
+          setTimeout(() => {
+            button.innerHTML = originalHtml;
+            button.classList.remove("smg-btn-success");
+          }, 2e3);
+          this.showToast(
+            typeof smgAdmin !== "undefined" && smgAdmin.strings?.copied ? smgAdmin.strings.copied : "Copied to clipboard",
+            "success"
+          );
+        } catch (error) {
+          console.error("Copy failed:", error);
+          this.showToast("Failed to copy", "error");
+        }
+      },
+      /**
+       * Handle refresh example (load new random post)
+       */
+      async handleRefreshExample(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-refresh-example");
+        button.disabled = true;
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<span class="dashicons dashicons-update smg-spin"></span>';
+        try {
+          await this.loadAndShowExample(this.currentExamplePostType, this.currentExampleSchemaType);
+        } finally {
+          button.disabled = false;
+          button.innerHTML = originalHtml;
+        }
+      },
+      /**
+       * Close the example modal
+       */
+      closeExampleModal() {
+        const modal = document.getElementById("smg-example-modal");
+        if (!modal || modal.style.display === "none")
+          return;
+        modal.classList.remove("smg-modal-open");
+        setTimeout(() => {
+          modal.style.display = "none";
+        }, this.config.animationDuration);
+        document.body.style.overflow = "";
+      },
+      /**
+       * Handle metabox schema type change
+       * Loads field overrides UI when schema type changes in the post editor
+       */
+      async handleMetaBoxSchemaTypeChange(e) {
+        const select = e.target;
+        const metaBox = select.closest(".smg-meta-box");
+        if (!metaBox)
+          return;
+        const postId = metaBox.dataset.postId;
+        const postType = metaBox.dataset.postType;
+        let schemaType = select.value;
+        if (!schemaType) {
+          const mappings = typeof smgAdmin !== "undefined" && smgAdmin.postTypeMappings ? smgAdmin.postTypeMappings : {};
+          schemaType = mappings[postType] || "";
+        }
+        const hiddenType = document.getElementById("smg_current_schema_type");
+        if (hiddenType) {
+          hiddenType.value = schemaType;
+        }
+        const overridesSection = metaBox.querySelector(".smg-field-overrides-section");
+        if (overridesSection) {
+          if (schemaType) {
+            overridesSection.style.display = "";
+            const container = overridesSection.querySelector(".smg-field-overrides-container");
+            if (container && container.style.display !== "none") {
+              await this.loadMetaBoxFieldOverrides(postId, schemaType, container);
+            }
+          } else {
+            overridesSection.style.display = "none";
+          }
+        }
+      },
+      /**
+       * Handle toggle overrides visibility in metabox
+       */
+      async handleToggleOverrides(e) {
+        e.preventDefault();
+        console.log("SMG: Toggle overrides clicked");
+        const button = e.target.closest(".smg-toggle-overrides");
+        const section = button.closest(".smg-field-overrides-section");
+        const container = section.querySelector(".smg-field-overrides-container");
+        const isExpanded = button.getAttribute("aria-expanded") === "true";
+        const toggleText = button.querySelector(".smg-toggle-text");
+        console.log("SMG: isExpanded =", isExpanded);
+        button.setAttribute("aria-expanded", !isExpanded);
+        if (isExpanded) {
+          this.slideUp(container);
+          if (toggleText) {
+            toggleText.textContent = typeof smgAdmin !== "undefined" && smgAdmin.strings?.show ? smgAdmin.strings.show : "Show";
+          }
+        } else {
+          this.slideDown(container);
+          if (toggleText) {
+            toggleText.textContent = typeof smgAdmin !== "undefined" && smgAdmin.strings?.hide ? smgAdmin.strings.hide : "Hide";
+          }
+          const content = container.querySelector(".smg-field-overrides-content");
+          console.log("SMG: content element", content);
+          console.log("SMG: content.innerHTML.trim()", content?.innerHTML?.trim());
+          if (content && !content.innerHTML.trim()) {
+            const metaBox = button.closest(".smg-meta-box");
+            const postId = metaBox?.dataset.postId;
+            const postType = metaBox?.dataset.postType;
+            console.log("SMG: postId =", postId, "postType =", postType);
+            let schemaType = document.getElementById("smg_current_schema_type")?.value || "";
+            console.log("SMG: schemaType from hidden field =", schemaType);
+            if (!schemaType) {
+              const select = document.getElementById("smg_schema_type");
+              console.log("SMG: select element", select, "value", select?.value);
+              if (select && !select.value) {
+                schemaType = typeof smgAdmin !== "undefined" && smgAdmin.postTypeMappings?.[postType] ? smgAdmin.postTypeMappings[postType] : "";
+                console.log("SMG: schemaType from mappings =", schemaType);
+              }
+            }
+            console.log("SMG: Final schemaType =", schemaType);
+            if (postId && schemaType) {
+              await this.loadMetaBoxFieldOverrides(postId, schemaType, container);
+            } else if (postId) {
+              console.log("SMG: No schema type, showing message");
+              content.innerHTML = '<p class="smg-notice"><span class="dashicons dashicons-info"></span> Select a schema type to configure field overrides.</p>';
+              const loading = container.querySelector(".smg-field-overrides-loading");
+              if (loading)
+                loading.style.display = "none";
+            }
+          } else {
+            console.log("SMG: Content already loaded or element not found");
+          }
+        }
+      },
+      /**
+       * Load field overrides via AJAX
+       */
+      async loadMetaBoxFieldOverrides(postId, schemaType, container) {
+        console.log("SMG: Loading field overrides", { postId, schemaType });
+        const loading = container.querySelector(".smg-field-overrides-loading");
+        const content = container.querySelector(".smg-field-overrides-content");
+        if (loading)
+          loading.style.display = "flex";
+        if (content)
+          content.innerHTML = "";
+        try {
+          const metaBox = document.querySelector(".smg-meta-box");
+          const postType = metaBox?.dataset.postType || "post";
+          console.log("SMG: AJAX request params", { postId, postType, schemaType });
+          const formData = new FormData();
+          formData.append("action", "smg_get_metabox_properties");
+          formData.append("nonce", typeof smgAdmin !== "undefined" ? smgAdmin.nonce : "");
+          formData.append("post_id", postId);
+          formData.append("post_type", postType);
+          formData.append("schema_type", schemaType);
+          const response = await fetch(typeof smgAdmin !== "undefined" ? smgAdmin.ajaxUrl : ajaxurl, {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+          });
+          const data = await response.json();
+          console.log("SMG: AJAX response", data);
+          if (data.success && data.data.html) {
+            if (content) {
+              content.innerHTML = data.data.html;
+              console.log("SMG: Loaded", content.querySelectorAll(".smg-field-override-row").length, "field rows");
+              const rows = content.querySelectorAll(".smg-field-override-row");
+              rows.forEach((row, index) => {
+                row.style.opacity = "0";
+                row.style.transform = "translateY(10px)";
+                setTimeout(() => {
+                  row.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+                  row.style.opacity = "1";
+                  row.style.transform = "translateY(0)";
+                }, 30 * index);
+              });
+            }
+          } else {
+            console.warn("SMG: AJAX returned no HTML or error", data);
+            if (content) {
+              content.innerHTML = `<p class="smg-notice"><span class="dashicons dashicons-warning"></span> ${data.data?.message || "Failed to load fields"}</p>`;
+            }
+          }
+        } catch (error) {
+          console.error("SMG: Failed to load field overrides:", error);
+          if (content) {
+            content.innerHTML = '<p class="smg-notice"><span class="dashicons dashicons-warning"></span> Failed to load fields</p>';
+          }
+        } finally {
+          if (loading)
+            loading.style.display = "none";
+        }
+      },
+      /**
+       * Handle override type radio change
+       */
+      handleOverrideTypeChange(e) {
+        const radio = e.target;
+        const row = radio.closest(".smg-field-override-row");
+        const property = row?.dataset.property;
+        const type = radio.value;
+        if (!row || !property)
+          return;
+        const fieldSelect = row.querySelector(".smg-override-field-select");
+        const customInput = row.querySelector(".smg-override-custom-input");
+        if (fieldSelect) {
+          fieldSelect.style.display = type === "field" ? "" : "none";
+        }
+        if (customInput) {
+          customInput.style.display = type === "custom" ? "" : "none";
+        }
+        this.updateOverridesJson();
+      },
+      /**
+       * Handle override value change
+       */
+      handleOverrideValueChange(e) {
+        this.updateOverridesJson();
+      },
+      /**
+       * Update the hidden JSON field with current overrides
+       */
+      updateOverridesJson() {
+        const hiddenField = document.getElementById("smg_field_overrides_json");
+        if (!hiddenField)
+          return;
+        const overrides = {};
+        const rows = document.querySelectorAll(".smg-field-override-row");
+        rows.forEach((row) => {
+          const property = row.dataset.property;
+          if (!property)
+            return;
+          const selectedRadio = row.querySelector(".smg-override-type-radio:checked");
+          const type = selectedRadio?.value || "auto";
+          if (type === "auto") {
+            return;
+          }
+          let value = "";
+          if (type === "field") {
+            const select = row.querySelector(".smg-override-select");
+            value = select?.value || "";
+          } else if (type === "custom") {
+            const input = row.querySelector(".smg-override-input");
+            const textarea = row.querySelector(".smg-override-textarea");
+            value = input?.value || textarea?.value || "";
+          }
+          if (value) {
+            overrides[property] = { type, value };
+          }
+        });
+        hiddenField.value = JSON.stringify(overrides);
+      },
+      /**
+       * Handle open preview modal
+       */
+      async handleOpenPreviewModal(e) {
+        e.preventDefault();
+        const modal = document.getElementById("smg-preview-modal");
+        if (!modal)
+          return;
+        const metaBox = document.querySelector(".smg-meta-box");
+        const postId = metaBox?.dataset.postId;
+        if (!postId)
+          return;
+        const preview = modal.querySelector(".smg-schema-preview-modal");
+        if (preview) {
+          preview.textContent = typeof smgAdmin !== "undefined" && smgAdmin.strings?.loading ? smgAdmin.strings.loading : "Loading...";
+        }
+        modal.style.display = "flex";
+        modal.offsetHeight;
+        modal.classList.add("smg-modal-open");
+        document.body.style.overflow = "hidden";
+        try {
+          const response = await this.fetchPreview(postId);
+          if (response.success && preview) {
+            preview.textContent = response.data.json;
+            if (response.data.validation) {
+              this.showValidation(response.data.validation);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to load preview:", error);
+          if (preview) {
+            preview.textContent = "Failed to load preview";
+          }
+        }
+      },
+      /**
+       * Close preview modal
+       */
+      closePreviewModal() {
+        const modal = document.getElementById("smg-preview-modal");
+        if (!modal || modal.style.display === "none")
+          return;
+        modal.classList.remove("smg-modal-open");
+        setTimeout(() => {
+          modal.style.display = "none";
+        }, this.config.animationDuration);
+        document.body.style.overflow = "";
+      },
+      /**
+       * Handle select logo button click
+       * Opens WordPress media library to select organization logo
+       */
+      handleSelectLogo(e) {
+        e.preventDefault();
+        if (!this.logoMediaFrame) {
+          this.logoMediaFrame = wp.media({
+            title: typeof smgAdmin !== "undefined" && smgAdmin.strings?.selectLogo ? smgAdmin.strings.selectLogo : "Select Organization Logo",
+            button: {
+              text: typeof smgAdmin !== "undefined" && smgAdmin.strings?.useLogo ? smgAdmin.strings.useLogo : "Use this logo"
+            },
+            library: {
+              type: "image"
+            },
+            multiple: false
+          });
+          this.logoMediaFrame.on("select", () => {
+            const attachment = this.logoMediaFrame.state().get("selection").first().toJSON();
+            this.updateLogoPreview(attachment);
+          });
+        }
+        this.logoMediaFrame.open();
+      },
+      /**
+       * Handle remove logo button click
+       */
+      handleRemoveLogo(e) {
+        e.preventDefault();
+        const preview = document.getElementById("smg-logo-preview");
+        const input = document.getElementById("smg-organization-logo");
+        const removeBtn = document.getElementById("smg-remove-logo");
+        if (preview) {
+          preview.innerHTML = '<span class="smg-no-image text-gray-400">' + (typeof smgAdmin !== "undefined" && smgAdmin.strings?.noLogo ? smgAdmin.strings.noLogo : "No logo set") + "</span>";
+        }
+        if (input) {
+          input.value = "";
+        }
+        if (removeBtn) {
+          removeBtn.classList.add("hidden");
+        }
+        this.showToast(
+          typeof smgAdmin !== "undefined" && smgAdmin.strings?.logoRemoved ? smgAdmin.strings.logoRemoved : "Logo removed. Save settings to apply.",
+          "info"
+        );
+      },
+      /**
+       * Update logo preview after selection
+       */
+      updateLogoPreview(attachment) {
+        const preview = document.getElementById("smg-logo-preview");
+        const input = document.getElementById("smg-organization-logo");
+        const removeBtn = document.getElementById("smg-remove-logo");
+        if (preview && attachment.url) {
+          const url = attachment.sizes?.thumbnail?.url || attachment.url;
+          preview.innerHTML = `<img src="${url}" alt="" class="max-h-16 rounded border border-gray-200">`;
+        }
+        if (input) {
+          input.value = attachment.id;
+        }
+        if (removeBtn) {
+          removeBtn.classList.remove("hidden");
+        }
+        this.showToast(
+          typeof smgAdmin !== "undefined" && smgAdmin.strings?.logoSelected ? smgAdmin.strings.logoSelected : "Logo selected. Save settings to apply.",
+          "success"
+        );
+      },
+      /**
+       * Show toast notification
+       */
+      showToast(message, type = "info") {
+        const toast = document.createElement("div");
+        toast.className = `smg-toast smg-toast-${type} smg-animate-slide-in-right`;
+        toast.innerHTML = `
+                <span class="dashicons dashicons-${type === "success" ? "yes-alt" : type === "error" ? "warning" : "info"}"></span>
+                ${message}
+            `;
+        let container = document.querySelector(".smg-toast-container");
+        if (!container) {
+          container = document.createElement("div");
+          container.className = "smg-toast-container";
+          container.style.cssText = "position: fixed; top: 50px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;";
+          document.body.appendChild(container);
+        }
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          toast.style.transform = "translateX(20px)";
+          setTimeout(() => toast.remove(), 300);
+        }, this.config.toastDuration);
+      },
+      /**
+       * Debounce utility
+       */
+      debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      },
+      /**
+       * Handle open integration settings modal
+       */
+      handleOpenIntegrationModal(e) {
+        e.preventDefault();
+        const button = e.target.closest(".smg-open-integration-modal");
+        const integration = button?.dataset.integration;
+        if (!integration)
+          return;
+        const modal = document.getElementById(`smg-integration-modal-${integration}`);
+        if (!modal)
+          return;
+        modal.style.display = "flex";
+        modal.offsetHeight;
+        modal.classList.add("smg-modal-open");
+        document.body.style.overflow = "hidden";
+      },
+      /**
+       * Close integration modal
+       */
+      closeIntegrationModal(modal) {
+        if (!modal || modal.style.display === "none")
+          return;
+        modal.classList.remove("smg-modal-open");
+        setTimeout(() => {
+          modal.style.display = "none";
+        }, this.config.animationDuration);
+        document.body.style.overflow = "";
+      }
+    };
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => SMGAdmin.init());
+    } else {
+      SMGAdmin.init();
+    }
+    window.SMGAdmin = SMGAdmin;
+  })();
+})();

@@ -91,6 +91,7 @@ add_filter('smg_article_schema_data', function(array $data, WP_Post $post, array
 #### `smg_course_schema_data`
 #### `smg_learning_resource_schema_data`
 #### `smg_software_schema_data`
+#### `smg_web_application_schema_data`
 #### `smg_breadcrumb_schema_data`
 #### `smg_website_schema_data`
 #### `smg_webpage_schema_data`

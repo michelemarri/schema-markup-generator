@@ -65,7 +65,7 @@ class WebPageSchema extends AbstractSchema
 
     public function build(WP_Post $post, array $mapping = []): array
     {
-        $data = $this->buildBase($post);
+        $data = $this->buildBase($post, $mapping);
 
         // Core properties
         $data['@id'] = $this->getPostUrl($post) . '#webpage';
@@ -181,7 +181,7 @@ class WebPageSchema extends AbstractSchema
 
     public function getPropertyDefinitions(): array
     {
-        return [
+        return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
                 'description' => __('Page title. Establishes page identity in site hierarchy.', 'schema-markup-generator'),
@@ -215,7 +215,7 @@ class WebPageSchema extends AbstractSchema
                     'CheckoutPage',
                 ],
             ],
-        ];
+        ]);
     }
 }
 

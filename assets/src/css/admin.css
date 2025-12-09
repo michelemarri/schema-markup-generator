@@ -930,7 +930,32 @@
 }
 
 .smg-integration-footer {
-  @apply px-6 py-4 bg-gray-50 border-t border-gray-200;
+  @apply px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between gap-4;
+}
+
+.smg-toggle-inline {
+  @apply inline-flex items-center gap-3 text-sm font-medium text-gray-700 cursor-pointer;
+}
+
+.smg-toggle-inline input[type="checkbox"] {
+  @apply sr-only;
+}
+
+.smg-toggle-slider-small {
+  @apply relative inline-block w-10 h-6 rounded-full bg-gray-300 transition-all duration-200 flex-shrink-0;
+}
+
+.smg-toggle-slider-small::before {
+  content: '';
+  @apply absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200;
+}
+
+.smg-toggle-inline input:checked + .smg-toggle-slider-small {
+  @apply bg-green-500;
+}
+
+.smg-toggle-inline input:checked + .smg-toggle-slider-small::before {
+  transform: translateX(16px);
 }
 
 /* ========================================
@@ -1490,6 +1515,22 @@
   @apply px-6 py-4 bg-gray-50 border-t border-gray-200;
 }
 
+/* Modal Sections (for Integration Modals) */
+.smg-modal-section {
+  @apply p-4 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+.smg-modal-section-title {
+  @apply flex items-center gap-2 text-sm font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-200;
+}
+
+.smg-modal-section-title .dashicons {
+  @apply text-gray-500;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
 .smg-modal-link {
   @apply inline-flex items-center gap-2 text-sm font-medium text-gray-700;
   text-decoration: none !important;
@@ -1535,6 +1576,10 @@
 
 .smg-modal-lg .smg-modal-content {
   @apply max-w-2xl;
+}
+
+.smg-modal-xl .smg-modal-content {
+  @apply max-w-4xl;
 }
 
 .smg-modal-lg .smg-modal-title {

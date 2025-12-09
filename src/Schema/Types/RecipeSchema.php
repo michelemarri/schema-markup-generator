@@ -34,7 +34,7 @@ class RecipeSchema extends AbstractSchema
 
     public function build(WP_Post $post, array $mapping = []): array
     {
-        $data = $this->buildBase($post);
+        $data = $this->buildBase($post, $mapping);
 
         // Core properties
         $data['name'] = html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8');
@@ -263,7 +263,7 @@ class RecipeSchema extends AbstractSchema
 
     public function getPropertyDefinitions(): array
     {
-        return [
+        return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
                 'description' => __('Recipe title. Shown prominently in recipe rich results.', 'schema-markup-generator'),
@@ -364,7 +364,7 @@ class RecipeSchema extends AbstractSchema
                 'example' => __('quick dinner, vegetarian, gluten-free, meal prep, comfort food, healthy', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/keywords',
             ],
-        ];
+        ]);
     }
 }
 

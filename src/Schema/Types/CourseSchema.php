@@ -34,7 +34,7 @@ class CourseSchema extends AbstractSchema
 
     public function build(WP_Post $post, array $mapping = []): array
     {
-        $data = $this->buildBase($post);
+        $data = $this->buildBase($post, $mapping);
 
         // Core properties
         $data['name'] = html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8');
@@ -443,7 +443,7 @@ class CourseSchema extends AbstractSchema
 
     public function getPropertyDefinitions(): array
     {
-        return [
+        return array_merge(self::getAdditionalTypeDefinition(), [
             // ========================================
             // Core Properties (Required by Google)
             // ========================================
@@ -660,7 +660,7 @@ class CourseSchema extends AbstractSchema
                 'example' => __('Google Data Analytics Professional Certificate, AWS Certified Developer, Completion Certificate', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/educationalCredentialAwarded',
             ],
-        ];
+        ]);
     }
 }
 

@@ -45,7 +45,7 @@ class ArticleSchema extends AbstractSchema
 
     public function build(WP_Post $post, array $mapping = []): array
     {
-        $data = $this->buildBase($post);
+        $data = $this->buildBase($post, $mapping);
 
         // Core properties
         $data['headline'] = html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8');
@@ -127,7 +127,7 @@ class ArticleSchema extends AbstractSchema
 
     public function getPropertyDefinitions(): array
     {
-        return [
+        return array_merge(self::getAdditionalTypeDefinition(), [
             'headline' => [
                 'type' => 'text',
                 'description' => __('Article title. Required for Google News and Discover eligibility.', 'schema-markup-generator'),
@@ -192,7 +192,7 @@ class ArticleSchema extends AbstractSchema
                 'schema_url' => 'https://schema.org/keywords',
                 'auto' => 'tags',
             ],
-        ];
+        ]);
     }
 }
 

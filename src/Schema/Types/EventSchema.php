@@ -34,7 +34,7 @@ class EventSchema extends AbstractSchema
 
     public function build(WP_Post $post, array $mapping = []): array
     {
-        $data = $this->buildBase($post);
+        $data = $this->buildBase($post, $mapping);
 
         // Core properties
         $data['name'] = html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8');
@@ -221,7 +221,7 @@ class EventSchema extends AbstractSchema
 
     public function getPropertyDefinitions(): array
     {
-        return [
+        return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
                 'description' => __('Event title. Shown in Google Events rich results and calendar integration.', 'schema-markup-generator'),
@@ -317,7 +317,7 @@ class EventSchema extends AbstractSchema
                 'example' => __('Tony Robbins, Coldplay, Dr. Jane Goodall', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/performer',
             ],
-        ];
+        ]);
     }
 }
 

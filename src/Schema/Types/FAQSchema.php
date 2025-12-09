@@ -34,7 +34,7 @@ class FAQSchema extends AbstractSchema
 
     public function build(WP_Post $post, array $mapping = []): array
     {
-        $data = $this->buildBase($post);
+        $data = $this->buildBase($post, $mapping);
 
         // Get FAQ items from mapping
         $faqItems = $this->getMappedValue($post, $mapping, 'faqItems');
@@ -129,7 +129,7 @@ class FAQSchema extends AbstractSchema
 
     public function getPropertyDefinitions(): array
     {
-        return [
+        return array_merge(self::getAdditionalTypeDefinition(), [
             'faqItems' => [
                 'type' => 'repeater',
                 'description' => __('Question/Answer pairs. Enables expandable FAQ rich results in Google - major SERP real estate boost.', 'schema-markup-generator'),
@@ -151,7 +151,7 @@ class FAQSchema extends AbstractSchema
                     ],
                 ],
             ],
-        ];
+        ]);
     }
 }
 

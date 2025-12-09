@@ -34,7 +34,7 @@ class HowToSchema extends AbstractSchema
 
     public function build(WP_Post $post, array $mapping = []): array
     {
-        $data = $this->buildBase($post);
+        $data = $this->buildBase($post, $mapping);
 
         // Core properties
         $data['name'] = html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8');
@@ -792,7 +792,7 @@ class HowToSchema extends AbstractSchema
 
     public function getPropertyDefinitions(): array
     {
-        return [
+        return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
                 'description' => __('Guide title. Displayed as the main heading in how-to rich results.', 'schema-markup-generator'),
@@ -852,7 +852,7 @@ class HowToSchema extends AbstractSchema
                     'text' => ['type' => 'textarea', 'description' => __('Detailed instructions for this step.', 'schema-markup-generator')],
                 ],
             ],
-        ];
+        ]);
     }
 }
 

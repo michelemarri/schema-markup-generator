@@ -34,7 +34,7 @@ class WebSiteSchema extends AbstractSchema
 
     public function build(WP_Post $post, array $mapping = []): array
     {
-        $data = $this->buildBase($post);
+        $data = $this->buildBase($post, $mapping);
 
         // Core properties
         $data['@id'] = home_url('/#website');
@@ -96,7 +96,7 @@ class WebSiteSchema extends AbstractSchema
 
     public function getPropertyDefinitions(): array
     {
-        return [
+        return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
                 'description' => __('Site name. Shown in Google Knowledge Panel and search results.', 'schema-markup-generator'),
@@ -120,7 +120,7 @@ class WebSiteSchema extends AbstractSchema
                 'example' => __('true (enable), false (disable)', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/potentialAction',
             ],
-        ];
+        ]);
     }
 }
 
