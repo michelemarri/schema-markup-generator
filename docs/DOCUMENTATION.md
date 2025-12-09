@@ -345,14 +345,57 @@ For cooking recipes.
 
 #### Course
 
-For online courses and educational content.
+For online courses and educational content. Compliant with schema.org specification where `instructor`, `courseMode`, and `offers` belong to `CourseInstance`.
 
-**Properties:**
+**Course-Level Properties:**
 - `name` - Course title
 - `description` - Course description
 - `provider` - Organization offering the course
-- `hasCourseInstance` - Course sections/modules
-- `numberOfLessons` - Total lesson count
+- `inLanguage` - Course language (auto-detected from WordPress)
+- `educationalLevel` - Difficulty level (Beginner, Intermediate, Advanced)
+- `timeRequired` - Total course duration
+- `isAccessibleForFree` - Automatically `true` for free courses
+- `teaches` - Skills/concepts taught (important for AI/LLM matching)
+- `about` - Main topics covered
+- `syllabus` - Course curriculum description
+- `aggregateRating` - Student ratings
+
+**CourseInstance Properties (auto-generated in `hasCourseInstance`):**
+- `instructor` - Person teaching the course (defaults to post author)
+- `courseMode` - Delivery format: online, onsite, blended (defaults to "online")
+- `offers` - Pricing and availability
+- `courseWorkload` - Expected weekly workload
+
+**Note:** Per schema.org specification, `instructor`, `courseMode`, and `offers` are properties of `CourseInstance`, not `Course`. The plugin automatically creates a `CourseInstance` with these properties.
+
+**Example Output:**
+```json
+{
+  "@type": "Course",
+  "name": "Python Fundamentals",
+  "description": "Learn Python programming...",
+  "provider": {
+    "@type": "Organization",
+    "name": "MenthorQ"
+  },
+  "inLanguage": "en-US",
+  "isAccessibleForFree": true,
+  "hasCourseInstance": {
+    "@type": "CourseInstance",
+    "courseMode": "online",
+    "instructor": {
+      "@type": "Person",
+      "name": "John Smith"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": 0,
+      "priceCurrency": "EUR",
+      "availability": "https://schema.org/InStock"
+    }
+  }
+}
+```
 
 #### LearningResource
 

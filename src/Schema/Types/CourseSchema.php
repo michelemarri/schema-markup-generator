@@ -63,17 +63,6 @@ class CourseSchema extends AbstractSchema
             ];
         }
 
-        // Instructor
-        $instructor = $this->getMappedValue($post, $mapping, 'instructor');
-        if ($instructor) {
-            $data['instructor'] = [
-                '@type' => 'Person',
-                'name' => is_array($instructor) ? ($instructor['name'] ?? '') : $instructor,
-            ];
-        } else {
-            $data['instructor'] = $this->getAuthor($post);
-        }
-
         // Duration
         $duration = $this->getMappedValue($post, $mapping, 'duration');
         if ($duration) {
@@ -86,27 +75,31 @@ class CourseSchema extends AbstractSchema
             $data['educationalLevel'] = $educationalLevel;
         }
 
-        // Course mode (online, onsite, blended) - default to online
-        $courseMode = $this->getMappedValue($post, $mapping, 'courseMode');
-        $data['courseMode'] = $courseMode ?: 'online';
-
         // Language - default to site language
         $inLanguage = $this->getMappedValue($post, $mapping, 'inLanguage');
         $data['inLanguage'] = $inLanguage ?: get_bloginfo('language');
 
-        // Offers (pricing) - always included, defaults to Free if no price mapped
+        // Build offers data (needed for both Course and CourseInstance)
         $offersData = $this->buildOffers($post, $mapping);
-        $data['offers'] = $offersData['offer'];
 
-        // isAccessibleForFree - Google recommended property for free courses
+        // isAccessibleForFree - Google recommended property for free courses (stays on Course level)
         if ($offersData['isFree']) {
             $data['isAccessibleForFree'] = true;
         }
 
-        // Course instances (specific occurrences)
-        $instances = $this->getMappedValue($post, $mapping, 'hasCourseInstance');
-        if (is_array($instances) && !empty($instances)) {
-            $data['hasCourseInstance'] = $this->buildCourseInstances($instances);
+        // ========================================
+        // CourseInstance (instructor, courseMode, offers belong here per schema.org)
+        // ========================================
+        $courseInstance = $this->buildDefaultCourseInstance($post, $mapping, $offersData);
+
+        // Course instances - merge default instance with any explicitly mapped instances
+        $explicitInstances = $this->getMappedValue($post, $mapping, 'hasCourseInstance');
+        if (is_array($explicitInstances) && !empty($explicitInstances)) {
+            // User provided explicit instances - add instructor/courseMode from default to each
+            $data['hasCourseInstance'] = $this->buildCourseInstances($explicitInstances, $courseInstance);
+        } else {
+            // Use the auto-generated default instance
+            $data['hasCourseInstance'] = $courseInstance;
         }
 
         // Aggregate rating
@@ -323,9 +316,54 @@ class CourseSchema extends AbstractSchema
     }
 
     /**
-     * Build course instances
+     * Build default CourseInstance with instructor, courseMode, and offers
+     * These properties belong to CourseInstance per schema.org specification
+     *
+     * @return array The default CourseInstance object
      */
-    private function buildCourseInstances(array $instances): array
+    private function buildDefaultCourseInstance(WP_Post $post, array $mapping, array $offersData): array
+    {
+        $courseInstance = [
+            '@type' => 'CourseInstance',
+        ];
+
+        // Course mode (online, onsite, blended) - default to online
+        $courseMode = $this->getMappedValue($post, $mapping, 'courseMode');
+        $courseInstance['courseMode'] = $courseMode ?: 'online';
+
+        // Instructor
+        $instructor = $this->getMappedValue($post, $mapping, 'instructor');
+        if ($instructor) {
+            $instructorData = [
+                '@type' => 'Person',
+                'name' => is_array($instructor) ? ($instructor['name'] ?? '') : $instructor,
+            ];
+            // Add instructor URL if available
+            if (is_array($instructor) && !empty($instructor['url'])) {
+                $instructorData['url'] = $instructor['url'];
+            }
+            $courseInstance['instructor'] = $instructorData;
+        } else {
+            $courseInstance['instructor'] = $this->getAuthor($post);
+        }
+
+        // Offers (pricing) - belongs to CourseInstance
+        $courseInstance['offers'] = $offersData['offer'];
+
+        // Course workload (if mapped)
+        $workload = $this->getMappedValue($post, $mapping, 'courseWorkload');
+        if ($workload) {
+            $courseInstance['courseWorkload'] = $workload;
+        }
+
+        return $courseInstance;
+    }
+
+    /**
+     * Build course instances from explicit mapping
+     * Merges default instance data (instructor, courseMode) into each explicit instance
+     */
+    private function buildCourseInstances(array $instances, array $defaultInstance): array
     {
         $result = [];
 
@@ -334,20 +372,47 @@ class CourseSchema extends AbstractSchema
                 '@type' => 'CourseInstance',
             ];
 
+            // Merge instructor from default if not explicitly provided
+            if (!empty($instance['instructor'])) {
+                $courseInstance['instructor'] = is_array($instance['instructor'])
+                    ? $instance['instructor']
+                    : ['@type' => 'Person', 'name' => $instance['instructor']];
+            } elseif (!empty($defaultInstance['instructor'])) {
+                $courseInstance['instructor'] = $defaultInstance['instructor'];
+            }
+
+            // Merge courseMode from default if not explicitly provided
+            if (!empty($instance['courseMode'])) {
+                $courseInstance['courseMode'] = $instance['courseMode'];
+            } elseif (!empty($defaultInstance['courseMode'])) {
+                $courseInstance['courseMode'] = $defaultInstance['courseMode'];
+            }
+
+            // Merge offers from default if not explicitly provided
+            if (!empty($instance['offers'])) {
+                $courseInstance['offers'] = $instance['offers'];
+            } elseif (!empty($defaultInstance['offers'])) {
+                $courseInstance['offers'] = $defaultInstance['offers'];
+            }
+
+            // Instance-specific properties
             if (!empty($instance['startDate'])) {
                 $courseInstance['startDate'] = $instance['startDate'];
             }
             if (!empty($instance['endDate'])) {
                 $courseInstance['endDate'] = $instance['endDate'];
             }
-            if (!empty($instance['courseMode'])) {
-                $courseInstance['courseMode'] = $instance['courseMode'];
-            }
             if (!empty($instance['location'])) {
                 $courseInstance['location'] = [
                     '@type' => 'Place',
                     'name' => $instance['location'],
                 ];
+            }
+            if (!empty($instance['courseWorkload'])) {
+                $courseInstance['courseWorkload'] = $instance['courseWorkload'];
+            }
+            if (!empty($instance['courseSchedule'])) {
+                $courseInstance['courseSchedule'] = $instance['courseSchedule'];
             }
 
             $result[] = $courseInstance;
@@ -364,8 +429,8 @@ class CourseSchema extends AbstractSchema
     public function getRecommendedProperties(): array
     {
         return [
-            'instructor',
-            'offers',
+            'instructor', // Goes to CourseInstance
+            'courseMode', // Goes to CourseInstance
             'image',
             'aggregateRating',
             'educationalLevel',
@@ -443,16 +508,16 @@ class CourseSchema extends AbstractSchema
             ],
 
             // ========================================
-            // Instructor & Credibility
+            // CourseInstance Properties (automatically placed in hasCourseInstance)
             // ========================================
             'instructor' => [
                 'type' => 'text',
-                'description' => __('Instructor/teacher name. Adds credibility and may appear in rich results.', 'schema-markup-generator'),
-                'description_long' => __('The instructor or teacher delivering the course. Including instructor credentials helps establish E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness).', 'schema-markup-generator'),
+                'description' => __('Instructor/teacher name. Goes into CourseInstance per schema.org.', 'schema-markup-generator'),
+                'description_long' => __('The instructor or teacher delivering the course. This property belongs to CourseInstance (not Course) per schema.org specification. Including instructor credentials helps establish E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness).', 'schema-markup-generator'),
                 'example' => __('Dr. John Smith, Jane Doe (Senior Developer at Google), Prof. Maria Garcia', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/instructor',
                 'auto' => 'author',
-                'auto_description' => __('Defaults to post author', 'schema-markup-generator'),
+                'auto_description' => __('Defaults to post author. Placed in CourseInstance.', 'schema-markup-generator'),
             ],
             'ratingValue' => [
                 'type' => 'number',
@@ -477,35 +542,35 @@ class CourseSchema extends AbstractSchema
             ],
 
             // ========================================
-            // Pricing & Availability
+            // Pricing & Availability (placed in CourseInstance.offers)
             // ========================================
             'price' => [
                 'type' => 'number',
-                'description' => __('Course price. Enables price display in search results. Use 0 for free courses.', 'schema-markup-generator'),
-                'description_long' => __('The price of the course. Use 0 for free courses (this will show "Free" in search results). Price information helps users filter and compare courses.', 'schema-markup-generator'),
+                'description' => __('Course price. Goes into CourseInstance.offers. Use 0 for free courses.', 'schema-markup-generator'),
+                'description_long' => __('The price of the course. Use 0 for free courses (this will set isAccessibleForFree on Course). Price information is placed in CourseInstance.offers per schema.org specification.', 'schema-markup-generator'),
                 'example' => __('0 (free), 49.99, 199.00, 499.00', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/price',
                 'auto' => '0 (Free)',
-                'auto_description' => __('Defaults to 0 (Free) if not mapped', 'schema-markup-generator'),
+                'auto_description' => __('Defaults to 0 (Free). Placed in CourseInstance.offers.', 'schema-markup-generator'),
             ],
             'priceCurrency' => [
                 'type' => 'text',
-                'description' => __('Currency code (EUR, USD, etc.). Required if price is set.', 'schema-markup-generator'),
-                'description_long' => __('The currency of the course price in ISO 4217 format. Required whenever a price is specified.', 'schema-markup-generator'),
+                'description' => __('Currency code (EUR, USD, etc.). Goes into CourseInstance.offers.', 'schema-markup-generator'),
+                'description_long' => __('The currency of the course price in ISO 4217 format. Placed in CourseInstance.offers per schema.org specification.', 'schema-markup-generator'),
                 'example' => __('EUR, USD, GBP', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/priceCurrency',
                 'auto' => 'site_currency',
-                'auto_description' => __('Auto-detected from WooCommerce/MemberPress or EUR', 'schema-markup-generator'),
+                'auto_description' => __('Auto-detected from WooCommerce/MemberPress or EUR. Placed in CourseInstance.offers.', 'schema-markup-generator'),
             ],
             'availability' => [
                 'type' => 'select',
-                'description' => __('Course availability status. Affects how the course appears in search.', 'schema-markup-generator'),
-                'description_long' => __('The availability status of the course. Use InStock for open enrollment, PreOrder for upcoming courses, or SoldOut if enrollment is closed.', 'schema-markup-generator'),
+                'description' => __('Course availability status. Goes into CourseInstance.offers.', 'schema-markup-generator'),
+                'description_long' => __('The availability status of the course. Use InStock for open enrollment, PreOrder for upcoming courses, or SoldOut if enrollment is closed. Placed in CourseInstance.offers per schema.org specification.', 'schema-markup-generator'),
                 'example' => __('InStock (open enrollment), PreOrder (coming soon)', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/availability',
                 'options' => ['InStock', 'SoldOut', 'PreOrder', 'Discontinued'],
                 'auto' => 'InStock',
-                'auto_description' => __('Defaults to InStock (always available)', 'schema-markup-generator'),
+                'auto_description' => __('Defaults to InStock. Placed in CourseInstance.offers.', 'schema-markup-generator'),
             ],
 
             // ========================================
@@ -528,13 +593,20 @@ class CourseSchema extends AbstractSchema
             ],
             'courseMode' => [
                 'type' => 'select',
-                'description' => __('Delivery format. Important for users searching specific course types.', 'schema-markup-generator'),
-                'description_long' => __('How the course is delivered: online (fully remote), onsite (in-person), or blended (combination). Important for users with specific delivery preferences.', 'schema-markup-generator'),
+                'description' => __('Delivery format. Goes into CourseInstance per schema.org.', 'schema-markup-generator'),
+                'description_long' => __('How the course is delivered: online (fully remote), onsite (in-person), or blended (combination). This property belongs to CourseInstance (not Course) per schema.org specification.', 'schema-markup-generator'),
                 'example' => __('online, onsite, blended', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/courseMode',
                 'options' => ['online', 'onsite', 'blended'],
                 'auto' => 'online',
-                'auto_description' => __('Defaults to online for e-learning courses', 'schema-markup-generator'),
+                'auto_description' => __('Defaults to online. Placed in CourseInstance.', 'schema-markup-generator'),
+            ],
+            'courseWorkload' => [
+                'type' => 'text',
+                'description' => __('Expected workload per week. Goes into CourseInstance per schema.org.', 'schema-markup-generator'),
+                'description_long' => __('The expected workload for students, typically expressed as hours per week. This property belongs to CourseInstance per schema.org specification.', 'schema-markup-generator'),
+                'example' => __('2 hours of lectures, 1 hour of lab, 3 hours of independent study per week', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/courseWorkload',
             ],
             'inLanguage' => [
                 'type' => 'text',

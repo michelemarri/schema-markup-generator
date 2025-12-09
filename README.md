@@ -234,6 +234,19 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.23.0
+- **Fixed**: Course schema now compliant with schema.org specification
+- **Changed**: `instructor`, `courseMode`, and `offers` now correctly placed in `CourseInstance` (not directly on `Course`)
+- **New**: Course schema automatically generates `hasCourseInstance` with instructor, courseMode, and offers
+- **New**: `courseWorkload` property added for CourseInstance (e.g., "2 hours lectures + 3 hours study per week")
+- **Improved**: Explicit course instances (via `hasCourseInstance` mapping) inherit instructor/courseMode/offers from defaults
+- **Improved**: Property definitions updated with clearer schema.org placement information
+- **Note**: This fixes Google Rich Results Test and schema.org validator warnings about `instructor` and `courseMode` on Course type
+
+### 1.22.2
+- **Fixed**: ACF/SCF custom fields appearing duplicated in field mapping dropdown
+- **Refactored**: Centralized ACF field discovery in ACFIntegration class
+
 ### 1.22.1
 - **Improved**: Generic support for ACF and SCF (Secure Custom Fields) - both plugins are now recognized
 - **Improved**: Integration labels adapt to the detected plugin (ACF or SCF)

@@ -61,16 +61,10 @@ class CustomFieldDiscovery
         $fields = [];
         $knownKeys = [];
 
-        // Get ACF fields if available (first priority)
-        if ($this->isACFActive()) {
-            $acfFields = $this->getACFFields($postType);
-            foreach ($acfFields as $field) {
-                $fields[] = $field;
-                $knownKeys[$field['key']] = true;
-            }
-        }
+        // Note: ACF fields are added via ACFIntegration filter (smg_discovered_fields)
+        // to avoid duplication and centralize ACF logic
 
-        // Get native WordPress meta keys (skip already known from ACF)
+        // Get native WordPress meta keys
         $nativeFields = $this->getNativeMetaKeys($postType);
         foreach ($nativeFields as $field) {
             if (!isset($knownKeys[$field['key']])) {
@@ -100,76 +94,11 @@ class CustomFieldDiscovery
     }
 
     /**
-     * Check if ACF is active
+     * Check if ACF/SCF is active
      */
     public function isACFActive(): bool
     {
         return class_exists('ACF') || function_exists('get_field');
-    }
-
-    /**
-     * Get ACF fields for a post type
-     */
-    private function getACFFields(string $postType): array
-    {
-        if (!function_exists('acf_get_field_groups')) {
-            return [];
-        }
-
-        $fields = [];
-        $fieldGroups = acf_get_field_groups(['post_type' => $postType]);
-
-        foreach ($fieldGroups as $group) {
-            $groupFields = acf_get_fields($group['key']);
-
-            if (!is_array($groupFields)) {
-                continue;
-            }
-
-            foreach ($groupFields as $field) {
-                $fields[] = [
-                    'key' => $field['name'],
-                    'name' => $field['name'],
-                    'label' => $field['label'],
-                    'type' => $this->mapACFFieldType($field['type']),
-                    'source' => 'acf',
-                    'acf_type' => $field['type'],
-                    'group' => $group['title'],
-                    'required' => !empty($field['required']),
-                ];
-            }
-        }
-
-        return $fields;
-    }
-
-    /**
-     * Map ACF field types to generic types
-     */
-    private function mapACFFieldType(string $acfType): string
-    {
-        return match ($acfType) {
-            'text', 'textarea', 'wysiwyg', 'message' => 'text',
-            'number', 'range' => 'number',
-            'email' => 'email',
-            'url', 'link', 'page_link' => 'url',
-            'image', 'file' => 'file',
-            'gallery' => 'gallery',
-            'select', 'checkbox', 'radio', 'button_group' => 'select',
-            'true_false' => 'boolean',
-            'date_picker' => 'date',
-            'date_time_picker' => 'datetime',
-            'time_picker' => 'time',
-            'color_picker' => 'color',
-            'post_object', 'relationship' => 'post',
-            'taxonomy' => 'taxonomy',
-            'user' => 'user',
-            'repeater', 'flexible_content' => 'repeater',
-            'group' => 'group',
-            'google_map' => 'location',
-            'oembed' => 'embed',
-            default => 'text',
-        };
     }
 
     /**
