@@ -35,7 +35,7 @@ class WebApplicationSchema extends AbstractSchema
 
     public function build(WP_Post $post, array $mapping = []): array
     {
-        $data = $this->buildBase($post);
+        $data = $this->buildBase($post, $mapping);
 
         // Core properties
         $data['name'] = html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8');
@@ -195,7 +195,7 @@ class WebApplicationSchema extends AbstractSchema
 
     public function getPropertyDefinitions(): array
     {
-        return [
+        return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
                 'description' => __('Web application name. Shown in software rich results.', 'schema-markup-generator'),
@@ -329,7 +329,7 @@ class WebApplicationSchema extends AbstractSchema
                 'example' => __('Everyone, Teen, Mature 17+', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/contentRating',
             ],
-        ];
+        ]);
     }
 }
 

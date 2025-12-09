@@ -235,6 +235,10 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.27.1
+- **Fixed**: WebApplication schema now includes `additionalType` property in field mapping
+- **Fixed**: WebApplication schema correctly passes mapping data to `buildBase()` for `additionalType` support
+
 ### 1.27.0
 - **New**: WebApplication schema type - for web-based applications, SaaS platforms, and online tools
 - **New**: `additionalType` property available on ALL schema types - allows specifying more specific Schema.org types
