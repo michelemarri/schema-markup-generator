@@ -89,6 +89,13 @@ class RankMathIntegration
         }
 
         $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('integrations');
+
+        // If all Rank Math schemas are disabled, no need to filter for duplicates
+        $disableAll = $settings['rankmath_disable_all_schemas'] ?? false;
+        if ($disableAll) {
+            return $schemas;
+        }
+
         $avoidDuplicates = $settings['rankmath_avoid_duplicates'] ?? true;
 
         if (!$avoidDuplicates) {
@@ -146,11 +153,18 @@ class RankMathIntegration
     /**
      * Optionally filter Rank Math schema
      *
-     * Can be used to let SMG handle specific schema types
+     * Can be used to let SMG handle specific schema types or disable all Rank Math schemas
      */
     public function filterRankMathSchema(array $data, $jsonld): array
     {
         $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('integrations');
+
+        // Check if we should disable all Rank Math schemas
+        $disableAll = $settings['rankmath_disable_all_schemas'] ?? false;
+        if ($disableAll) {
+            return [];
+        }
+
         $takeOver = $settings['rankmath_takeover_types'] ?? [];
 
         if (empty($takeOver)) {

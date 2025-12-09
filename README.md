@@ -234,6 +234,12 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.25.0
+- **New**: Option to completely disable all Rank Math schema output
+- **New**: "Disable All Rank Math Schemas" toggle in Integrations → Rank Math Settings
+- **Improved**: When all Rank Math schemas are disabled, SMG handles all structured data exclusively
+- **Improved**: Duplicate prevention and takeover options are disabled when "Disable All" is active
+
 ### 1.23.0
 - **Fixed**: Course schema now compliant with schema.org specification
 - **Changed**: `instructor`, `courseMode`, and `offers` now correctly placed in `CourseInstance` (not directly on `Course`)
