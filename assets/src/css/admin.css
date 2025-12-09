@@ -1158,6 +1158,156 @@
 }
 
 /* ========================================
+   Meta Box - Enhanced Field Overrides
+   ======================================== */
+
+.smg-meta-box .smg-field-label {
+  @apply block text-sm font-semibold text-gray-900 mb-2;
+}
+
+.smg-meta-box .smg-field-description {
+  @apply text-xs text-gray-500 mt-1 mb-3;
+}
+
+.smg-toggle-overrides {
+  @apply flex items-center gap-1;
+}
+
+.smg-toggle-overrides .dashicons {
+  transition: transform 200ms ease;
+}
+
+.smg-toggle-overrides[aria-expanded="true"] .dashicons {
+  transform: rotate(180deg);
+}
+
+.smg-field-overrides-container {
+  @apply mt-4;
+}
+
+.smg-field-overrides-loading {
+  @apply flex items-center justify-center gap-2 py-8 text-sm text-gray-500;
+}
+
+.smg-field-overrides-list {
+  @apply grid gap-4;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 782px) {
+  .smg-field-overrides-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .smg-field-overrides-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.smg-field-override-row {
+  @apply p-4 bg-gray-50 border border-gray-200 rounded-lg;
+  transition: all 200ms ease;
+}
+
+.smg-field-override-row:hover {
+  @apply bg-gray-100 border-gray-300 shadow-sm;
+}
+
+.smg-field-override-header {
+  @apply flex items-start justify-between gap-4 mb-3;
+}
+
+.smg-field-override-info {
+  @apply flex flex-col gap-1;
+}
+
+.smg-field-override-name {
+  @apply flex justify-between font-semibold text-sm text-gray-900;
+}
+
+.smg-field-override-desc {
+  @apply text-xs text-gray-500 leading-relaxed;
+}
+
+.smg-field-override-controls {
+  @apply flex flex-col gap-3;
+}
+
+.smg-field-override-type {
+  @apply flex flex-wrap items-center gap-4;
+}
+
+.smg-radio-label {
+  @apply inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer;
+}
+
+.smg-radio-label input[type="radio"] {
+  @apply w-4 h-4 cursor-pointer;
+  accent-color: #171717;
+}
+
+.smg-global-mapping-hint {
+  @apply text-xs text-gray-400 ml-1;
+}
+
+.smg-field-override-value {
+  @apply mt-2;
+}
+
+.smg-override-field-select,
+.smg-override-custom-input {
+  animation: fadeIn 200ms ease;
+}
+
+.smg-override-select {
+  @apply max-w-full;
+}
+
+.smg-override-input,
+.smg-override-textarea {
+  @apply w-full max-w-none;
+}
+
+.smg-override-textarea {
+  @apply min-h-[60px];
+}
+
+/* Preview Mini */
+.smg-preview-mini {
+  @apply bg-gray-900 rounded-lg overflow-hidden mb-4;
+}
+
+.smg-schema-preview-mini {
+  @apply p-4 max-h-[150px] overflow-auto font-mono text-xs leading-relaxed text-gray-200 whitespace-pre-wrap break-words;
+  background: #1a1a1a;
+  tab-size: 2;
+}
+
+.smg-schema-preview-mini::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.smg-schema-preview-mini::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+.smg-schema-preview-mini::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded;
+}
+
+/* Preview Modal Actions */
+.smg-preview-modal-actions {
+  @apply flex gap-2 mb-4;
+}
+
+.smg-schema-preview-modal {
+  @apply max-h-[400px];
+}
+
+/* ========================================
    Auto/Manual Badges
    ======================================== */
 

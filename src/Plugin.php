@@ -8,6 +8,7 @@ use Metodo\SchemaMarkupGenerator\Admin\SettingsPage;
 use Metodo\SchemaMarkupGenerator\Admin\MetaBox;
 use Metodo\SchemaMarkupGenerator\Admin\PreviewHandler;
 use Metodo\SchemaMarkupGenerator\Admin\SchemaPropertiesHandler;
+use Metodo\SchemaMarkupGenerator\Admin\MetaBoxPropertiesHandler;
 use Metodo\SchemaMarkupGenerator\Admin\MappingSaveHandler;
 use Metodo\SchemaMarkupGenerator\Admin\RandomExampleHandler;
 use Metodo\SchemaMarkupGenerator\Discovery\PostTypeDiscovery;
@@ -123,10 +124,20 @@ class Plugin
                 $this->services['schema_factory'],
                 $this->services['schema_renderer']
             );
+            // Inject discovery services for field overrides
+            $this->services['metabox']->setDiscoveryServices(
+                $this->services['custom_field_discovery'],
+                $this->services['taxonomy_discovery']
+            );
             $this->services['preview_handler'] = new PreviewHandler(
                 $this->services['schema_renderer']
             );
             $this->services['schema_properties_handler'] = new SchemaPropertiesHandler(
+                $this->services['schema_factory'],
+                $this->services['custom_field_discovery'],
+                $this->services['taxonomy_discovery']
+            );
+            $this->services['metabox_properties_handler'] = new MetaBoxPropertiesHandler(
                 $this->services['schema_factory'],
                 $this->services['custom_field_discovery'],
                 $this->services['taxonomy_discovery']
@@ -227,6 +238,7 @@ class Plugin
             add_action('wp_ajax_smg_save_schema_mapping', [$this->services['mapping_save_handler'], 'handleSaveSchemaMapping']);
             add_action('wp_ajax_smg_save_field_mapping', [$this->services['mapping_save_handler'], 'handleSaveFieldMapping']);
             add_action('wp_ajax_smg_get_random_example', [$this->services['random_example_handler'], 'handle']);
+            add_action('wp_ajax_smg_get_metabox_properties', [$this->services['metabox_properties_handler'], 'handle']);
         }
 
         // Plugin action links
@@ -287,6 +299,7 @@ class Plugin
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('smg_admin_nonce'),
             'isSettingsPage' => $isSettingsPage,
+            'postTypeMappings' => get_option('smg_post_type_mappings', []),
             'strings' => [
                 'validating' => __('Validating...', 'schema-markup-generator'),
                 'valid' => __('Schema is valid', 'schema-markup-generator'),
@@ -304,12 +317,17 @@ class Plugin
                 'noLogo' => __('No logo set', 'schema-markup-generator'),
                 'logoSelected' => __('Logo selected. Save settings to apply.', 'schema-markup-generator'),
                 'logoRemoved' => __('Logo removed. Save settings to apply.', 'schema-markup-generator'),
+                'show' => __('Show', 'schema-markup-generator'),
+                'hide' => __('Hide', 'schema-markup-generator'),
             ],
         ]);
     }
 
     /**
      * Check if schema is enabled for the current post being edited
+     * 
+     * Returns true for all public post types where the metabox is shown,
+     * so CSS/JS are always loaded when the metabox is visible.
      */
     private function isSchemaEnabledForCurrentPost(): bool
     {
@@ -319,18 +337,12 @@ class Plugin
             return false;
         }
 
-        // Get configured post type mappings
-        $mappings = get_option('smg_post_type_mappings', []);
+        // Get all public post types (same logic as MetaBox::register())
+        $postTypes = get_post_types(['public' => true], 'names');
+        unset($postTypes['attachment']);
         
-        // Check if this post type has a schema mapping
-        if (!empty($mappings[$post->post_type])) {
-            return true;
-        }
-        
-        // Default supported post types
-        $defaultTypes = ['post', 'page'];
-        
-        return in_array($post->post_type, $defaultTypes, true);
+        // Load assets for all public post types where metabox is shown
+        return isset($postTypes[$post->post_type]);
     }
 
     /**

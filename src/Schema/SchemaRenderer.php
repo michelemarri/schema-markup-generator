@@ -103,13 +103,20 @@ class SchemaRenderer
             $schema = $this->schemaFactory->create($schemaType);
 
             if ($schema) {
-                // Get field mapping for this post type
+                // Get field mapping for this post type (global settings)
                 $mapping = $fieldMappings[$post->post_type] ?? [];
 
-                // Get per-post field overrides
-                $postMapping = get_post_meta($post->ID, '_smg_field_mapping', true);
-                if (is_array($postMapping)) {
-                    $mapping = array_merge($mapping, $postMapping);
+                // Get per-post field overrides (new format with type + value)
+                $postOverrides = get_post_meta($post->ID, '_smg_field_overrides', true);
+                if (is_array($postOverrides)) {
+                    $processedOverrides = $this->processFieldOverrides($postOverrides);
+                    $mapping = array_merge($mapping, $processedOverrides);
+                }
+
+                // Legacy support: check old _smg_field_mapping format
+                $legacyMapping = get_post_meta($post->ID, '_smg_field_mapping', true);
+                if (is_array($legacyMapping)) {
+                    $mapping = array_merge($mapping, $legacyMapping);
                 }
 
                 $schemaData = $schema->build($post, $mapping);
@@ -290,6 +297,50 @@ class SchemaRenderer
 
         // Also try without modification date (legacy)
         $this->cache->delete('schema_' . $postId);
+    }
+
+    /**
+     * Process field overrides from the new format
+     *
+     * Converts the new format:
+     * ['property' => ['type' => 'field|custom', 'value' => '...']]
+     * 
+     * To the standard mapping format:
+     * ['property' => 'field_key_or_custom_value']
+     * 
+     * Custom values are prefixed with 'custom:' so they can be handled
+     * differently in the schema build process.
+     *
+     * @param array $overrides Field overrides from post meta
+     * @return array Processed mapping array
+     */
+    private function processFieldOverrides(array $overrides): array
+    {
+        $mapping = [];
+
+        foreach ($overrides as $property => $override) {
+            if (!is_array($override)) {
+                continue;
+            }
+
+            $type = $override['type'] ?? 'auto';
+            $value = $override['value'] ?? '';
+
+            // Skip 'auto' type - it means use global mapping
+            if ($type === 'auto' || empty($value)) {
+                continue;
+            }
+
+            if ($type === 'custom') {
+                // Prefix custom values so they're treated as literal values
+                $mapping[$property] = 'custom:' . $value;
+            } else {
+                // 'field' type - use the field key directly
+                $mapping[$property] = $value;
+            }
+        }
+
+        return $mapping;
     }
 }
 

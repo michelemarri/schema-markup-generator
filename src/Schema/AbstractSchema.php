@@ -194,6 +194,8 @@ abstract class AbstractSchema implements SchemaInterface
      * 
      * Automatically sanitizes string values by stripping HTML tags.
      * URLs are preserved. Use the 'smg_sanitize_mapped_value' filter to customize.
+     * 
+     * Supports custom values prefixed with 'custom:' which are used as literal values.
      */
     protected function getMappedValue(WP_Post $post, array $mapping, string $property, mixed $default = null): mixed
     {
@@ -204,8 +206,31 @@ abstract class AbstractSchema implements SchemaInterface
         $fieldKey = $mapping[$property];
         $value = null;
 
-        // Check ACF first
-        if (function_exists('get_field')) {
+        // Handle custom literal values (from per-post overrides)
+        if (is_string($fieldKey) && str_starts_with($fieldKey, 'custom:')) {
+            $value = substr($fieldKey, 7); // Remove 'custom:' prefix
+            
+            // Sanitize and return the custom value
+            $value = $this->sanitizeMappedValue($value, $property);
+            
+            /**
+             * Filter the sanitized mapped value
+             * 
+             * @param mixed   $value    The sanitized value
+             * @param string  $property The schema property name
+             * @param string  $fieldKey The source field key
+             * @param WP_Post $post     The post object
+             */
+            return apply_filters('smg_sanitize_mapped_value', $value, $property, $fieldKey, $post);
+        }
+
+        // Handle standard WordPress post fields
+        if (is_string($fieldKey)) {
+            $value = $this->resolveStandardField($post, $fieldKey);
+        }
+
+        // Check ACF if no value yet
+        if (($value === null || $value === false) && function_exists('get_field')) {
             $value = get_field($fieldKey, $post->ID);
         }
 
@@ -231,6 +256,62 @@ abstract class AbstractSchema implements SchemaInterface
          * @param WP_Post $post     The post object
          */
         return apply_filters('smg_sanitize_mapped_value', $value, $property, $fieldKey, $post);
+    }
+
+    /**
+     * Resolve standard WordPress field values
+     * 
+     * Handles post fields, site fields, and special fields like featured_image
+     */
+    protected function resolveStandardField(WP_Post $post, string $fieldKey): mixed
+    {
+        return match ($fieldKey) {
+            'post_title' => html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8'),
+            'post_content' => $post->post_content,
+            'post_excerpt' => $this->getPostDescription($post),
+            'post_date' => $this->formatDate($post->post_date_gmt),
+            'post_modified' => $this->formatDate($post->post_modified_gmt),
+            'post_url' => $this->getPostUrl($post),
+            'featured_image' => $this->getFeaturedImageUrl($post),
+            'author' => $this->getAuthor($post)['name'] ?? null,
+            'site_name' => get_bloginfo('name'),
+            'site_url' => home_url('/'),
+            'site_description' => get_bloginfo('description'),
+            'site_language' => get_bloginfo('language'),
+            'site_language_code' => explode('-', get_bloginfo('language'))[0],
+            'site_currency' => $this->getSiteCurrency(),
+            default => null, // Not a standard field, return null to continue lookup
+        };
+    }
+
+    /**
+     * Get featured image URL
+     */
+    protected function getFeaturedImageUrl(WP_Post $post): ?string
+    {
+        $thumbnailId = get_post_thumbnail_id($post);
+
+        if (!$thumbnailId) {
+            return null;
+        }
+
+        $image = wp_get_attachment_image_url((int) $thumbnailId, 'full');
+
+        return $image ?: null;
+    }
+
+    /**
+     * Get site currency from available sources
+     */
+    protected function getSiteCurrency(): string
+    {
+        // Try WooCommerce first
+        if (function_exists('get_woocommerce_currency')) {
+            return get_woocommerce_currency();
+        }
+
+        // Default to EUR
+        return 'EUR';
     }
 
     /**

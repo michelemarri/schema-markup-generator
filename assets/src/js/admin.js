@@ -55,17 +55,24 @@
          * Bind event handlers
          */
         bindEvents() {
-            // Toggle field mappings
+            // Toggle field mappings (settings page)
             document.addEventListener('click', (e) => {
                 if (e.target.closest('.smg-toggle-fields')) {
                     this.handleToggleFields(e);
                 }
             });
 
-            // Schema type change (auto-save)
+            // Schema type change in settings page (auto-save)
             document.addEventListener('change', (e) => {
                 if (e.target.classList.contains('smg-schema-select')) {
                     this.handleSchemaTypeChange(e);
+                }
+            });
+
+            // Schema type change in metabox (load field overrides)
+            document.addEventListener('change', (e) => {
+                if (e.target.classList.contains('smg-schema-type-select')) {
+                    this.handleMetaBoxSchemaTypeChange(e);
                 }
             });
 
@@ -73,6 +80,46 @@
             document.addEventListener('change', (e) => {
                 if (e.target.classList.contains('smg-field-select')) {
                     this.handleFieldMappingChange(e);
+                }
+            });
+
+            // Toggle field overrides (metabox)
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.smg-toggle-overrides')) {
+                    this.handleToggleOverrides(e);
+                }
+            });
+
+            // Override type radio change (metabox)
+            document.addEventListener('change', (e) => {
+                if (e.target.classList.contains('smg-override-type-radio')) {
+                    this.handleOverrideTypeChange(e);
+                }
+            });
+
+            // Override value change (metabox)
+            document.addEventListener('change', (e) => {
+                if (e.target.classList.contains('smg-override-select') ||
+                    e.target.classList.contains('smg-override-input') ||
+                    e.target.classList.contains('smg-override-textarea')) {
+                    this.handleOverrideValueChange(e);
+                }
+            });
+
+            // Open preview modal
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.smg-open-preview-modal')) {
+                    this.handleOpenPreviewModal(e);
+                }
+            });
+
+            // Close preview modal
+            document.addEventListener('click', (e) => {
+                const previewModal = document.getElementById('smg-preview-modal');
+                if (previewModal && (e.target.closest('.smg-modal-close') || e.target.classList.contains('smg-modal-overlay'))) {
+                    if (previewModal.contains(e.target)) {
+                        this.closePreviewModal();
+                    }
                 }
             });
 
@@ -1250,6 +1297,326 @@
             }, this.config.animationDuration);
 
             // Restore body scrolling
+            document.body.style.overflow = '';
+        },
+
+        /**
+         * Handle metabox schema type change
+         * Loads field overrides UI when schema type changes in the post editor
+         */
+        async handleMetaBoxSchemaTypeChange(e) {
+            const select = e.target;
+            const metaBox = select.closest('.smg-meta-box');
+            if (!metaBox) return;
+
+            const postId = metaBox.dataset.postId;
+            const postType = metaBox.dataset.postType;
+            let schemaType = select.value;
+
+            // If empty, get the default type
+            if (!schemaType) {
+                const mappings = typeof smgAdmin !== 'undefined' && smgAdmin.postTypeMappings 
+                    ? smgAdmin.postTypeMappings 
+                    : {};
+                schemaType = mappings[postType] || '';
+            }
+
+            // Update hidden field
+            const hiddenType = document.getElementById('smg_current_schema_type');
+            if (hiddenType) {
+                hiddenType.value = schemaType;
+            }
+
+            // Show/hide field overrides section
+            const overridesSection = metaBox.querySelector('.smg-field-overrides-section');
+            if (overridesSection) {
+                if (schemaType) {
+                    overridesSection.style.display = '';
+                    // If already expanded, reload the fields
+                    const container = overridesSection.querySelector('.smg-field-overrides-container');
+                    if (container && container.style.display !== 'none') {
+                        await this.loadMetaBoxFieldOverrides(postId, schemaType, container);
+                    }
+                } else {
+                    overridesSection.style.display = 'none';
+                }
+            }
+        },
+
+        /**
+         * Handle toggle overrides visibility in metabox
+         */
+        async handleToggleOverrides(e) {
+            e.preventDefault();
+            console.log('SMG: Toggle overrides clicked');
+            
+            const button = e.target.closest('.smg-toggle-overrides');
+            const section = button.closest('.smg-field-overrides-section');
+            const container = section.querySelector('.smg-field-overrides-container');
+            const isExpanded = button.getAttribute('aria-expanded') === 'true';
+            const toggleText = button.querySelector('.smg-toggle-text');
+
+            console.log('SMG: isExpanded =', isExpanded);
+
+            button.setAttribute('aria-expanded', !isExpanded);
+
+            if (isExpanded) {
+                this.slideUp(container);
+                if (toggleText) {
+                    toggleText.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.show 
+                        ? smgAdmin.strings.show 
+                        : 'Show';
+                }
+            } else {
+                this.slideDown(container);
+                if (toggleText) {
+                    toggleText.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.hide 
+                        ? smgAdmin.strings.hide 
+                        : 'Hide';
+                }
+
+                // Load field overrides if not loaded yet
+                const content = container.querySelector('.smg-field-overrides-content');
+                console.log('SMG: content element', content);
+                console.log('SMG: content.innerHTML.trim()', content?.innerHTML?.trim());
+                
+                if (content && !content.innerHTML.trim()) {
+                    const metaBox = button.closest('.smg-meta-box');
+                    const postId = metaBox?.dataset.postId;
+                    const postType = metaBox?.dataset.postType;
+                    
+                    console.log('SMG: postId =', postId, 'postType =', postType);
+                    
+                    // Get schema type from hidden field or from select
+                    let schemaType = document.getElementById('smg_current_schema_type')?.value || '';
+                    console.log('SMG: schemaType from hidden field =', schemaType);
+                    
+                    // If empty, try to get from select's default
+                    if (!schemaType) {
+                        const select = document.getElementById('smg_schema_type');
+                        console.log('SMG: select element', select, 'value', select?.value);
+                        // Check if there's a default in the option text
+                        if (select && !select.value) {
+                            // Get default from post type mappings
+                            schemaType = typeof smgAdmin !== 'undefined' && smgAdmin.postTypeMappings?.[postType] 
+                                ? smgAdmin.postTypeMappings[postType] 
+                                : '';
+                            console.log('SMG: schemaType from mappings =', schemaType);
+                        }
+                    }
+
+                    console.log('SMG: Final schemaType =', schemaType);
+
+                    if (postId && schemaType) {
+                        await this.loadMetaBoxFieldOverrides(postId, schemaType, container);
+                    } else if (postId) {
+                        console.log('SMG: No schema type, showing message');
+                        // Show message if no schema type
+                        content.innerHTML = '<p class="smg-notice"><span class="dashicons dashicons-info"></span> Select a schema type to configure field overrides.</p>';
+                        const loading = container.querySelector('.smg-field-overrides-loading');
+                        if (loading) loading.style.display = 'none';
+                    }
+                } else {
+                    console.log('SMG: Content already loaded or element not found');
+                }
+            }
+        },
+
+        /**
+         * Load field overrides via AJAX
+         */
+        async loadMetaBoxFieldOverrides(postId, schemaType, container) {
+            console.log('SMG: Loading field overrides', { postId, schemaType });
+            
+            const loading = container.querySelector('.smg-field-overrides-loading');
+            const content = container.querySelector('.smg-field-overrides-content');
+
+            if (loading) loading.style.display = 'flex';
+            if (content) content.innerHTML = '';
+
+            try {
+                const metaBox = document.querySelector('.smg-meta-box');
+                const postType = metaBox?.dataset.postType || 'post';
+
+                console.log('SMG: AJAX request params', { postId, postType, schemaType });
+
+                const formData = new FormData();
+                formData.append('action', 'smg_get_metabox_properties');
+                formData.append('nonce', typeof smgAdmin !== 'undefined' ? smgAdmin.nonce : '');
+                formData.append('post_id', postId);
+                formData.append('post_type', postType);
+                formData.append('schema_type', schemaType);
+
+                const response = await fetch(typeof smgAdmin !== 'undefined' ? smgAdmin.ajaxUrl : ajaxurl, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                });
+
+                const data = await response.json();
+                console.log('SMG: AJAX response', data);
+
+                if (data.success && data.data.html) {
+                    if (content) {
+                        content.innerHTML = data.data.html;
+                        console.log('SMG: Loaded', content.querySelectorAll('.smg-field-override-row').length, 'field rows');
+                        // Animate rows
+                        const rows = content.querySelectorAll('.smg-field-override-row');
+                        rows.forEach((row, index) => {
+                            row.style.opacity = '0';
+                            row.style.transform = 'translateY(10px)';
+                            setTimeout(() => {
+                                row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                                row.style.opacity = '1';
+                                row.style.transform = 'translateY(0)';
+                            }, 30 * index);
+                        });
+                    }
+                } else {
+                    console.warn('SMG: AJAX returned no HTML or error', data);
+                    if (content) {
+                        content.innerHTML = `<p class="smg-notice"><span class="dashicons dashicons-warning"></span> ${data.data?.message || 'Failed to load fields'}</p>`;
+                    }
+                }
+            } catch (error) {
+                console.error('SMG: Failed to load field overrides:', error);
+                if (content) {
+                    content.innerHTML = '<p class="smg-notice"><span class="dashicons dashicons-warning"></span> Failed to load fields</p>';
+                }
+            } finally {
+                if (loading) loading.style.display = 'none';
+            }
+        },
+
+        /**
+         * Handle override type radio change
+         */
+        handleOverrideTypeChange(e) {
+            const radio = e.target;
+            const row = radio.closest('.smg-field-override-row');
+            const property = row?.dataset.property;
+            const type = radio.value;
+
+            if (!row || !property) return;
+
+            const fieldSelect = row.querySelector('.smg-override-field-select');
+            const customInput = row.querySelector('.smg-override-custom-input');
+
+            // Show/hide appropriate input
+            if (fieldSelect) {
+                fieldSelect.style.display = type === 'field' ? '' : 'none';
+            }
+            if (customInput) {
+                customInput.style.display = type === 'custom' ? '' : 'none';
+            }
+
+            // Update overrides JSON
+            this.updateOverridesJson();
+        },
+
+        /**
+         * Handle override value change
+         */
+        handleOverrideValueChange(e) {
+            this.updateOverridesJson();
+        },
+
+        /**
+         * Update the hidden JSON field with current overrides
+         */
+        updateOverridesJson() {
+            const hiddenField = document.getElementById('smg_field_overrides_json');
+            if (!hiddenField) return;
+
+            const overrides = {};
+            const rows = document.querySelectorAll('.smg-field-override-row');
+
+            rows.forEach(row => {
+                const property = row.dataset.property;
+                if (!property) return;
+
+                const selectedRadio = row.querySelector('.smg-override-type-radio:checked');
+                const type = selectedRadio?.value || 'auto';
+
+                if (type === 'auto') {
+                    // Don't include auto in overrides
+                    return;
+                }
+
+                let value = '';
+                if (type === 'field') {
+                    const select = row.querySelector('.smg-override-select');
+                    value = select?.value || '';
+                } else if (type === 'custom') {
+                    const input = row.querySelector('.smg-override-input');
+                    const textarea = row.querySelector('.smg-override-textarea');
+                    value = input?.value || textarea?.value || '';
+                }
+
+                if (value) {
+                    overrides[property] = { type, value };
+                }
+            });
+
+            hiddenField.value = JSON.stringify(overrides);
+        },
+
+        /**
+         * Handle open preview modal
+         */
+        async handleOpenPreviewModal(e) {
+            e.preventDefault();
+            const modal = document.getElementById('smg-preview-modal');
+            if (!modal) return;
+
+            const metaBox = document.querySelector('.smg-meta-box');
+            const postId = metaBox?.dataset.postId;
+
+            if (!postId) return;
+
+            const preview = modal.querySelector('.smg-schema-preview-modal');
+            if (preview) {
+                preview.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.loading 
+                    ? smgAdmin.strings.loading 
+                    : 'Loading...';
+            }
+
+            // Show modal
+            modal.style.display = 'flex';
+            modal.offsetHeight; // Force reflow
+            modal.classList.add('smg-modal-open');
+            document.body.style.overflow = 'hidden';
+
+            // Load preview
+            try {
+                const response = await this.fetchPreview(postId);
+                if (response.success && preview) {
+                    preview.textContent = response.data.json;
+                    if (response.data.validation) {
+                        this.showValidation(response.data.validation);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load preview:', error);
+                if (preview) {
+                    preview.textContent = 'Failed to load preview';
+                }
+            }
+        },
+
+        /**
+         * Close preview modal
+         */
+        closePreviewModal() {
+            const modal = document.getElementById('smg-preview-modal');
+            if (!modal || modal.style.display === 'none') return;
+
+            modal.classList.remove('smg-modal-open');
+
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, this.config.animationDuration);
+
             document.body.style.overflow = '';
         },
 
