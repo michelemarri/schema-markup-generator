@@ -255,6 +255,14 @@ abstract class AbstractSchema implements SchemaInterface
         $fieldKey = $mapping[$property];
         $value = null;
 
+        // Handle schema type selection (for additionalType)
+        if (is_string($fieldKey) && str_starts_with($fieldKey, 'schema:')) {
+            $schemaType = substr($fieldKey, 7); // Remove 'schema:' prefix
+            
+            // Return the schema type (will be converted to URL in normalizeAdditionalType)
+            return apply_filters('smg_sanitize_mapped_value', $schemaType, $property, $fieldKey, $post);
+        }
+
         // Handle custom literal values (from per-post overrides)
         if (is_string($fieldKey) && str_starts_with($fieldKey, 'custom:')) {
             $value = substr($fieldKey, 7); // Remove 'custom:' prefix
@@ -545,18 +553,18 @@ abstract class AbstractSchema implements SchemaInterface
      *
      * @return array The additionalType property definition
      */
+    /**
+     * Get the additionalType property definition
+     *
+     * NOTE: additionalType is now handled at the post type level (next to schema type selector)
+     * and NOT in the field mapping table. This method returns an empty array.
+     * The additionalType value is stored in smg_field_mappings with 'schema:' prefix.
+     *
+     * @return array Empty array - additionalType is no longer shown in field mapping
+     */
     public static function getAdditionalTypeDefinition(): array
     {
-        return [
-            'additionalType' => [
-                'type' => 'text',
-                'description' => __('Additional Schema.org type for more specific classification.', 'schema-markup-generator'),
-                'description_long' => __('Specifies an additional, more specific Schema.org type. Google, Bing, and LLMs require this to be a full URL (e.g., https://schema.org/MobileApplication). You can enter just the type name (e.g., MobileApplication) and it will be automatically converted to the full URL.', 'schema-markup-generator'),
-                'example' => __('MobileApplication, EducationalOccupationalProgram, TechArticle, HowToDirection', 'schema-markup-generator'),
-                'schema_url' => 'https://schema.org/additionalType',
-                'placeholder' => 'https://schema.org/TypeName',
-            ],
-        ];
+        return [];
     }
 }
 

@@ -9,7 +9,7 @@ Automatic schema.org structured data generation for WordPress, optimized for sea
 ## Features
 
 - **Auto-Discovery** - Automatically detects all post types, custom fields, and taxonomies
-- **17 Schema Types** - Article, Product, Organization, Person, FAQ, HowTo, Event, Recipe, Review, Course, LearningResource, WebApplication and more
+- **18 Schema Types** - Article, Product, Organization, Person, FAQ, HowTo, Event, Recipe, Review, Course, LearningResource, WebApplication, FinancialProduct and more
 - **additionalType Support** - Add more specific Schema.org types to any schema (e.g., add "MobileApplication" to SoftwareApplication)
 - **Smart Schema Suggestions** - Recommends schema types based on post type names
 - **Property Documentation** - Click any property for detailed description, examples, and schema.org link
@@ -64,6 +64,7 @@ composer install
 | Instructional | FAQPage, HowTo, Recipe, Course, LearningResource |
 | Media & Events | Event, VideoObject |
 | Technical | SoftwareApplication, WebApplication, WebSite, BreadcrumbList |
+| Financial | FinancialProduct |
 
 ## Configuration
 
@@ -234,6 +235,18 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - [Metodo.dev](https://metodo.dev)
 
 ## Changelog
+
+### 1.29.0
+- **New**: FinancialProduct schema type - for loans, mortgages, bank accounts, credit cards, insurance policies, and investment products
+- **New**: Supports key financial properties: interestRate, annualPercentageRate (TAEG/APR), feesAndCommissionsSpecification, loanTerm, amount
+- **New**: 20+ predefined categories for financial products (Loan, MortgageLoan, CreditCard, SavingsAccount, Insurance, etc.)
+
+### 1.28.0
+- **New**: `additionalType` dropdown moved next to the main schema type selector for better UX
+- **New**: Select any schema type (Article, Product, WebApplication, etc.) as an additional type directly from the header row
+- **Improved**: `additionalType` no longer appears in the field mapping table - cleaner interface
+- **Improved**: Auto-saves when you change the additional type, just like the main schema type
+- **Note**: Schema types are automatically converted to full Schema.org URLs (e.g., `WebApplication` → `https://schema.org/WebApplication`)
 
 ### 1.27.1
 - **Fixed**: WebApplication schema now includes `additionalType` property in field mapping

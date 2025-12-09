@@ -21,6 +21,7 @@ use Metodo\SchemaMarkupGenerator\Schema\Types\CourseSchema;
 use Metodo\SchemaMarkupGenerator\Schema\Types\LearningResourceSchema;
 use Metodo\SchemaMarkupGenerator\Schema\Types\SoftwareAppSchema;
 use Metodo\SchemaMarkupGenerator\Schema\Types\WebApplicationSchema;
+use Metodo\SchemaMarkupGenerator\Schema\Types\FinancialProductSchema;
 
 /**
  * Schema Factory
@@ -106,6 +107,9 @@ class SchemaFactory
             // Technical
             'SoftwareApplication' => SoftwareAppSchema::class,
             'WebApplication' => WebApplicationSchema::class,
+
+            // Financial
+            'FinancialProduct' => FinancialProductSchema::class,
         ];
 
         foreach ($defaultTypes as $type => $class) {
@@ -244,6 +248,9 @@ class SchemaFactory
                 'WebApplication' => __('Web Application', 'schema-markup-generator'),
                 'WebSite' => __('Website', 'schema-markup-generator'),
                 'BreadcrumbList' => __('Breadcrumb', 'schema-markup-generator'),
+            ],
+            __('Financial', 'schema-markup-generator') => [
+                'FinancialProduct' => __('Financial Product', 'schema-markup-generator'),
             ],
         ];
     }

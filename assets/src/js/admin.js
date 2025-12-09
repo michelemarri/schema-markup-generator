@@ -83,6 +83,13 @@
                 }
             });
 
+            // Additional type change (auto-save)
+            document.addEventListener('change', (e) => {
+                if (e.target.classList.contains('smg-additional-type-select')) {
+                    this.handleAdditionalTypeChange(e);
+                }
+            });
+
             // Toggle field overrides (metabox)
             document.addEventListener('click', (e) => {
                 if (e.target.closest('.smg-toggle-overrides')) {
@@ -619,6 +626,47 @@
                 if (row) {
                     row.classList.remove('smg-saving');
                 }
+                this.showToast(
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saveFailed
+                        ? smgAdmin.strings.saveFailed
+                        : 'Failed to save',
+                    'error'
+                );
+            }
+        },
+
+        /**
+         * Handle additional type change
+         * 
+         * Saves the additional type (additionalType) for a post type
+         */
+        async handleAdditionalTypeChange(e) {
+            const select = e.target;
+            const card = select.closest('.smg-post-type-card');
+            const postType = card?.dataset.postType || select.dataset.postType;
+
+            if (!postType) return;
+
+            const additionalType = select.value; // Already has 'schema:' prefix or is empty
+
+            try {
+                await this.saveFieldMapping(postType, 'additionalType', additionalType);
+
+                // Visual feedback
+                select.classList.add('smg-saved');
+                setTimeout(() => {
+                    select.classList.remove('smg-saved');
+                }, 1500);
+                
+                // Show toast notification
+                this.showToast(
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saved 
+                        ? smgAdmin.strings.saved 
+                        : 'Saved',
+                    'success'
+                );
+            } catch (error) {
+                console.error('Failed to save additional type:', error);
                 this.showToast(
                     typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saveFailed
                         ? smgAdmin.strings.saveFailed
@@ -1560,7 +1608,7 @@
 
                 let value = '';
                 if (type === 'field') {
-                    const select = row.querySelector('.smg-override-select');
+                    const select = row.querySelector('.smg-override-field-select .smg-override-select');
                     value = select?.value || '';
                 } else if (type === 'custom') {
                     const input = row.querySelector('.smg-override-input');

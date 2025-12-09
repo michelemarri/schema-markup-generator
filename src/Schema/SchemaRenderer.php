@@ -303,13 +303,13 @@ class SchemaRenderer
      * Process field overrides from the new format
      *
      * Converts the new format:
-     * ['property' => ['type' => 'field|custom', 'value' => '...']]
+     * ['property' => ['type' => 'field|custom|schema', 'value' => '...']]
      * 
      * To the standard mapping format:
      * ['property' => 'field_key_or_custom_value']
      * 
-     * Custom values are prefixed with 'custom:' so they can be handled
-     * differently in the schema build process.
+     * Custom values are prefixed with 'custom:' and schema types with 'schema:'
+     * so they can be handled differently in the schema build process.
      *
      * @param array $overrides Field overrides from post meta
      * @return array Processed mapping array
@@ -334,6 +334,9 @@ class SchemaRenderer
             if ($type === 'custom') {
                 // Prefix custom values so they're treated as literal values
                 $mapping[$property] = 'custom:' . $value;
+            } elseif ($type === 'schema') {
+                // Prefix schema types for additionalType handling
+                $mapping[$property] = 'schema:' . $value;
             } else {
                 // 'field' type - use the field key directly
                 $mapping[$property] = $value;

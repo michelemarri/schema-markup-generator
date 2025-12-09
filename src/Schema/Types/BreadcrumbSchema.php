@@ -267,7 +267,7 @@ class BreadcrumbSchema extends AbstractSchema
                 'schema_url' => 'https://schema.org/BreadcrumbList',
                 'auto' => 'hierarchy',
             ],
-        ];
+        ]);
     }
 }
 

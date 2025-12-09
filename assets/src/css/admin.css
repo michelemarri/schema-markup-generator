@@ -692,7 +692,19 @@
 }
 
 .smg-post-type-schema {
-  @apply min-w-[220px];
+  @apply min-w-[200px];
+}
+
+.smg-post-type-additional {
+  @apply min-w-[180px];
+}
+
+.smg-post-type-additional .smg-additional-type-select {
+  @apply text-gray-500;
+}
+
+.smg-post-type-additional .smg-additional-type-select:has(option:checked:not([value=""])) {
+  @apply text-gray-900 font-medium;
 }
 
 .smg-post-type-fields {

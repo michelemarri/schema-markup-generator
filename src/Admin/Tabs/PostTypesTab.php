@@ -184,6 +184,28 @@ class PostTypesTab extends AbstractTab
                                     <?php endforeach; ?>
                                 </select>
                             </div>
+                            <div class="smg-post-type-additional">
+                                <?php 
+                                $currentAdditionalType = $currentFieldMapping['additionalType'] ?? '';
+                                $selectedAdditionalType = str_starts_with($currentAdditionalType, 'schema:') ? substr($currentAdditionalType, 7) : '';
+                                ?>
+                                <select name="smg_field_mappings[<?php echo esc_attr($postType); ?>][additionalType]"
+                                        class="smg-select smg-additional-type-select"
+                                        data-post-type="<?php echo esc_attr($postType); ?>"
+                                        title="<?php esc_attr_e('Additional Type (optional)', 'schema-markup-generator'); ?>">
+                                    <option value=""><?php esc_html_e('+ Additional Type', 'schema-markup-generator'); ?></option>
+                                    <?php foreach ($schemaTypes as $group => $types): ?>
+                                        <optgroup label="<?php echo esc_attr($group); ?>">
+                                            <?php foreach ($types as $type => $label): ?>
+                                                <option value="schema:<?php echo esc_attr($type); ?>"
+                                                        <?php selected($selectedAdditionalType, $type); ?>>
+                                                    <?php echo esc_html($label); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </optgroup>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
                             <button type="button" class="smg-toggle-fields button button-secondary"
                                     aria-expanded="false">
                                 <?php esc_html_e('Field Mapping', 'schema-markup-generator'); ?>
