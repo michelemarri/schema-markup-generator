@@ -296,23 +296,11 @@ class CourseSchema extends AbstractSchema
     }
 
     /**
-     * Get default currency from integrations or fallback to EUR
+     * Get default currency from integrations or fallback to USD
      */
     private function getDefaultCurrency(): string
     {
-        // Try WooCommerce
-        if (function_exists('get_woocommerce_currency')) {
-            return get_woocommerce_currency();
-        }
-
-        // Try MemberPress
-        if (class_exists('MeprOptions')) {
-            $options = \MeprOptions::fetch();
-            return $options->currency_code ?? 'EUR';
-        }
-
-        // Fallback to EUR
-        return 'EUR';
+        return $this->getSiteCurrency();
     }
 
     /**

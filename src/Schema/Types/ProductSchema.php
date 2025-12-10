@@ -112,7 +112,7 @@ class ProductSchema extends AbstractSchema
      */
     private function buildOffers(WP_Post $post, array $mapping, mixed $price): array
     {
-        $priceCurrency = $this->getMappedValue($post, $mapping, 'priceCurrency') ?: 'EUR';
+        $priceCurrency = $this->getMappedValue($post, $mapping, 'priceCurrency') ?: $this->getSiteCurrency();
 
         $offers = [
             '@type' => 'Offer',

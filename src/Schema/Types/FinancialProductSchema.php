@@ -107,7 +107,7 @@ class FinancialProductSchema extends AbstractSchema
         // Loan/Credit specific properties
         $loanAmount = $this->getMappedValue($post, $mapping, 'amount');
         if ($loanAmount) {
-            $currency = $this->getMappedValue($post, $mapping, 'currency') ?: 'EUR';
+            $currency = $this->getMappedValue($post, $mapping, 'currency') ?: $this->getSiteCurrency();
             $data['amount'] = [
                 '@type' => 'MonetaryAmount',
                 'value' => (float) $loanAmount,
@@ -163,7 +163,7 @@ class FinancialProductSchema extends AbstractSchema
             return null;
         }
 
-        $currency = $this->getMappedValue($post, $mapping, 'priceCurrency') ?: 'EUR';
+        $currency = $this->getMappedValue($post, $mapping, 'priceCurrency') ?: $this->getSiteCurrency();
 
         $offers = [
             '@type' => 'Offer',

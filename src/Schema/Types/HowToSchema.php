@@ -63,7 +63,7 @@ class HowToSchema extends AbstractSchema
         if ($estimatedCost) {
             $data['estimatedCost'] = [
                 '@type' => 'MonetaryAmount',
-                'currency' => $this->getMappedValue($post, $mapping, 'currency') ?: 'EUR',
+                'currency' => $this->getMappedValue($post, $mapping, 'currency') ?: $this->getSiteCurrency(),
                 'value' => (float) $estimatedCost,
             ];
         }

@@ -359,16 +359,31 @@ abstract class AbstractSchema implements SchemaInterface
 
     /**
      * Get site currency from available sources
+     * 
+     * Checks integration settings to determine which source to use.
+     * Only pulls currency from plugins that have their integration enabled.
      */
     protected function getSiteCurrency(): string
     {
-        // Try WooCommerce first
-        if (function_exists('get_woocommerce_currency')) {
+        $integrationSettings = get_option('smg_integrations_settings', []);
+        
+        // Try WooCommerce if integration is enabled (default: true for backwards compatibility)
+        $wooEnabled = $integrationSettings['integration_woocommerce_enabled'] ?? true;
+        if ($wooEnabled && function_exists('get_woocommerce_currency')) {
             return get_woocommerce_currency();
         }
 
-        // Default to EUR
-        return 'EUR';
+        // Try MemberPress if integration is enabled (default: true for backwards compatibility)
+        $meprEnabled = $integrationSettings['integration_memberpress_memberships_enabled'] ?? true;
+        if ($meprEnabled && class_exists('MeprOptions')) {
+            $options = \MeprOptions::fetch();
+            if (isset($options->currency_code) && !empty($options->currency_code)) {
+                return $options->currency_code;
+            }
+        }
+
+        // Default to USD
+        return 'USD';
     }
 
     /**

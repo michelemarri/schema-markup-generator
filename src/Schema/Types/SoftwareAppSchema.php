@@ -165,7 +165,7 @@ class SoftwareAppSchema extends AbstractSchema
         $offers = [
             '@type' => 'Offer',
             'price' => (float) $price,
-            'priceCurrency' => $this->getMappedValue($post, $mapping, 'priceCurrency') ?: 'EUR',
+            'priceCurrency' => $this->getMappedValue($post, $mapping, 'priceCurrency') ?: $this->getSiteCurrency(),
         ];
 
         if ((float) $price === 0.0) {

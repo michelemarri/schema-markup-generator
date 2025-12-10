@@ -192,7 +192,7 @@ class EventSchema extends AbstractSchema
         $offers = [
             '@type' => 'Offer',
             'price' => (float) $price,
-            'priceCurrency' => $this->getMappedValue($post, $mapping, 'priceCurrency') ?: 'EUR',
+            'priceCurrency' => $this->getMappedValue($post, $mapping, 'priceCurrency') ?: $this->getSiteCurrency(),
             'url' => $this->getMappedValue($post, $mapping, 'ticketUrl') ?: $this->getPostUrl($post),
         ];
 

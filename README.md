@@ -236,6 +236,12 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.29.1
+- **Fixed**: Currency now auto-detected from MemberPress/WooCommerce settings in all schema types
+- **Fixed**: Product, Event, SoftwareApp, WebApplication, HowTo, FinancialProduct schemas now use site currency instead of hardcoded EUR fallback
+- **Fixed**: Currency detection now respects integration enabled/disabled settings - only reads from active integrations
+- **Changed**: Default fallback currency changed from EUR to USD when no ecommerce plugin is detected
+
 ### 1.29.0
 - **New**: FinancialProduct schema type - for loans, mortgages, bank accounts, credit cards, insurance policies, and investment products
 - **New**: Supports key financial properties: interestRate, annualPercentageRate (TAEG/APR), feesAndCommissionsSpecification, loanTerm, amount
