@@ -69,6 +69,13 @@
                 }
             });
 
+            // Taxonomy schema type change (auto-save)
+            document.addEventListener('change', (e) => {
+                if (e.target.classList.contains('smg-taxonomy-schema-select')) {
+                    this.handleTaxonomySchemaChange(e);
+                }
+            });
+
             // Schema type change in metabox (load field overrides)
             document.addEventListener('change', (e) => {
                 if (e.target.classList.contains('smg-schema-type-select')) {
@@ -294,6 +301,45 @@
                     this.closeIntegrationModal(integrationModal);
                 }
             });
+
+            // Calculate course durations button
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('#smg-calculate-durations-btn')) {
+                    this.handleCalculateCourseDurations(e);
+                }
+            });
+
+            // YouTube API key management
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('#smg-save-youtube-api')) {
+                    this.handleSaveYouTubeApiKey(e);
+                }
+                if (e.target.closest('#smg-test-youtube-api')) {
+                    this.handleTestYouTubeApiKey(e);
+                }
+                if (e.target.closest('#smg-remove-youtube-api')) {
+                    this.handleRemoveYouTubeApiKey(e);
+                }
+                if (e.target.closest('#smg-change-youtube-api')) {
+                    this.handleChangeYouTubeApiKey(e);
+                }
+            });
+
+            // Integration settings auto-save (checkboxes and toggles in modals AND cards)
+            document.addEventListener('change', (e) => {
+                const input = e.target;
+                
+                // Check if input is inside an integration modal OR integration card
+                const modal = input.closest('.smg-integration-modal');
+                const card = input.closest('.smg-integration-card');
+                
+                if (!modal && !card) return;
+
+                // Handle checkboxes and toggles
+                if (input.type === 'checkbox' && input.name && input.name.startsWith('smg_integrations_settings')) {
+                    this.handleIntegrationSettingChange(input);
+                }
+            });
         },
 
         /**
@@ -310,7 +356,7 @@
          */
         initAnimations() {
             // Animate cards on page load
-            const cards = document.querySelectorAll('.smg-card, .smg-post-type-card, .smg-integration-card, .smg-step');
+            const cards = document.querySelectorAll('.smg-card, .smg-post-type-card, .smg-taxonomy-card, .smg-integration-card, .smg-step');
             cards.forEach((card, index) => {
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(10px)';
@@ -542,8 +588,8 @@
 
                     // Show save success toast notification
                     this.showToast(
-                        typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saved 
-                            ? smgAdmin.strings.saved 
+                        typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saved
+                            ? smgAdmin.strings.saved
                             : 'Saved',
                         'success'
                     );
@@ -566,8 +612,8 @@
                 `;
                 fieldsContainer.style.opacity = '1';
                 this.showToast(
-                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saveFailed 
-                        ? smgAdmin.strings.saveFailed 
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saveFailed
+                        ? smgAdmin.strings.saveFailed
                         : 'Failed to save',
                     'error'
                 );
@@ -613,11 +659,11 @@
                         row.classList.remove('smg-saved');
                     }, 1500);
                 }
-                
+
                 // Show toast notification
                 this.showToast(
-                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saved 
-                        ? smgAdmin.strings.saved 
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saved
+                        ? smgAdmin.strings.saved
                         : 'Saved',
                     'success'
                 );
@@ -657,11 +703,11 @@
                 setTimeout(() => {
                     select.classList.remove('smg-saved');
                 }, 1500);
-                
+
                 // Show toast notification
                 this.showToast(
-                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saved 
-                        ? smgAdmin.strings.saved 
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saved
+                        ? smgAdmin.strings.saved
                         : 'Saved',
                     'success'
                 );
@@ -674,6 +720,120 @@
                     'error'
                 );
             }
+        },
+
+        /**
+         * Handle taxonomy schema type change
+         * 
+         * Auto-saves when taxonomy schema type changes
+         */
+        async handleTaxonomySchemaChange(e) {
+            const select = e.target;
+            const taxonomy = select.dataset.taxonomy;
+            const schemaType = select.value;
+            const card = select.closest('.smg-taxonomy-card');
+
+            if (!card) return;
+
+            // Update mapped state
+            if (schemaType) {
+                card.classList.add('smg-mapped');
+            } else {
+                card.classList.remove('smg-mapped');
+            }
+
+            // Show saving state
+            card.classList.add('smg-saving');
+
+            try {
+                await this.saveTaxonomySchemaMapping(taxonomy, schemaType);
+
+                // Update schema info section
+                const infoSection = card.querySelector('.smg-taxonomy-schema-info');
+                if (schemaType) {
+                    if (infoSection) {
+                        infoSection.innerHTML = `
+                            <span class="smg-schema-badge">
+                                <span class="dashicons dashicons-yes-alt"></span>
+                                ${this.escapeHtml(schemaType)}
+                            </span>
+                            <span class="smg-schema-hint">
+                                ${typeof smgAdmin !== 'undefined' && smgAdmin.strings?.schemaOnArchive
+                                ? smgAdmin.strings.schemaOnArchive
+                                : 'Schema will be rendered on taxonomy archive pages'}
+                            </span>
+                        `;
+                        infoSection.style.display = '';
+                    } else {
+                        // Create info section if it doesn't exist
+                        const header = card.querySelector('.smg-taxonomy-header');
+                        if (header) {
+                            const newInfo = document.createElement('div');
+                            newInfo.className = 'smg-taxonomy-schema-info';
+                            newInfo.innerHTML = `
+                                <span class="smg-schema-badge">
+                                    <span class="dashicons dashicons-yes-alt"></span>
+                                    ${this.escapeHtml(schemaType)}
+                                </span>
+                                <span class="smg-schema-hint">
+                                    ${typeof smgAdmin !== 'undefined' && smgAdmin.strings?.schemaOnArchive
+                                    ? smgAdmin.strings.schemaOnArchive
+                                    : 'Schema will be rendered on taxonomy archive pages'}
+                                </span>
+                            `;
+                            header.after(newInfo);
+                        }
+                    }
+                } else if (infoSection) {
+                    infoSection.style.display = 'none';
+                }
+
+                // Show success toast
+                this.showToast(
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saved
+                        ? smgAdmin.strings.saved
+                        : 'Saved',
+                    'success'
+                );
+            } catch (error) {
+                console.error('Failed to save taxonomy schema:', error);
+                this.showToast(
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saveFailed
+                        ? smgAdmin.strings.saveFailed
+                        : 'Failed to save',
+                    'error'
+                );
+            } finally {
+                card.classList.remove('smg-saving');
+            }
+        },
+
+        /**
+         * Save taxonomy schema mapping via AJAX
+         */
+        saveTaxonomySchemaMapping(taxonomy, schemaType) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('action', 'smg_save_taxonomy_mapping');
+                formData.append('nonce', typeof smgAdmin !== 'undefined' ? smgAdmin.nonce : '');
+                formData.append('taxonomy', taxonomy);
+                formData.append('schema_type', schemaType);
+
+                fetch(typeof smgAdmin !== 'undefined' ? smgAdmin.ajaxUrl : ajaxurl, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            resolve(data);
+                        } else {
+                            reject(new Error(data.data?.message || 'Save failed'));
+                        }
+                    })
+                    .catch(error => reject(error));
+            });
         },
 
         /**
@@ -1245,12 +1405,12 @@
                 if (response.success) {
                     schemaPreview.textContent = response.data.json;
                     postTitleEl.textContent = response.data.post_title;
-                    
+
                     if (response.data.edit_url) {
                         editLink.href = response.data.edit_url;
                         editLink.style.display = 'inline-flex';
                     }
-                    
+
                     if (response.data.view_url) {
                         viewLink.href = response.data.view_url;
                         viewLink.style.display = 'inline-flex';
@@ -1304,7 +1464,7 @@
 
                 // Visual feedback
                 const originalHtml = button.innerHTML;
-                button.innerHTML = '<span class="dashicons dashicons-yes"></span> ' + 
+                button.innerHTML = '<span class="dashicons dashicons-yes"></span> ' +
                     (typeof smgAdmin !== 'undefined' && smgAdmin.strings?.copied ? smgAdmin.strings.copied : 'Copied');
                 button.classList.add('smg-btn-success');
 
@@ -1314,8 +1474,8 @@
                 }, 2000);
 
                 this.showToast(
-                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.copied 
-                        ? smgAdmin.strings.copied 
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.copied
+                        ? smgAdmin.strings.copied
                         : 'Copied to clipboard',
                     'success'
                 );
@@ -1378,8 +1538,8 @@
 
             // If empty, get the default type
             if (!schemaType) {
-                const mappings = typeof smgAdmin !== 'undefined' && smgAdmin.postTypeMappings 
-                    ? smgAdmin.postTypeMappings 
+                const mappings = typeof smgAdmin !== 'undefined' && smgAdmin.postTypeMappings
+                    ? smgAdmin.postTypeMappings
                     : {};
                 schemaType = mappings[postType] || '';
             }
@@ -1412,7 +1572,7 @@
         async handleToggleOverrides(e) {
             e.preventDefault();
             console.log('SMG: Toggle overrides clicked');
-            
+
             const button = e.target.closest('.smg-toggle-overrides');
             const section = button.closest('.smg-field-overrides-section');
             const container = section.querySelector('.smg-field-overrides-container');
@@ -1426,15 +1586,15 @@
             if (isExpanded) {
                 this.slideUp(container);
                 if (toggleText) {
-                    toggleText.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.show 
-                        ? smgAdmin.strings.show 
+                    toggleText.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.show
+                        ? smgAdmin.strings.show
                         : 'Show';
                 }
             } else {
                 this.slideDown(container);
                 if (toggleText) {
-                    toggleText.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.hide 
-                        ? smgAdmin.strings.hide 
+                    toggleText.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.hide
+                        ? smgAdmin.strings.hide
                         : 'Hide';
                 }
 
@@ -1442,18 +1602,18 @@
                 const content = container.querySelector('.smg-field-overrides-content');
                 console.log('SMG: content element', content);
                 console.log('SMG: content.innerHTML.trim()', content?.innerHTML?.trim());
-                
+
                 if (content && !content.innerHTML.trim()) {
                     const metaBox = button.closest('.smg-meta-box');
                     const postId = metaBox?.dataset.postId;
                     const postType = metaBox?.dataset.postType;
-                    
+
                     console.log('SMG: postId =', postId, 'postType =', postType);
-                    
+
                     // Get schema type from hidden field or from select
                     let schemaType = document.getElementById('smg_current_schema_type')?.value || '';
                     console.log('SMG: schemaType from hidden field =', schemaType);
-                    
+
                     // If empty, try to get from select's default
                     if (!schemaType) {
                         const select = document.getElementById('smg_schema_type');
@@ -1461,8 +1621,8 @@
                         // Check if there's a default in the option text
                         if (select && !select.value) {
                             // Get default from post type mappings
-                            schemaType = typeof smgAdmin !== 'undefined' && smgAdmin.postTypeMappings?.[postType] 
-                                ? smgAdmin.postTypeMappings[postType] 
+                            schemaType = typeof smgAdmin !== 'undefined' && smgAdmin.postTypeMappings?.[postType]
+                                ? smgAdmin.postTypeMappings[postType]
                                 : '';
                             console.log('SMG: schemaType from mappings =', schemaType);
                         }
@@ -1490,7 +1650,7 @@
          */
         async loadMetaBoxFieldOverrides(postId, schemaType, container) {
             console.log('SMG: Loading field overrides', { postId, schemaType });
-            
+
             const loading = container.querySelector('.smg-field-overrides-loading');
             const content = container.querySelector('.smg-field-overrides-content');
 
@@ -1639,8 +1799,8 @@
 
             const preview = modal.querySelector('.smg-schema-preview-modal');
             if (preview) {
-                preview.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.loading 
-                    ? smgAdmin.strings.loading 
+                preview.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.loading
+                    ? smgAdmin.strings.loading
                     : 'Loading...';
             }
 
@@ -1862,6 +2022,451 @@
 
             // Restore body scrolling
             document.body.style.overflow = '';
+        },
+
+        /**
+         * Handle integration setting change (auto-save)
+         */
+        async handleIntegrationSettingChange(input) {
+            // Extract setting key from input name
+            // Format: smg_integrations_settings[setting_key] or smg_integrations_settings[setting_key][]
+            const nameMatch = input.name.match(/smg_integrations_settings\[([^\]]+)\]/);
+            if (!nameMatch) return;
+
+            const settingKey = nameMatch[1];
+            let settingValue;
+
+            // Check if it's an array input (like rankmath_takeover_types)
+            if (input.name.endsWith('[]')) {
+                // Collect all checked values for this array setting
+                const allCheckboxes = document.querySelectorAll(`input[name="${input.name}"]`);
+                settingValue = Array.from(allCheckboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value);
+            } else {
+                // Simple checkbox/toggle
+                settingValue = input.checked ? '1' : '0';
+            }
+
+            // Show saving state
+            const row = input.closest('.smg-modal-section, .smg-toggle, label');
+            if (row) {
+                row.classList.add('smg-saving');
+            }
+
+            try {
+                await this.saveIntegrationSetting(settingKey, settingValue);
+
+                // Show success feedback
+                if (row) {
+                    row.classList.remove('smg-saving');
+                    row.classList.add('smg-saved');
+                    setTimeout(() => {
+                        row.classList.remove('smg-saved');
+                    }, 1500);
+                }
+
+                // Show toast notification
+                this.showToast(
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saved
+                        ? smgAdmin.strings.saved
+                        : 'Saved',
+                    'success'
+                );
+
+                // Special handling: Update card status when integration enabled/disabled
+                if (settingKey.startsWith('integration_') && settingKey.endsWith('_enabled')) {
+                    this.updateIntegrationCardStatus(settingKey, input.checked);
+                }
+            } catch (error) {
+                console.error('Failed to save integration setting:', error);
+                if (row) {
+                    row.classList.remove('smg-saving');
+                }
+                this.showToast(
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saveFailed
+                        ? smgAdmin.strings.saveFailed
+                        : 'Failed to save',
+                    'error'
+                );
+            }
+        },
+
+        /**
+         * Save integration setting via AJAX
+         */
+        saveIntegrationSetting(settingKey, settingValue) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('action', 'smg_save_integration_setting');
+                formData.append('nonce', typeof smgAdmin !== 'undefined' ? smgAdmin.nonce : '');
+                formData.append('setting_key', settingKey);
+
+                // Handle array values
+                if (Array.isArray(settingValue)) {
+                    settingValue.forEach(val => {
+                        formData.append('setting_value[]', val);
+                    });
+                    // Also send empty array indicator if no values
+                    if (settingValue.length === 0) {
+                        formData.append('setting_value', '');
+                    }
+                } else {
+                    formData.append('setting_value', settingValue);
+                }
+
+                fetch(typeof smgAdmin !== 'undefined' ? smgAdmin.ajaxUrl : ajaxurl, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            resolve(data);
+                        } else {
+                            reject(new Error(data.data?.message || 'Save failed'));
+                        }
+                    })
+                    .catch(error => reject(error));
+            });
+        },
+
+        /**
+         * Update integration card status after enable/disable toggle
+         */
+        updateIntegrationCardStatus(settingKey, isEnabled) {
+            // Extract integration slug from setting key
+            // Format: integration_[slug]_enabled
+            const match = settingKey.match(/^integration_(.+)_enabled$/);
+            if (!match) return;
+
+            const slug = match[1];
+            const card = document.querySelector(`.smg-integration-card .smg-open-integration-modal[data-integration="${slug}"]`)?.closest('.smg-integration-card');
+
+            if (!card) return;
+
+            // Update card classes
+            if (isEnabled) {
+                card.classList.remove('detected');
+                card.classList.add('active');
+                // Update status badge
+                const badge = card.querySelector('.smg-status-badge');
+                if (badge) {
+                    badge.className = 'smg-status-badge active';
+                    badge.innerHTML = '<span class="dashicons dashicons-yes-alt"></span> Active';
+                }
+            } else {
+                card.classList.remove('active');
+                card.classList.add('detected');
+                // Update status badge
+                const badge = card.querySelector('.smg-status-badge');
+                if (badge) {
+                    badge.className = 'smg-status-badge detected';
+                    badge.innerHTML = '<span class="dashicons dashicons-visibility"></span> Detected';
+                }
+            }
+        },
+
+        /**
+         * Handle calculate course durations button click
+         */
+        async handleCalculateCourseDurations(e) {
+            e.preventDefault();
+
+            const button = document.getElementById('smg-calculate-durations-btn');
+            const progressContainer = document.getElementById('smg-duration-progress');
+            const progressBar = document.getElementById('smg-duration-progress-bar');
+            const statusText = document.getElementById('smg-duration-status');
+            const resultsContainer = document.getElementById('smg-duration-results');
+            const resultsList = document.getElementById('smg-duration-results-list');
+
+            if (!button || !progressContainer || !resultsContainer) return;
+
+            // Hide button and show progress
+            button.classList.add('hidden');
+            progressContainer.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            progressBar.style.width = '5%';
+            
+            // Show spinner (in case it was hidden from previous run)
+            const spinner = progressContainer.querySelector('.smg-spinner');
+            if (spinner) {
+                spinner.classList.remove('hidden');
+            }
+
+            // Progress phases with descriptive messages
+            const progressPhases = [
+                { percent: 5, message: 'Loading MemberPress courses...' },
+                { percent: 15, message: 'Scanning course structure...' },
+                { percent: 25, message: 'Reading lesson content...' },
+                { percent: 40, message: 'Searching for embedded YouTube videos...' },
+                { percent: 55, message: 'Searching for embedded Vimeo videos...' },
+                { percent: 65, message: 'Extracting video IDs...' },
+                { percent: 75, message: 'Fetching durations from YouTube API...' },
+                { percent: 85, message: 'Calculating total course durations...' },
+                { percent: 90, message: 'Saving duration metadata...' },
+            ];
+
+            let currentPhase = 0;
+            statusText.textContent = progressPhases[0].message;
+
+            try {
+                // Animate through progress phases
+                const progressInterval = setInterval(() => {
+                    if (currentPhase < progressPhases.length - 1) {
+                        currentPhase++;
+                        const phase = progressPhases[currentPhase];
+                        progressBar.style.width = phase.percent + '%';
+                        statusText.textContent = phase.message;
+                    }
+                }, 800);
+
+                const response = await fetch(smgAdmin.ajaxUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'smg_calculate_course_durations',
+                        nonce: smgAdmin.nonce,
+                    }),
+                });
+
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+                
+                // Hide spinner when complete
+                const spinner = progressContainer.querySelector('.smg-spinner');
+                if (spinner) {
+                    spinner.classList.add('hidden');
+                }
+
+                const data = await response.json();
+
+                // Log debug info to console for troubleshooting
+                if (data.data?.debug) {
+                    console.group('SMG Course Duration Debug');
+                    console.log('Debug info for first courses:', data.data.debug);
+                    data.data.debug.forEach(courseDebug => {
+                        console.group(`Course: ${courseDebug.course_title}`);
+                        console.log(`Total lessons: ${courseDebug.total_lessons}, With video: ${courseDebug.lessons_with_video}`);
+                        courseDebug.lessons?.forEach(lesson => {
+                            console.log(`Lesson: ${lesson.title}`, {
+                                content_length: lesson.content_length,
+                                has_youtube_text: lesson.has_youtube_text,
+                                youtube_url_found: lesson.youtube_url_found,
+                                duration: lesson.duration_seconds,
+                                content_preview: lesson.content_preview
+                            });
+                        });
+                        console.groupEnd();
+                    });
+                    console.groupEnd();
+                }
+
+                if (data.success) {
+                    statusText.innerHTML = '<span class="dashicons dashicons-yes-alt" style="color: var(--smg-success);"></span> ' + data.data.message;
+
+                    // Build results HTML
+                    let html = '';
+                    if (data.data.courses && data.data.courses.length > 0) {
+                        data.data.courses.forEach(course => {
+                            const hasVideo = course.has_video ? 'has-video' : '';
+                            html += `
+                                <div class="smg-duration-result-item ${hasVideo}">
+                                    <span class="smg-duration-result-title">${this.escapeHtml(course.title)}</span>
+                                    <span class="smg-duration-result-meta">
+                                        <span class="smg-duration-result-lessons">${course.lessons} lessons</span>
+                                        <span class="smg-duration-result-time">${course.duration_formatted}</span>
+                                    </span>
+                                </div>
+                            `;
+                        });
+
+                        // Add summary
+                        html += `
+                            <div class="smg-duration-summary">
+                                <span class="smg-duration-summary-label">
+                                    ${data.data.courses_with_video}/${data.data.total_courses} courses with video
+                                </span>
+                                <span class="smg-duration-summary-value">
+                                    Total: ${data.data.total_duration}
+                                </span>
+                            </div>
+                        `;
+                    } else {
+                        html = '<p class="smg-text-muted text-sm">' + (smgAdmin?.i18n?.no_courses || 'No courses found.') + '</p>';
+                    }
+
+                    resultsList.innerHTML = html;
+                    resultsContainer.classList.remove('hidden');
+                } else {
+                    statusText.innerHTML = '<span class="dashicons dashicons-warning" style="color: var(--smg-error);"></span> ' + (data.data?.message || 'Error calculating durations.');
+                }
+            } catch (error) {
+                console.error('Error calculating durations:', error);
+                statusText.innerHTML = '<span class="dashicons dashicons-warning" style="color: var(--smg-error);"></span> ' + (smgAdmin?.i18n?.error || 'An error occurred.');
+            }
+
+            // Show button again
+            button.classList.remove('hidden');
+        },
+
+        /**
+         * Handle save YouTube API key
+         */
+        async handleSaveYouTubeApiKey(e) {
+            e.preventDefault();
+
+            const button = e.target.closest('#smg-save-youtube-api');
+            const input = document.getElementById('smg-youtube-api-key-input');
+            const resultDiv = document.getElementById('smg-youtube-api-result');
+            const apiKey = input?.value?.trim();
+
+            if (!apiKey) {
+                this.showYouTubeResult(resultDiv, false, 'Please enter an API key.');
+                return;
+            }
+
+            button.disabled = true;
+            button.innerHTML = '<span class="smg-spinner"></span> Verifying...';
+
+            try {
+                const response = await fetch(smgAdmin.ajaxUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'smg_save_youtube_api_key',
+                        nonce: smgAdmin.nonce,
+                        api_key: apiKey,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.showYouTubeResult(resultDiv, true, data.data.message);
+                    // Refresh the page to show the new API key status
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    this.showYouTubeResult(resultDiv, false, data.data?.message || 'Failed to save API key.');
+                }
+            } catch (error) {
+                console.error('YouTube API save error:', error);
+                this.showYouTubeResult(resultDiv, false, 'An error occurred. Please try again.');
+            }
+
+            button.disabled = false;
+            button.innerHTML = '<span class="dashicons dashicons-saved"></span> Save & Test';
+        },
+
+        /**
+         * Handle test YouTube API key
+         */
+        async handleTestYouTubeApiKey(e) {
+            e.preventDefault();
+
+            const button = e.target.closest('#smg-test-youtube-api');
+            button.disabled = true;
+            button.innerHTML = '<span class="smg-spinner"></span> Testing...';
+
+            try {
+                const response = await fetch(smgAdmin.ajaxUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'smg_test_youtube_api_key',
+                        nonce: smgAdmin.nonce,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ ' + data.data.message);
+                } else {
+                    alert('❌ ' + (data.data?.message || 'API key test failed.'));
+                }
+            } catch (error) {
+                console.error('YouTube API test error:', error);
+                alert('❌ An error occurred while testing the API key.');
+            }
+
+            button.disabled = false;
+            button.innerHTML = '<span class="dashicons dashicons-yes"></span> Test API Key';
+        },
+
+        /**
+         * Handle remove YouTube API key
+         */
+        async handleRemoveYouTubeApiKey(e) {
+            e.preventDefault();
+
+            if (!confirm('Are you sure you want to remove the YouTube API key?')) {
+                return;
+            }
+
+            const button = e.target.closest('#smg-remove-youtube-api');
+            button.disabled = true;
+            button.innerHTML = '<span class="smg-spinner"></span> Removing...';
+
+            try {
+                const response = await fetch(smgAdmin.ajaxUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'smg_remove_youtube_api_key',
+                        nonce: smgAdmin.nonce,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ ' + data.data.message);
+                    window.location.reload();
+                } else {
+                    alert('❌ ' + (data.data?.message || 'Failed to remove API key.'));
+                }
+            } catch (error) {
+                console.error('YouTube API remove error:', error);
+                alert('❌ An error occurred while removing the API key.');
+            }
+
+            button.disabled = false;
+            button.innerHTML = '<span class="dashicons dashicons-trash"></span> Remove';
+        },
+
+        /**
+         * Handle change YouTube API key (show input form)
+         */
+        handleChangeYouTubeApiKey(e) {
+            e.preventDefault();
+            const form = document.getElementById('smg-youtube-api-form');
+            if (form) {
+                form.classList.remove('hidden');
+            }
+        },
+
+        /**
+         * Show YouTube API result message
+         */
+        showYouTubeResult(resultDiv, success, message) {
+            if (!resultDiv) return;
+
+            resultDiv.classList.remove('hidden');
+            resultDiv.className = `mt-3 p-3 rounded-lg text-sm ${success ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-800 border border-red-200'}`;
+            resultDiv.innerHTML = `
+                <span class="dashicons ${success ? 'dashicons-yes-alt' : 'dashicons-warning'}" style="color: ${success ? 'var(--smg-success)' : 'var(--smg-error)'};"></span>
+                ${this.escapeHtml(message)}
+            `;
         },
     };
 

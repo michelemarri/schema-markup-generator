@@ -24,6 +24,7 @@ use Metodo\SchemaMarkupGenerator\Integration\ACFIntegration;
 use Metodo\SchemaMarkupGenerator\Integration\MemberPressCoursesIntegration;
 use Metodo\SchemaMarkupGenerator\Integration\MemberPressMembershipIntegration;
 use Metodo\SchemaMarkupGenerator\Integration\WooCommerceIntegration;
+use Metodo\SchemaMarkupGenerator\Integration\YouTubeIntegration;
 use Metodo\SchemaMarkupGenerator\Rest\SchemaEndpoint;
 use Metodo\SchemaMarkupGenerator\Logger\Logger;
 use Metodo\SchemaMarkupGenerator\Updater\GitHubUpdater;
@@ -103,6 +104,7 @@ class Plugin
         $this->services['memberpress_courses_integration'] = new MemberPressCoursesIntegration();
         $this->services['memberpress_membership_integration'] = new MemberPressMembershipIntegration();
         $this->services['woocommerce_integration'] = new WooCommerceIntegration();
+        $this->services['youtube_integration'] = new YouTubeIntegration();
 
         // REST API
         $this->services['rest_endpoint'] = new SchemaEndpoint(
@@ -188,6 +190,7 @@ class Plugin
             'memberpress_courses_integration' => 'integration_memberpress_courses_enabled',
             'memberpress_membership_integration' => 'integration_memberpress_memberships_enabled',
             'woocommerce_integration' => 'integration_woocommerce_enabled',
+            'youtube_integration' => 'integration_youtube_enabled',
         ];
 
         foreach ($integrations as $serviceKey => $settingKey) {
@@ -237,6 +240,8 @@ class Plugin
             add_action('wp_ajax_smg_get_schema_properties', [$this->services['schema_properties_handler'], 'handle']);
             add_action('wp_ajax_smg_save_schema_mapping', [$this->services['mapping_save_handler'], 'handleSaveSchemaMapping']);
             add_action('wp_ajax_smg_save_field_mapping', [$this->services['mapping_save_handler'], 'handleSaveFieldMapping']);
+            add_action('wp_ajax_smg_save_taxonomy_mapping', [$this->services['mapping_save_handler'], 'handleSaveTaxonomyMapping']);
+            add_action('wp_ajax_smg_save_integration_setting', [$this->services['mapping_save_handler'], 'handleSaveIntegrationSetting']);
             add_action('wp_ajax_smg_get_random_example', [$this->services['random_example_handler'], 'handle']);
             add_action('wp_ajax_smg_get_metabox_properties', [$this->services['metabox_properties_handler'], 'handle']);
         }

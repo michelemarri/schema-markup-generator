@@ -38,9 +38,13 @@ class IntegrationsTab extends AbstractTab
         return 'dashicons-admin-plugins';
     }
 
+    /**
+     * Return empty string to disable the form wrapper and Save button
+     * All integration settings are auto-saved via AJAX
+     */
     public function getSettingsGroup(): string
     {
-        return 'smg_integrations';
+        return '';
     }
 
     public function getRegisteredOptions(): array
@@ -74,6 +78,7 @@ class IntegrationsTab extends AbstractTab
             'integration_woocommerce_enabled' => !empty($input['integration_woocommerce_enabled']),
             'integration_memberpress_courses_enabled' => !empty($input['integration_memberpress_courses_enabled']),
             'integration_memberpress_memberships_enabled' => !empty($input['integration_memberpress_memberships_enabled']),
+            'integration_youtube_enabled' => !empty($input['integration_youtube_enabled']),
             // ACF
             'acf_auto_discover' => !empty($input['acf_auto_discover']),
             'acf_include_nested' => !empty($input['acf_include_nested']),
@@ -140,6 +145,17 @@ class IntegrationsTab extends AbstractTab
                     __('Generate Product schemas for MemberPress memberships with pricing, trial info, and registration URLs.', 'schema-markup-generator'),
                     $settings
                 );
+
+                // YouTube API Integration - always show (API key needed)
+                $youtubeIntegration = new \Metodo\SchemaMarkupGenerator\Integration\YouTubeIntegration();
+                $this->renderIntegrationCard(
+                    'YouTube Data API',
+                    true, // Always "detected" since it's an external API
+                    'youtube',
+                    __('Get accurate video durations for Course schemas. Requires free Google API key.', 'schema-markup-generator'),
+                    $settings,
+                    $youtubeIntegration->hasApiKey() // Custom check for API key
+                );
                 ?>
             </div>
 
@@ -160,11 +176,17 @@ class IntegrationsTab extends AbstractTab
      * @param string $slug        Integration slug for settings
      * @param string $description Integration description
      * @param array  $settings    Current settings array
+     * @param bool   $hasApiKey   Optional: for API integrations, whether key is set
      */
-    private function renderIntegrationCard(string $name, bool $detected, string $slug, string $description, array $settings): void
+    private function renderIntegrationCard(string $name, bool $detected, string $slug, string $description, array $settings, ?bool $hasApiKey = null): void
     {
         $isEnabled = $settings['integration_' . $slug . '_enabled'] ?? true;
         $isActive = $detected && $isEnabled;
+        
+        // For API integrations, check if API key is configured
+        if ($hasApiKey !== null) {
+            $isActive = $isEnabled && $hasApiKey;
+        }
         $hasSettings = $this->integrationHasSettings($slug);
 
         // Card class: active (green), detected (neutral), inactive (grey)
@@ -228,7 +250,7 @@ class IntegrationsTab extends AbstractTab
      */
     private function integrationHasSettings(string $slug): bool
     {
-        return in_array($slug, ['rankmath', 'acf', 'woocommerce', 'memberpress_courses'], true);
+        return in_array($slug, ['rankmath', 'acf', 'woocommerce', 'memberpress_courses', 'youtube'], true);
     }
 
     /**
@@ -255,6 +277,11 @@ class IntegrationsTab extends AbstractTab
         // MemberPress Courses Modal
         if (post_type_exists('mpcs-lesson') && ($settings['integration_memberpress_courses_enabled'] ?? true)) {
             $this->renderMemberPressCoursesModal($settings);
+        }
+
+        // YouTube API Modal
+        if ($settings['integration_youtube_enabled'] ?? true) {
+            $this->renderYouTubeModal($settings);
         }
     }
 
@@ -346,8 +373,8 @@ class IntegrationsTab extends AbstractTab
                 </div>
                 <div class="smg-modal-footer">
                     <p class="smg-text-muted text-xs m-0">
-                        <span class="dashicons dashicons-info" style="font-size: 14px; width: 14px; height: 14px;"></span>
-                        <?php esc_html_e('Changes are saved when you click "Save Changes" at the bottom of the page.', 'schema-markup-generator'); ?>
+                        <span class="dashicons dashicons-saved" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                        <?php esc_html_e('Changes are saved automatically.', 'schema-markup-generator'); ?>
                     </p>
                 </div>
             </div>
@@ -430,8 +457,8 @@ class IntegrationsTab extends AbstractTab
                 </div>
                 <div class="smg-modal-footer">
                     <p class="smg-text-muted text-xs m-0">
-                        <span class="dashicons dashicons-info" style="font-size: 14px; width: 14px; height: 14px;"></span>
-                        <?php esc_html_e('Changes are saved when you click "Save Changes" at the bottom of the page.', 'schema-markup-generator'); ?>
+                        <span class="dashicons dashicons-saved" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                        <?php esc_html_e('Changes are saved automatically.', 'schema-markup-generator'); ?>
                     </p>
                 </div>
             </div>
@@ -602,8 +629,8 @@ class IntegrationsTab extends AbstractTab
                 </div>
                 <div class="smg-modal-footer">
                     <p class="smg-text-muted text-xs m-0">
-                        <span class="dashicons dashicons-info" style="font-size: 14px; width: 14px; height: 14px;"></span>
-                        <?php esc_html_e('Changes are saved when you click "Save Changes" at the bottom of the page.', 'schema-markup-generator'); ?>
+                        <span class="dashicons dashicons-saved" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                        <?php esc_html_e('Changes are saved automatically.', 'schema-markup-generator'); ?>
                     </p>
                 </div>
             </div>
@@ -657,6 +684,39 @@ class IntegrationsTab extends AbstractTab
                             </div>
                         </div>
 
+                        <!-- Video Duration Calculator -->
+                        <div class="smg-modal-section">
+                            <h4 class="smg-modal-section-title">
+                                <span class="dashicons dashicons-clock"></span>
+                                <?php esc_html_e('Course Duration Calculator', 'schema-markup-generator'); ?>
+                            </h4>
+                            <p class="smg-text-muted text-sm mb-4">
+                                <?php esc_html_e('Scan all lessons for embedded videos (YouTube/Vimeo) and calculate total course duration for schema.org timeRequired property.', 'schema-markup-generator'); ?>
+                            </p>
+                            <div id="smg-duration-calculator">
+                                <button type="button" id="smg-calculate-durations-btn" class="smg-btn smg-btn-primary">
+                                    <span class="dashicons dashicons-video-alt3"></span>
+                                    <?php esc_html_e('Calculate All Course Durations', 'schema-markup-generator'); ?>
+                                </button>
+                                <div id="smg-duration-progress" class="hidden mt-4">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="smg-spinner"></span>
+                                        <span id="smg-duration-status" class="text-sm"><?php esc_html_e('Calculating...', 'schema-markup-generator'); ?></span>
+                                    </div>
+                                    <div class="smg-progress-bar">
+                                        <div id="smg-duration-progress-bar" class="smg-progress-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div id="smg-duration-results" class="hidden mt-4">
+                                    <h5 class="text-sm font-semibold mb-2">
+                                        <span class="dashicons dashicons-yes-alt" style="color: var(--smg-success);"></span>
+                                        <?php esc_html_e('Results', 'schema-markup-generator'); ?>
+                                    </h5>
+                                    <div id="smg-duration-results-list" class="smg-duration-results-list"></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Integration Status -->
                         <div class="smg-modal-section">
                             <h4 class="smg-modal-section-title">
@@ -690,8 +750,162 @@ class IntegrationsTab extends AbstractTab
                 </div>
                 <div class="smg-modal-footer">
                     <p class="smg-text-muted text-xs m-0">
-                        <span class="dashicons dashicons-info" style="font-size: 14px; width: 14px; height: 14px;"></span>
-                        <?php esc_html_e('Changes are saved when you click "Save Changes" at the bottom of the page.', 'schema-markup-generator'); ?>
+                        <span class="dashicons dashicons-saved" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                        <?php esc_html_e('Changes are saved automatically.', 'schema-markup-generator'); ?>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Render YouTube API settings modal
+     */
+    private function renderYouTubeModal(array $settings): void
+    {
+        $youtubeIntegration = new \Metodo\SchemaMarkupGenerator\Integration\YouTubeIntegration();
+        $hasApiKey = $youtubeIntegration->hasApiKey();
+        $maskedKey = $youtubeIntegration->getMaskedApiKey();
+        $quotaInfo = $youtubeIntegration->getQuotaInfo();
+        ?>
+        <div class="smg-modal smg-modal-lg smg-integration-modal" id="smg-integration-modal-youtube">
+            <div class="smg-modal-overlay"></div>
+            <div class="smg-modal-content">
+                <button type="button" class="smg-modal-close">
+                    <span class="dashicons dashicons-no-alt"></span>
+                </button>
+                <h3 class="smg-modal-title">
+                    <span class="dashicons dashicons-youtube"></span>
+                    <?php esc_html_e('YouTube Data API Settings', 'schema-markup-generator'); ?>
+                </h3>
+                <div class="smg-modal-body">
+                    <div class="flex flex-col gap-6">
+                        <!-- API Key Configuration -->
+                        <div class="smg-modal-section">
+                            <h4 class="smg-modal-section-title">
+                                <span class="dashicons dashicons-admin-network"></span>
+                                <?php esc_html_e('API Key Configuration', 'schema-markup-generator'); ?>
+                            </h4>
+                            
+                            <?php if ($hasApiKey): ?>
+                                <!-- API Key is set -->
+                                <div class="smg-api-key-status mb-4">
+                                    <div class="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                                        <span class="dashicons dashicons-yes-alt" style="color: var(--smg-success);"></span>
+                                        <span class="text-sm font-medium text-emerald-800">
+                                            <?php esc_html_e('API Key configured', 'schema-markup-generator'); ?>
+                                        </span>
+                                        <code class="ml-2 px-2 py-1 bg-emerald-100 rounded text-xs"><?php echo esc_html($maskedKey); ?></code>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="button" id="smg-test-youtube-api" class="smg-btn smg-btn-secondary smg-btn-sm">
+                                        <span class="dashicons dashicons-yes"></span>
+                                        <?php esc_html_e('Test API Key', 'schema-markup-generator'); ?>
+                                    </button>
+                                    <button type="button" id="smg-change-youtube-api" class="smg-btn smg-btn-secondary smg-btn-sm">
+                                        <span class="dashicons dashicons-edit"></span>
+                                        <?php esc_html_e('Change Key', 'schema-markup-generator'); ?>
+                                    </button>
+                                    <button type="button" id="smg-remove-youtube-api" class="smg-btn smg-btn-danger smg-btn-sm">
+                                        <span class="dashicons dashicons-trash"></span>
+                                        <?php esc_html_e('Remove', 'schema-markup-generator'); ?>
+                                    </button>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- API Key Input Form (hidden if key exists) -->
+                            <div id="smg-youtube-api-form" class="<?php echo $hasApiKey ? 'hidden' : ''; ?>">
+                                <p class="smg-text-muted text-sm mb-3">
+                                    <?php esc_html_e('Enter your YouTube Data API v3 key. The key will be encrypted before saving.', 'schema-markup-generator'); ?>
+                                </p>
+                                <div class="flex gap-2">
+                                    <input type="password" 
+                                           id="smg-youtube-api-key-input" 
+                                           class="smg-input flex-1" 
+                                           placeholder="AIza..."
+                                           autocomplete="off">
+                                    <button type="button" id="smg-save-youtube-api" class="smg-btn smg-btn-primary">
+                                        <span class="dashicons dashicons-saved"></span>
+                                        <?php esc_html_e('Save & Test', 'schema-markup-generator'); ?>
+                                    </button>
+                                </div>
+                                <div id="smg-youtube-api-result" class="hidden mt-3"></div>
+                            </div>
+                        </div>
+
+                        <!-- How to get API Key -->
+                        <div class="smg-modal-section">
+                            <h4 class="smg-modal-section-title">
+                                <span class="dashicons dashicons-info-outline"></span>
+                                <?php esc_html_e('How to Get a Free API Key', 'schema-markup-generator'); ?>
+                            </h4>
+                            <ol class="text-sm text-gray-600 space-y-2 list-decimal list-inside">
+                                <li><?php printf(
+                                    __('Go to %s', 'schema-markup-generator'),
+                                    '<a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-blue-600 hover:underline">Google Cloud Console</a>'
+                                ); ?></li>
+                                <li><?php esc_html_e('Create a new project (or select existing)', 'schema-markup-generator'); ?></li>
+                                <li><?php esc_html_e('Enable "YouTube Data API v3" in the API Library', 'schema-markup-generator'); ?></li>
+                                <li><?php esc_html_e('Go to Credentials → Create Credentials → API Key', 'schema-markup-generator'); ?></li>
+                                <li><?php esc_html_e('(Optional) Restrict the key to YouTube Data API v3 only', 'schema-markup-generator'); ?></li>
+                                <li><?php esc_html_e('Copy and paste the key above', 'schema-markup-generator'); ?></li>
+                            </ol>
+                        </div>
+
+                        <!-- Quota Info -->
+                        <div class="smg-modal-section">
+                            <h4 class="smg-modal-section-title">
+                                <span class="dashicons dashicons-performance"></span>
+                                <?php esc_html_e('API Quota', 'schema-markup-generator'); ?>
+                            </h4>
+                            <div class="flex flex-col gap-2 text-sm">
+                                <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                    <span class="text-gray-600"><?php esc_html_e('Daily Limit (Free)', 'schema-markup-generator'); ?></span>
+                                    <span class="font-semibold"><?php echo number_format($quotaInfo['daily_limit']); ?> <?php esc_html_e('units', 'schema-markup-generator'); ?></span>
+                                </div>
+                                <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                    <span class="text-gray-600"><?php esc_html_e('Cost per Video', 'schema-markup-generator'); ?></span>
+                                    <span class="font-semibold"><?php echo $quotaInfo['cost_per_video']; ?> <?php esc_html_e('unit', 'schema-markup-generator'); ?></span>
+                                </div>
+                                <p class="smg-text-muted text-xs mt-2">
+                                    <?php echo esc_html($quotaInfo['note']); ?>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Integration Status -->
+                        <div class="smg-modal-section">
+                            <h4 class="smg-modal-section-title">
+                                <span class="dashicons dashicons-info"></span>
+                                <?php esc_html_e('Features', 'schema-markup-generator'); ?>
+                            </h4>
+                            <ul class="text-sm text-gray-600 space-y-2">
+                                <li class="flex items-center gap-2">
+                                    <span class="dashicons dashicons-yes" style="color: var(--smg-success);"></span>
+                                    <?php esc_html_e('Accurate video duration for Course timeRequired', 'schema-markup-generator'); ?>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <span class="dashicons dashicons-yes" style="color: var(--smg-success);"></span>
+                                    <?php esc_html_e('Video title and thumbnail extraction', 'schema-markup-generator'); ?>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <span class="dashicons dashicons-yes" style="color: var(--smg-success);"></span>
+                                    <?php esc_html_e('Results cached for 1 week (minimal API usage)', 'schema-markup-generator'); ?>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <span class="dashicons dashicons-yes" style="color: var(--smg-success);"></span>
+                                    <?php esc_html_e('API key encrypted with AES-256-CBC', 'schema-markup-generator'); ?>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="smg-modal-footer">
+                    <p class="smg-text-muted text-xs m-0">
+                        <span class="dashicons dashicons-lock" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                        <?php esc_html_e('Your API key is encrypted and stored securely.', 'schema-markup-generator'); ?>
                     </p>
                 </div>
             </div>

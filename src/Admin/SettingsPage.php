@@ -10,6 +10,7 @@ use Metodo\SchemaMarkupGenerator\Discovery\TaxonomyDiscovery;
 use Metodo\SchemaMarkupGenerator\Integration\ACFIntegration;
 use Metodo\SchemaMarkupGenerator\Admin\Tabs\GeneralTab;
 use Metodo\SchemaMarkupGenerator\Admin\Tabs\PostTypesTab;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\TaxonomiesTab;
 use Metodo\SchemaMarkupGenerator\Admin\Tabs\PagesTab;
 use Metodo\SchemaMarkupGenerator\Admin\Tabs\SchemaTypesTab;
 use Metodo\SchemaMarkupGenerator\Admin\Tabs\IntegrationsTab;
@@ -37,6 +38,11 @@ class SettingsPage
      */
     private array $tabs = [];
 
+    /**
+     * Tab groups with sub-tabs
+     */
+    private array $tabGroups = [];
+
     public function __construct(
         PostTypeDiscovery $postTypeDiscovery,
         CustomFieldDiscovery $customFieldDiscovery,
@@ -56,15 +62,36 @@ class SettingsPage
      */
     private function registerTabs(): void
     {
-        $this->tabs = [
-            'general' => new GeneralTab(),
-            'post-types' => new PostTypesTab(
+        // Define sub-tabs for the "Schemas" group
+        $schemasSubTabs = [
+            'schemas-post-types' => new PostTypesTab(
                 $this->postTypeDiscovery,
                 $this->customFieldDiscovery,
                 $this->taxonomyDiscovery,
                 $this->acfIntegration
             ),
-            'pages' => new PagesTab(),
+            'schemas-taxonomies' => new TaxonomiesTab($this->taxonomyDiscovery),
+            'schemas-pages' => new PagesTab(),
+        ];
+
+        // Register tab groups (tabs with sub-tabs)
+        $this->tabGroups = [
+            'schemas' => [
+                'title' => __('Schemas', 'schema-markup-generator'),
+                'icon' => 'dashicons-networking',
+                'subtabs' => $schemasSubTabs,
+                'default' => 'schemas-post-types',
+            ],
+        ];
+
+        // Register all tabs (flat structure for settings registration)
+        $this->tabs = [
+            'general' => new GeneralTab(),
+            // Schemas sub-tabs
+            'schemas-post-types' => $schemasSubTabs['schemas-post-types'],
+            'schemas-taxonomies' => $schemasSubTabs['schemas-taxonomies'],
+            'schemas-pages' => $schemasSubTabs['schemas-pages'],
+            // Other tabs
             'schema-types' => new SchemaTypesTab(),
             'integrations' => new IntegrationsTab(),
             'tools' => new ToolsTab(),
@@ -78,6 +105,54 @@ class SettingsPage
          * @param array $tabs Array of tab instances
          */
         $this->tabs = apply_filters('smg_settings_tabs', $this->tabs);
+
+        /**
+         * Filter tab groups
+         *
+         * @param array $tabGroups Array of tab group configurations
+         */
+        $this->tabGroups = apply_filters('smg_settings_tab_groups', $this->tabGroups);
+    }
+
+    /**
+     * Get the parent tab ID for a given tab
+     */
+    private function getParentTabId(string $tabId): ?string
+    {
+        foreach ($this->tabGroups as $groupId => $group) {
+            if (isset($group['subtabs'][$tabId])) {
+                return $groupId;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Check if a tab ID belongs to a group
+     */
+    private function isSubTab(string $tabId): bool
+    {
+        return $this->getParentTabId($tabId) !== null;
+    }
+
+    /**
+     * Get the active sub-tab for a group
+     */
+    private function getActiveSubTab(string $groupId, string $currentTab): string
+    {
+        if (!isset($this->tabGroups[$groupId])) {
+            return '';
+        }
+
+        $group = $this->tabGroups[$groupId];
+        
+        // If current tab is a subtab of this group, return it
+        if (isset($group['subtabs'][$currentTab])) {
+            return $currentTab;
+        }
+
+        // Return default subtab
+        return $group['default'] ?? array_key_first($group['subtabs']);
     }
 
     /**
@@ -124,6 +199,9 @@ class SettingsPage
             $currentTab = 'general';
         }
 
+        // Determine if we're in a tab group
+        $currentParentTab = $this->getParentTabId($currentTab);
+
         $bannerPath = SMG_PLUGIN_DIR . 'assets/images/banner-1544x500.png';
         $bannerUrl = SMG_PLUGIN_URL . 'assets/images/banner-1544x500.png';
         $hasBanner = file_exists($bannerPath);
@@ -162,15 +240,15 @@ class SettingsPage
                 </div>
                 <?php endif; ?>
 
+                <!-- Main Tabs Navigation -->
                 <nav class="smg-tabs-nav">
-                    <?php foreach ($this->tabs as $tabId => $tab): ?>
-                        <a href="<?php echo esc_url(admin_url('options-general.php?page=schema-markup-generator&tab=' . $tabId)); ?>"
-                           class="smg-tab-link <?php echo $currentTab === $tabId ? 'active' : ''; ?>">
-                            <span class="dashicons <?php echo esc_attr($tab->getIcon()); ?>"></span>
-                            <?php echo esc_html($tab->getTitle()); ?>
-                        </a>
-                    <?php endforeach; ?>
+                    <?php $this->renderMainTabsNav($currentTab, $currentParentTab); ?>
                 </nav>
+
+                <!-- Sub-tabs Navigation (if applicable) -->
+                <?php if ($currentParentTab): ?>
+                    <?php $this->renderSubTabsNav($currentParentTab, $currentTab); ?>
+                <?php endif; ?>
 
                 <div class="smg-tab-content">
                     <?php
@@ -221,6 +299,104 @@ class SettingsPage
                 </div>
             </div>
         </div>
+        <?php
+    }
+
+    /**
+     * Render main tabs navigation
+     */
+    private function renderMainTabsNav(string $currentTab, ?string $currentParentTab): void
+    {
+        // Build the navigation structure
+        $navItems = [];
+
+        // Add regular tabs (not in groups)
+        foreach ($this->tabs as $tabId => $tab) {
+            // Skip if this tab is part of a group
+            if ($this->isSubTab($tabId)) {
+                continue;
+            }
+
+            $navItems[$tabId] = [
+                'type' => 'tab',
+                'tab' => $tab,
+            ];
+        }
+
+        // Insert tab groups in their correct position
+        $finalNav = [];
+        $groupInserted = [];
+
+        // First add 'general'
+        if (isset($navItems['general'])) {
+            $finalNav['general'] = $navItems['general'];
+        }
+
+        // Add 'schemas' group after general
+        foreach ($this->tabGroups as $groupId => $group) {
+            $finalNav[$groupId] = [
+                'type' => 'group',
+                'group' => $group,
+            ];
+        }
+
+        // Add remaining tabs
+        foreach ($navItems as $tabId => $item) {
+            if ($tabId === 'general') {
+                continue;
+            }
+            $finalNav[$tabId] = $item;
+        }
+
+        // Render navigation items
+        foreach ($finalNav as $itemId => $item) {
+            if ($item['type'] === 'group') {
+                $group = $item['group'];
+                $isActive = $currentParentTab === $itemId;
+                $defaultSubTab = $group['default'] ?? array_key_first($group['subtabs']);
+                ?>
+                <a href="<?php echo esc_url(admin_url('options-general.php?page=schema-markup-generator&tab=' . $defaultSubTab)); ?>"
+                   class="smg-tab-link smg-tab-link-group <?php echo $isActive ? 'active' : ''; ?>">
+                    <span class="dashicons <?php echo esc_attr($group['icon']); ?>"></span>
+                    <?php echo esc_html($group['title']); ?>
+                </a>
+                <?php
+            } else {
+                $tab = $item['tab'];
+                $isActive = $currentTab === $itemId && !$currentParentTab;
+                ?>
+                <a href="<?php echo esc_url(admin_url('options-general.php?page=schema-markup-generator&tab=' . $itemId)); ?>"
+                   class="smg-tab-link <?php echo $isActive ? 'active' : ''; ?>">
+                    <span class="dashicons <?php echo esc_attr($tab->getIcon()); ?>"></span>
+                    <?php echo esc_html($tab->getTitle()); ?>
+                </a>
+                <?php
+            }
+        }
+    }
+
+    /**
+     * Render sub-tabs navigation
+     */
+    private function renderSubTabsNav(string $groupId, string $currentTab): void
+    {
+        if (!isset($this->tabGroups[$groupId])) {
+            return;
+        }
+
+        $group = $this->tabGroups[$groupId];
+        $subtabs = $group['subtabs'];
+
+        ?>
+        <nav class="smg-subtabs-nav">
+            <?php foreach ($subtabs as $tabId => $tab): ?>
+                <a href="<?php echo esc_url(admin_url('options-general.php?page=schema-markup-generator&tab=' . $tabId)); ?>"
+                   class="smg-subtab-link <?php echo $currentTab === $tabId ? 'active' : ''; ?>">
+                    <span class="dashicons <?php echo esc_attr($tab->getIcon()); ?>"></span>
+                    <?php echo esc_html($tab->getTitle()); ?>
+                </a>
+            <?php endforeach; ?>
+        </nav>
         <?php
     }
 }

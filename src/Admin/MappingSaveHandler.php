@@ -158,4 +158,143 @@ class MappingSaveHandler
             ]);
         }
     }
+
+    /**
+     * Handle AJAX request for saving taxonomy schema mapping
+     */
+    public function handleSaveTaxonomyMapping(): void
+    {
+        check_ajax_referer('smg_admin_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Permission denied', 'schema-markup-generator')]);
+        }
+
+        $taxonomy = isset($_POST['taxonomy']) ? sanitize_key($_POST['taxonomy']) : '';
+        $schemaType = isset($_POST['schema_type']) ? sanitize_text_field($_POST['schema_type']) : '';
+
+        if (empty($taxonomy)) {
+            wp_send_json_error(['message' => __('Invalid taxonomy', 'schema-markup-generator')]);
+        }
+
+        // Force fresh read from database (bypass alloptions cache)
+        wp_cache_delete('alloptions', 'options');
+        wp_cache_delete('smg_taxonomy_mappings', 'options');
+        
+        // Get current mappings
+        $mappings = get_option('smg_taxonomy_mappings', []);
+        
+        // Ensure it's an array
+        if (!is_array($mappings)) {
+            $mappings = [];
+        }
+
+        // Update the mapping for this taxonomy
+        if (empty($schemaType)) {
+            unset($mappings[$taxonomy]);
+        } else {
+            $mappings[$taxonomy] = $schemaType;
+        }
+
+        // Clear cache before save
+        wp_cache_delete('alloptions', 'options');
+        wp_cache_delete('smg_taxonomy_mappings', 'options');
+        
+        // Use update_option which handles both create and update
+        $saved = update_option('smg_taxonomy_mappings', $mappings, true);
+        
+        // Clear cache after save
+        wp_cache_delete('alloptions', 'options');
+        wp_cache_delete('smg_taxonomy_mappings', 'options');
+
+        // update_option returns false if value is unchanged, so check if save worked
+        $verify = get_option('smg_taxonomy_mappings', []);
+        $success = isset($verify[$taxonomy]) ? ($verify[$taxonomy] === $schemaType) : empty($schemaType);
+
+        if ($success) {
+            wp_send_json_success([
+                'message' => __('Taxonomy schema mapping saved', 'schema-markup-generator'),
+                'taxonomy' => $taxonomy,
+                'schema_type' => $schemaType,
+            ]);
+        } else {
+            wp_send_json_error([
+                'message' => __('Failed to save mapping', 'schema-markup-generator'),
+            ]);
+        }
+    }
+
+    /**
+     * Handle AJAX request for saving integration setting
+     * 
+     * Auto-saves individual integration settings when modified in modal.
+     */
+    public function handleSaveIntegrationSetting(): void
+    {
+        check_ajax_referer('smg_admin_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Permission denied', 'schema-markup-generator')]);
+        }
+
+        $settingKey = isset($_POST['setting_key']) ? sanitize_text_field($_POST['setting_key']) : '';
+        $settingValue = $_POST['setting_value'] ?? '';
+
+        if (empty($settingKey)) {
+            wp_send_json_error(['message' => __('Invalid setting key', 'schema-markup-generator')]);
+        }
+
+        // Force fresh read from database (bypass alloptions cache)
+        wp_cache_delete('alloptions', 'options');
+        wp_cache_delete('smg_integrations_settings', 'options');
+        
+        // Get current settings
+        $settings = get_option('smg_integrations_settings', []);
+        
+        // Ensure it's an array
+        if (!is_array($settings)) {
+            $settings = [];
+        }
+
+        // Handle array values (like rankmath_takeover_types)
+        if (is_array($settingValue)) {
+            $settings[$settingKey] = array_map('sanitize_text_field', $settingValue);
+        } elseif ($settingValue === 'true' || $settingValue === '1') {
+            // Handle boolean true
+            $settings[$settingKey] = true;
+        } elseif ($settingValue === 'false' || $settingValue === '0' || $settingValue === '') {
+            // Handle boolean false
+            $settings[$settingKey] = false;
+        } else {
+            // Handle string values
+            $settings[$settingKey] = sanitize_text_field($settingValue);
+        }
+
+        // Clear cache before save
+        wp_cache_delete('alloptions', 'options');
+        wp_cache_delete('smg_integrations_settings', 'options');
+        
+        // Save the settings
+        update_option('smg_integrations_settings', $settings, true);
+
+        // Clear cache after save
+        wp_cache_delete('alloptions', 'options');
+        wp_cache_delete('smg_integrations_settings', 'options');
+
+        // Verify save worked
+        $verify = get_option('smg_integrations_settings', []);
+        $success = isset($verify[$settingKey]);
+
+        if ($success) {
+            wp_send_json_success([
+                'message' => __('Setting saved', 'schema-markup-generator'),
+                'setting_key' => $settingKey,
+                'setting_value' => $settings[$settingKey],
+            ]);
+        } else {
+            wp_send_json_error([
+                'message' => __('Failed to save setting', 'schema-markup-generator'),
+            ]);
+        }
+    }
 }

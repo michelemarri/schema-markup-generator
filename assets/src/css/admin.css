@@ -49,6 +49,7 @@
   color: #ff5f01;
 }
 
+
 /* ========================================
    Hero Component
    ======================================== */
@@ -66,8 +67,8 @@
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.4));
 }
 
-.smg-hero-title {
-  @apply text-3xl font-bold text-white mb-2;
+.smg-wrap .smg-hero-title {
+  @apply text-3xl font-bold text-white;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -130,6 +131,57 @@
 .smg-tab-content {
   @apply bg-white border border-gray-200 rounded-xl shadow p-8;
   animation: fadeIn 0.3s ease-out;
+}
+
+/* Tab Link with Group indicator */
+.smg-tab-link-group {
+  @apply relative;
+}
+
+.smg-tab-link-group::after {
+  content: '';
+  @apply absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-gray-400 rounded-full;
+  transition: all 200ms ease;
+}
+
+.smg-tab-link-group.active::after {
+  @apply bg-gray-700;
+}
+
+/* ========================================
+   Sub-tabs Navigation
+   ======================================== */
+
+.smg-subtabs-nav {
+  @apply flex items-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+.smg-subtab-link {
+  @apply flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-200 rounded-lg whitespace-nowrap;
+  transition: all 200ms ease;
+}
+
+.smg-subtab-link:hover {
+  @apply bg-gray-100 text-gray-700 border-gray-300;
+}
+
+.smg-subtab-link.active {
+  @apply bg-gray-900 text-white border-gray-900;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.smg-subtab-link .dashicons {
+  @apply text-base;
+  line-height: 1;
+  transition: transform 200ms ease;
+}
+
+.smg-subtab-link:hover .dashicons {
+  transform: scale(1.1);
+}
+
+.smg-subtab-link.active .dashicons {
+  @apply text-white;
 }
 
 /* ========================================
@@ -744,6 +796,135 @@
 }
 
 /* ========================================
+   Taxonomy Card
+   ======================================== */
+
+.smg-taxonomy-card {
+  @apply bg-white border border-gray-200 rounded-lg overflow-hidden;
+  transition: all 200ms ease;
+}
+
+.smg-taxonomy-card:hover {
+  @apply border-gray-300 shadow;
+}
+
+.smg-taxonomy-card.smg-mapped {
+  @apply border-l-[3px] border-l-green-500;
+}
+
+.smg-taxonomy-header {
+  @apply flex flex-wrap items-center gap-4 px-6 py-5;
+  background: linear-gradient(135deg, #fafafa, #f5f5f5);
+}
+
+.smg-taxonomy-info {
+  @apply flex items-start gap-3 flex-1 min-w-[280px];
+}
+
+.smg-taxonomy-info>.dashicons {
+  @apply text-gray-500 mt-0.5;
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.smg-taxonomy-details {
+  @apply flex flex-col gap-1;
+}
+
+.smg-taxonomy-details h3 {
+  @apply text-base font-semibold m-0;
+}
+
+.smg-taxonomy-meta {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+.smg-taxonomy-meta code {
+  @apply px-2 py-0.5 text-xs text-gray-500 bg-gray-200 rounded;
+}
+
+.smg-taxonomy-type {
+  @apply px-2 py-0.5 text-xs font-medium text-blue-600 bg-blue-100 rounded;
+}
+
+.smg-taxonomy-count {
+  @apply text-xs text-gray-400;
+}
+
+.smg-taxonomy-post-types {
+  @apply flex flex-wrap items-center gap-2 mt-2;
+}
+
+.smg-taxonomy-post-types .smg-label {
+  @apply text-xs text-gray-400;
+}
+
+.smg-post-type-tag {
+  @apply px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-100 border border-gray-200 rounded;
+}
+
+.smg-taxonomy-schema {
+  @apply min-w-[220px];
+}
+
+.smg-taxonomy-schema-info {
+  @apply flex flex-wrap items-center gap-3 px-6 py-3 bg-green-50 border-t border-green-100;
+}
+
+.smg-schema-badge {
+  @apply inline-flex items-center gap-1 px-3 py-1 text-sm font-medium text-green-700 bg-white border border-green-200 rounded-full;
+}
+
+.smg-schema-badge .dashicons {
+  @apply text-green-500;
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.smg-schema-hint {
+  @apply text-xs text-green-600;
+}
+
+/* ========================================
+   Help Section
+   ======================================== */
+
+.smg-help-section {
+  @apply p-6 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+.smg-help-section h4 {
+  @apply text-sm font-semibold text-gray-900 mb-4;
+}
+
+.smg-help-grid {
+  @apply grid gap-3;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.smg-help-item {
+  @apply flex flex-col gap-1 p-3 bg-white border border-gray-200 rounded;
+}
+
+.smg-help-item strong {
+  @apply text-sm font-semibold text-gray-900;
+}
+
+.smg-help-item span {
+  @apply text-xs text-gray-500 leading-relaxed;
+}
+
+.smg-pages-help {
+  @apply p-6 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+.smg-pages-help h4 {
+  @apply text-sm font-semibold text-gray-900 mb-4;
+}
+
+/* ========================================
    Schema Preview
    ======================================== */
 
@@ -893,7 +1074,7 @@
    ======================================== */
 
 .smg-integration-card {
-  @apply bg-white border border-gray-200 rounded-lg overflow-hidden;
+  @apply bg-white border border-gray-200 rounded-lg overflow-hidden flex flex-col;
   transition: all 200ms ease;
 }
 
@@ -934,7 +1115,7 @@
 }
 
 .smg-integration-body {
-  @apply px-6 py-5;
+  @apply flex-1 px-6 py-5;
 }
 
 .smg-integration-body p {
@@ -962,11 +1143,11 @@
   @apply absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200;
 }
 
-.smg-toggle-inline input:checked + .smg-toggle-slider-small {
+.smg-toggle-inline input:checked+.smg-toggle-slider-small {
   @apply bg-green-500;
 }
 
-.smg-toggle-inline input:checked + .smg-toggle-slider-small::before {
+.smg-toggle-inline input:checked+.smg-toggle-slider-small::before {
   transform: translateX(16px);
 }
 
@@ -1533,7 +1714,7 @@
 }
 
 .smg-modal-section-title {
-  @apply flex items-center gap-2 text-sm font-semibold text-gray-900 mb-4 pb-3 border-b border-gray-200;
+  @apply flex items-center gap-2 text-sm font-semibold text-gray-900 mt-0 mb-4 pb-4 border-b border-gray-200;
 }
 
 .smg-modal-section-title .dashicons {
@@ -1556,6 +1737,67 @@
   font-size: 16px;
   width: 16px;
   height: 16px;
+}
+
+/* Progress Bar */
+.smg-progress-bar {
+  @apply w-full h-2 bg-gray-200 rounded-full overflow-hidden;
+}
+
+.smg-progress-fill {
+  @apply h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full;
+  transition: width 300ms ease-out;
+}
+
+/* Spinner */
+.smg-spinner {
+  @apply inline-block w-4 h-4 border-2 border-gray-300 rounded-full animate-spin;
+  border-top-color: var(--smg-primary, #171717);
+}
+
+/* Duration Calculator Results */
+.smg-duration-results-list {
+  @apply flex flex-col gap-2 max-h-48 overflow-y-auto p-2 bg-white border border-gray-200 rounded-lg;
+}
+
+.smg-duration-result-item {
+  @apply flex items-center justify-between gap-4 py-2 px-3 text-sm bg-gray-50 rounded-md;
+}
+
+.smg-duration-result-item.has-video {
+  @apply bg-emerald-50;
+}
+
+.smg-duration-result-title {
+  @apply flex-1 font-medium text-gray-900 truncate;
+}
+
+.smg-duration-result-meta {
+  @apply flex items-center gap-3 text-gray-500;
+}
+
+.smg-duration-result-lessons {
+  @apply text-xs;
+}
+
+.smg-duration-result-time {
+  @apply font-semibold text-emerald-600;
+}
+
+.smg-duration-result-item:not(.has-video) .smg-duration-result-time {
+  @apply text-gray-400;
+}
+
+.smg-duration-summary {
+  @apply flex items-center justify-between gap-4 mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-sm;
+}
+
+.smg-duration-summary-label {
+  @apply font-medium text-emerald-800;
+}
+
+.smg-duration-summary-value {
+  @apply font-bold text-emerald-700;
 }
 
 /* ========================================

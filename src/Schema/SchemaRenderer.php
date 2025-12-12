@@ -197,9 +197,342 @@ class SchemaRenderer
             }
         }
 
+        // Taxonomy archive pages (category, tag, custom taxonomy)
+        if (is_tax() || is_category() || is_tag()) {
+            $taxonomySchema = $this->buildTaxonomySchema();
+            if ($taxonomySchema) {
+                $schemas[] = $taxonomySchema;
+            }
+        }
+
         if (!empty($schemas)) {
             $this->outputSchemas($schemas);
         }
+    }
+
+    /**
+     * Build schema for taxonomy archive pages
+     *
+     * @return array|null Schema data or null if not configured
+     */
+    private function buildTaxonomySchema(): ?array
+    {
+        $term = get_queried_object();
+
+        if (!$term instanceof \WP_Term) {
+            return null;
+        }
+
+        $taxonomy = $term->taxonomy;
+        $mappings = get_option('smg_taxonomy_mappings', []);
+
+        // Check if this taxonomy has a schema mapping
+        if (!isset($mappings[$taxonomy]) || empty($mappings[$taxonomy])) {
+            $this->logger->debug("No schema mapping for taxonomy: {$taxonomy}");
+            return null;
+        }
+
+        $schemaType = $mappings[$taxonomy];
+        $termUrl = get_term_link($term);
+        $termUrl = is_wp_error($termUrl) ? home_url() : $termUrl;
+
+        // Build schema based on type
+        $schema = $this->buildTaxonomySchemaByType($schemaType, $term, $termUrl);
+
+        if ($schema) {
+            /**
+             * Filter taxonomy schema data
+             *
+             * @param array    $schema     The schema data
+             * @param \WP_Term $term       The term object
+             * @param string   $schemaType The schema type
+             */
+            $schema = apply_filters('smg_taxonomy_schema', $schema, $term, $schemaType);
+
+            $this->logger->debug("Generated {$schemaType} schema for term {$term->term_id} ({$taxonomy})");
+        }
+
+        return $schema;
+    }
+
+    /**
+     * Build taxonomy schema by type
+     *
+     * @param string   $schemaType The schema type
+     * @param \WP_Term $term       The term object
+     * @param string   $termUrl    The term archive URL
+     * @return array Schema data
+     */
+    private function buildTaxonomySchemaByType(string $schemaType, \WP_Term $term, string $termUrl): array
+    {
+        $baseSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => $schemaType,
+            'name' => html_entity_decode($term->name, ENT_QUOTES, 'UTF-8'),
+            'url' => $termUrl,
+        ];
+
+        // Add description if available
+        if (!empty($term->description)) {
+            $baseSchema['description'] = wp_strip_all_tags($term->description);
+        }
+
+        // Type-specific enhancements
+        switch ($schemaType) {
+            case 'DefinedTerm':
+                $baseSchema = $this->buildDefinedTermSchema($baseSchema, $term);
+                break;
+
+            case 'ItemList':
+                $baseSchema = $this->buildItemListSchema($baseSchema, $term);
+                break;
+
+            case 'CollectionPage':
+                $baseSchema = $this->buildCollectionPageSchema($baseSchema, $term, $termUrl);
+                break;
+
+            case 'Place':
+            case 'City':
+            case 'Country':
+            case 'State':
+                $baseSchema = $this->buildPlaceSchema($baseSchema, $term, $schemaType);
+                break;
+
+            case 'Person':
+                $baseSchema = $this->buildPersonSchema($baseSchema, $term);
+                break;
+
+            case 'Organization':
+            case 'Brand':
+                $baseSchema = $this->buildOrganizationSchema($baseSchema, $term, $schemaType);
+                break;
+
+            case 'BreadcrumbList':
+                $baseSchema = $this->buildTaxonomyBreadcrumbSchema($term, $termUrl);
+                break;
+        }
+
+        return $this->cleanSchemaData($baseSchema);
+    }
+
+    /**
+     * Build DefinedTerm schema for taxonomy
+     */
+    private function buildDefinedTermSchema(array $schema, \WP_Term $term): array
+    {
+        // Get the taxonomy object for the term set name
+        $taxonomyObj = get_taxonomy($term->taxonomy);
+        
+        if ($taxonomyObj) {
+            $schema['inDefinedTermSet'] = [
+                '@type' => 'DefinedTermSet',
+                'name' => $taxonomyObj->labels->singular_name ?? $taxonomyObj->label,
+            ];
+        }
+
+        // Add term ID as identifier
+        $schema['identifier'] = $term->slug;
+
+        return $schema;
+    }
+
+    /**
+     * Build ItemList schema for taxonomy (list of posts in this term)
+     */
+    private function buildItemListSchema(array $schema, \WP_Term $term): array
+    {
+        $schema['numberOfItems'] = (int) $term->count;
+
+        // Get recent items in this term
+        $posts = get_posts([
+            'post_type' => 'any',
+            'posts_per_page' => 10,
+            'tax_query' => [
+                [
+                    'taxonomy' => $term->taxonomy,
+                    'field' => 'term_id',
+                    'terms' => $term->term_id,
+                ],
+            ],
+        ]);
+
+        if (!empty($posts)) {
+            $listItems = [];
+            foreach ($posts as $index => $post) {
+                $listItems[] = [
+                    '@type' => 'ListItem',
+                    'position' => $index + 1,
+                    'name' => html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8'),
+                    'url' => get_permalink($post),
+                ];
+            }
+            $schema['itemListElement'] = $listItems;
+        }
+
+        return $schema;
+    }
+
+    /**
+     * Build CollectionPage schema for taxonomy
+     */
+    private function buildCollectionPageSchema(array $schema, \WP_Term $term, string $termUrl): array
+    {
+        $schema['mainEntity'] = [
+            '@type' => 'ItemList',
+            'numberOfItems' => (int) $term->count,
+        ];
+
+        // Add breadcrumb
+        $schema['breadcrumb'] = $this->buildTaxonomyBreadcrumbSchema($term, $termUrl);
+
+        return $schema;
+    }
+
+    /**
+     * Build Place schema for taxonomy (locations)
+     */
+    private function buildPlaceSchema(array $schema, \WP_Term $term, string $schemaType): array
+    {
+        // Keep the specific type (City, Country, State, or Place)
+        $schema['@type'] = $schemaType;
+
+        // Try to get additional location data from term meta
+        $address = get_term_meta($term->term_id, 'address', true);
+        if ($address) {
+            $schema['address'] = $address;
+        }
+
+        $geo = get_term_meta($term->term_id, 'geo', true);
+        if (is_array($geo) && isset($geo['lat']) && isset($geo['lng'])) {
+            $schema['geo'] = [
+                '@type' => 'GeoCoordinates',
+                'latitude' => (float) $geo['lat'],
+                'longitude' => (float) $geo['lng'],
+            ];
+        }
+
+        return $schema;
+    }
+
+    /**
+     * Build Person schema for taxonomy (authors, speakers, etc.)
+     */
+    private function buildPersonSchema(array $schema, \WP_Term $term): array
+    {
+        // Try to get additional person data from term meta
+        $jobTitle = get_term_meta($term->term_id, 'job_title', true);
+        if ($jobTitle) {
+            $schema['jobTitle'] = $jobTitle;
+        }
+
+        $email = get_term_meta($term->term_id, 'email', true);
+        if ($email && is_email($email)) {
+            $schema['email'] = $email;
+        }
+
+        $image = get_term_meta($term->term_id, 'image', true);
+        if ($image) {
+            $schema['image'] = $image;
+        }
+
+        // Check if ACF has an image field
+        if (function_exists('get_field')) {
+            $acfImage = get_field('image', $term);
+            if ($acfImage) {
+                if (is_array($acfImage) && isset($acfImage['url'])) {
+                    $schema['image'] = $acfImage['url'];
+                } elseif (is_string($acfImage)) {
+                    $schema['image'] = $acfImage;
+                }
+            }
+        }
+
+        return $schema;
+    }
+
+    /**
+     * Build Organization/Brand schema for taxonomy
+     */
+    private function buildOrganizationSchema(array $schema, \WP_Term $term, string $schemaType): array
+    {
+        $schema['@type'] = $schemaType;
+
+        // Try to get logo from term meta or ACF
+        $logo = get_term_meta($term->term_id, 'logo', true);
+        
+        if (!$logo && function_exists('get_field')) {
+            $logo = get_field('logo', $term);
+            if (is_array($logo) && isset($logo['url'])) {
+                $logo = $logo['url'];
+            }
+        }
+
+        if ($logo) {
+            $schema['logo'] = $logo;
+        }
+
+        return $schema;
+    }
+
+    /**
+     * Build breadcrumb schema for taxonomy archive
+     */
+    private function buildTaxonomyBreadcrumbSchema(\WP_Term $term, string $termUrl): array
+    {
+        $items = [
+            [
+                '@type' => 'ListItem',
+                'position' => 1,
+                'name' => get_bloginfo('name'),
+                'item' => home_url('/'),
+            ],
+        ];
+
+        // Add parent terms for hierarchical taxonomies
+        $position = 2;
+        $ancestors = get_ancestors($term->term_id, $term->taxonomy, 'taxonomy');
+        $ancestors = array_reverse($ancestors);
+
+        foreach ($ancestors as $ancestorId) {
+            $ancestor = get_term($ancestorId, $term->taxonomy);
+            if ($ancestor && !is_wp_error($ancestor)) {
+                $ancestorUrl = get_term_link($ancestor);
+                if (!is_wp_error($ancestorUrl)) {
+                    $items[] = [
+                        '@type' => 'ListItem',
+                        'position' => $position++,
+                        'name' => html_entity_decode($ancestor->name, ENT_QUOTES, 'UTF-8'),
+                        'item' => $ancestorUrl,
+                    ];
+                }
+            }
+        }
+
+        // Add current term
+        $items[] = [
+            '@type' => 'ListItem',
+            'position' => $position,
+            'name' => html_entity_decode($term->name, ENT_QUOTES, 'UTF-8'),
+            'item' => $termUrl,
+        ];
+
+        return [
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => $items,
+        ];
+    }
+
+    /**
+     * Clean schema data by removing empty values
+     */
+    private function cleanSchemaData(array $data): array
+    {
+        return array_filter($data, function ($value) {
+            if (is_array($value)) {
+                return !empty($value);
+            }
+            return $value !== null && $value !== '';
+        });
     }
 
     /**

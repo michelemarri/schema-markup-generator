@@ -236,6 +236,51 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.33.0
+- **New**: Auto-save for integration settings - Changes in integration modals are saved automatically
+- **Improved**: No need to close modal and click "Save Changes" - toggle any setting and it's saved instantly
+- **Improved**: Visual feedback with "Saved" toast notification when settings change
+- **Improved**: Modal footers now show "Changes are saved automatically" message
+
+### 1.32.0
+- **New**: YouTube Data API v3 Integration - Accurate video duration extraction for Course schemas
+- **New**: Secure API key storage with AES-256-CBC encryption (using WordPress AUTH_KEY)
+- **New**: YouTube API configuration modal in Integrations tab
+- **New**: API key test, save, and remove functionality via AJAX
+- **New**: Video details retrieval (duration, title, thumbnail, channel) via YouTube Data API
+- **New**: Results cached for 1 week to minimize API usage (10,000 free units/day)
+- **Improved**: Course duration calculation now uses YouTube API (when configured) instead of oEmbed fallback
+- **Improved**: Clear instructions for obtaining a free Google Cloud API key
+- **Security**: API key is never stored in plaintext - always encrypted at rest
+
+### 1.31.0
+- **New**: Auto-calculated course duration - MemberPress Courses now automatically calculates total course duration from lesson videos
+- **New**: "Calculate All Course Durations" button in MemberPress Courses integration modal
+- **New**: Virtual field `mpcs_total_duration` - Returns total course duration in minutes (maps to `duration`)
+- **New**: Virtual field `mpcs_total_duration_hours` - Returns total course duration in hours (maps to `duration`)
+- **New**: Automatic video duration extraction from YouTube and Vimeo embeds via oEmbed API
+- **New**: Duration is calculated and saved when lessons are saved - zero performance impact on frontend
+- **New**: Background calculation via WP-Cron for courses not yet calculated
+- **New**: Progress bar and results display when calculating durations
+- **Improved**: Course schema automatically includes `timeRequired` from calculated duration when not explicitly mapped
+- **Improved**: Supports multiple duration input formats: seconds, minutes, HH:MM:SS, MM:SS, ISO 8601 (PT1H30M)
+- **Performance**: oEmbed calls happen only in admin when saving lessons, not during page render
+
+### 1.30.0
+- **Added**: Taxonomy Schema Mapping - Assign schema types (DefinedTerm, Place, Person, Brand, etc.) to taxonomies
+- **Added**: Taxonomy Archive Schema Rendering - Schemas now render on category, tag, and custom taxonomy archive pages
+- **Added**: Sub-tabs navigation system - Grouped Post Types, Taxonomies, and Pages under unified "Schemas" tab
+- **Added**: Modern sub-tabs UI with smooth transitions and active state indicators
+- **Added**: Smart taxonomy schema suggestions based on taxonomy name/slug (locations → Place, authors → Person, brands → Brand)
+- **Added**: Auto-save for taxonomy schema mappings via AJAX
+- **Added**: `smg_save_taxonomy_mapping` AJAX handler
+- **Added**: `smg_taxonomy_schema` filter for customizing taxonomy schema data
+- **Added**: New option `smg_taxonomy_mappings` for storing taxonomy-to-schema assignments
+- **Added**: Support for multiple taxonomy schema types: DefinedTerm, ItemList, CollectionPage, Place, Person, Organization, Brand
+- **Added**: Hierarchical breadcrumb generation for taxonomy archives
+- **Added**: ACF integration for taxonomy term meta (image, logo fields)
+- **Improved**: Settings page organization with cleaner tab hierarchy
+
 ### 1.29.1
 - **Fixed**: Currency now auto-detected from MemberPress/WooCommerce settings in all schema types
 - **Fixed**: Product, Event, SoftwareApp, WebApplication, HowTo, FinancialProduct schemas now use site currency instead of hardcoded EUR fallback
