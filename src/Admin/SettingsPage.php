@@ -43,6 +43,11 @@ class SettingsPage
      */
     private array $tabGroups = [];
 
+    /**
+     * Whether tabs have been registered
+     */
+    private bool $tabsRegistered = false;
+
     public function __construct(
         PostTypeDiscovery $postTypeDiscovery,
         CustomFieldDiscovery $customFieldDiscovery,
@@ -54,6 +59,19 @@ class SettingsPage
         $this->taxonomyDiscovery = $taxonomyDiscovery;
         $this->acfIntegration = $acfIntegration;
 
+        // Note: registerTabs() is called lazily in ensureTabsRegistered()
+        // to avoid loading translations too early (before 'init' hook)
+    }
+
+    /**
+     * Ensure tabs are registered (lazy loading to avoid early translation calls)
+     */
+    private function ensureTabsRegistered(): void
+    {
+        if ($this->tabsRegistered) {
+            return;
+        }
+        $this->tabsRegistered = true;
         $this->registerTabs();
     }
 
@@ -119,6 +137,7 @@ class SettingsPage
      */
     private function getParentTabId(string $tabId): ?string
     {
+        $this->ensureTabsRegistered();
         foreach ($this->tabGroups as $groupId => $group) {
             if (isset($group['subtabs'][$tabId])) {
                 return $groupId;
@@ -140,6 +159,7 @@ class SettingsPage
      */
     private function getActiveSubTab(string $groupId, string $currentTab): string
     {
+        $this->ensureTabsRegistered();
         if (!isset($this->tabGroups[$groupId])) {
             return '';
         }
@@ -177,6 +197,7 @@ class SettingsPage
      */
     public function registerSettings(): void
     {
+        $this->ensureTabsRegistered();
         // Let each tab register its settings under its own group
         foreach ($this->tabs as $tab) {
             $tab->registerSettings();
@@ -191,6 +212,8 @@ class SettingsPage
         if (!current_user_can('manage_options')) {
             return;
         }
+
+        $this->ensureTabsRegistered();
 
         $currentTab = $_GET['tab'] ?? 'general';
 
@@ -307,6 +330,8 @@ class SettingsPage
      */
     private function renderMainTabsNav(string $currentTab, ?string $currentParentTab): void
     {
+        $this->ensureTabsRegistered();
+
         // Build the navigation structure
         $navItems = [];
 
@@ -380,6 +405,7 @@ class SettingsPage
      */
     private function renderSubTabsNav(string $groupId, string $currentTab): void
     {
+        $this->ensureTabsRegistered();
         if (!isset($this->tabGroups[$groupId])) {
             return;
         }

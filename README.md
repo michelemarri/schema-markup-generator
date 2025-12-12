@@ -236,6 +236,9 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.33.1
+- **Fixed**: WordPress 6.7+ translation loading warning - Lazy load translations to avoid "loaded too early" notice
+
 ### 1.33.0
 - **New**: Auto-save for integration settings - Changes in integration modals are saved automatically
 - **Improved**: No need to close modal and click "Save Changes" - toggle any setting and it's saved instantly
