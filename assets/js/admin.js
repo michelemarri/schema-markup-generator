@@ -1773,8 +1773,13 @@
             console.groupEnd();
           }
           if (data.success) {
-            statusText.innerHTML = '<span class="dashicons dashicons-yes-alt" style="color: var(--smg-success);"></span> ' + data.data.message;
-            let html = "";
+            progressContainer.classList.add("hidden");
+            let html = `
+                        <div class="smg-duration-success-message">
+                            <span class="dashicons dashicons-yes-alt" style="color: var(--smg-success);"></span>
+                            ${data.data.message}
+                        </div>
+                    `;
             if (data.data.courses && data.data.courses.length > 0) {
               data.data.courses.forEach((course) => {
                 const hasVideo = course.has_video ? "has-video" : "";
@@ -1799,18 +1804,20 @@
                             </div>
                         `;
             } else {
-              html = '<p class="smg-text-muted text-sm">' + (smgAdmin?.i18n?.no_courses || "No courses found.") + "</p>";
+              html += '<p class="smg-text-muted text-sm">' + (smgAdmin?.i18n?.no_courses || "No courses found.") + "</p>";
             }
             resultsList.innerHTML = html;
             resultsContainer.classList.remove("hidden");
+            button.classList.remove("hidden");
           } else {
             statusText.innerHTML = '<span class="dashicons dashicons-warning" style="color: var(--smg-error);"></span> ' + (data.data?.message || "Error calculating durations.");
+            button.classList.remove("hidden");
           }
         } catch (error) {
           console.error("Error calculating durations:", error);
           statusText.innerHTML = '<span class="dashicons dashicons-warning" style="color: var(--smg-error);"></span> ' + (smgAdmin?.i18n?.error || "An error occurred.");
+          button.classList.remove("hidden");
         }
-        button.classList.remove("hidden");
       },
       /**
        * Handle save YouTube API key

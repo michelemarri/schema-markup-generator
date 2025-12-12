@@ -1800,6 +1800,17 @@
   @apply font-bold text-emerald-700;
 }
 
+.smg-duration-success-message {
+  @apply flex items-center gap-2 mb-3 p-3 text-sm font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg;
+}
+
+.smg-duration-success-message .dashicons {
+  @apply text-emerald-600;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
 /* ========================================
    View Example Button
    ======================================== */
