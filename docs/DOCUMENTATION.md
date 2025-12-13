@@ -407,6 +407,35 @@ For individual lessons or educational materials.
 - `learningResourceType` - Type (lesson, tutorial, etc.)
 - `isPartOf` - Parent course (auto-detected with MemberPress Courses)
 
+**Video Auto-Detection:**
+
+The LearningResource schema automatically detects embedded videos in post content:
+
+- **YouTube** - Detected from standard URLs, short URLs, embed URLs, iframes, and WordPress blocks
+- **Vimeo** - Detected from standard URLs, player URLs, and embed blocks
+- **Other video platforms** - Detected from WordPress embed blocks
+
+When a video is detected, the schema automatically includes a `VideoObject` with:
+- `name` - Post title
+- `description` - Post description
+- `embedUrl` / `contentUrl` - Video URLs
+- `thumbnailUrl` - Video thumbnail (or featured image as fallback)
+- `uploadDate` - Post publication date
+- `duration` - Video duration (auto-fetched, see below)
+- `hasPart` - Video chapters (auto-extracted from content if present)
+
+**Video Duration Auto-Fetch:**
+
+Video duration is automatically fetched based on the platform:
+
+| Platform | Method | Configuration Required |
+|----------|--------|----------------------|
+| YouTube | YouTube Data API v3 | Yes - configure API key in Settings → Integrations |
+| Vimeo | oEmbed API | No - works automatically |
+| Other | oEmbed API | No - if provider supports duration |
+
+**Note:** The YouTube Data API provides more accurate duration data than oEmbed. Configure your API key in the Integrations tab for automatic YouTube video duration extraction. Results are cached for 1 week.
+
 ---
 
 ## Field Mapping

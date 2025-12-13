@@ -236,6 +236,10 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.33.3
+- **Improved**: LearningResource schema now auto-fetches video duration via YouTube Data API when video is detected in content
+- **Improved**: YouTube API takes precedence over oEmbed for more accurate video duration (oEmbed as fallback for Vimeo/others)
+
 ### 1.33.1
 - **Fixed**: WordPress 6.7+ translation loading warning - Lazy load translations to avoid "loaded too early" notice
 

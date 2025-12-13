@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Metodo\SchemaMarkupGenerator\Schema\Types;
 
+use Metodo\SchemaMarkupGenerator\Integration\YouTubeIntegration;
 use Metodo\SchemaMarkupGenerator\Schema\AbstractSchema;
 use WP_Post;
 
@@ -469,10 +470,19 @@ class LearningResourceSchema extends AbstractSchema
             }
         }
 
-        // Try to fetch additional data via oEmbed (duration, etc.)
+        // For YouTube videos, try YouTube Data API first (more accurate than oEmbed)
+        if (!empty($embedData['platform']) && $embedData['platform'] === 'youtube' && !empty($embedData['id'])) {
+            $youtubeDuration = $this->getYouTubeVideoDuration($embedData['id']);
+            if ($youtubeDuration > 0) {
+                $video['duration'] = $this->formatVideoDuration($youtubeDuration);
+            }
+        }
+
+        // Try to fetch additional data via oEmbed (duration for Vimeo, author, etc.)
         $oEmbedData = $this->fetchOEmbedData($embedData);
         if ($oEmbedData) {
-            if (!empty($oEmbedData['duration'])) {
+            // Only use oEmbed duration if we don't have one yet (YouTube API takes precedence)
+            if (empty($video['duration']) && !empty($oEmbedData['duration'])) {
                 $video['duration'] = $this->formatVideoDuration($oEmbedData['duration']);
             }
             if (!empty($oEmbedData['thumbnail_url']) && empty($video['thumbnailUrl'])) {
@@ -493,6 +503,42 @@ class LearningResourceSchema extends AbstractSchema
         }
 
         return $video;
+    }
+
+    /**
+     * Get YouTube video duration using YouTube Data API v3
+     *
+     * Uses the YouTubeIntegration if API key is configured.
+     * Results are cached for performance.
+     *
+     * @param string $videoId YouTube video ID
+     * @return int Duration in seconds (0 if not available)
+     */
+    private function getYouTubeVideoDuration(string $videoId): int
+    {
+        $youtubeIntegration = $this->getYouTubeIntegration();
+
+        if (!$youtubeIntegration || !$youtubeIntegration->isAvailable()) {
+            return 0;
+        }
+
+        return $youtubeIntegration->getVideoDuration($videoId);
+    }
+
+    /**
+     * Get YouTube Integration instance (lazy loaded)
+     *
+     * @return YouTubeIntegration|null
+     */
+    private function getYouTubeIntegration(): ?YouTubeIntegration
+    {
+        static $instance = null;
+
+        if ($instance === null) {
+            $instance = new YouTubeIntegration();
+        }
+
+        return $instance;
     }
 
     /**
@@ -883,10 +929,12 @@ class LearningResourceSchema extends AbstractSchema
             ],
             'videoDuration' => [
                 'type' => 'number',
-                'description' => __('Video length in minutes. Auto-fetched via oEmbed when possible.', 'schema-markup-generator'),
-                'description_long' => __('The duration of the video content in minutes. When possible, this is automatically fetched from the video platform via oEmbed.', 'schema-markup-generator'),
+                'description' => __('Video length in minutes. Auto-fetched via YouTube API or oEmbed when possible.', 'schema-markup-generator'),
+                'description_long' => __('The duration of the video content in minutes. For YouTube videos, this is automatically fetched via YouTube Data API (when configured). For Vimeo and other platforms, oEmbed is used.', 'schema-markup-generator'),
                 'example' => __('15, 30, 60 (minutes)', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/duration',
+                'auto' => 'youtube_api',
+                'auto_description' => __('Auto-fetched via YouTube Data API when configured, oEmbed as fallback', 'schema-markup-generator'),
             ],
             'videoChapters' => [
                 'type' => 'repeater',
