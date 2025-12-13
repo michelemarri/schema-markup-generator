@@ -104,6 +104,16 @@ class MemberPressCoursesIntegration
             'type' => 'url',
             'description' => 'URL of the parent course. Auto-detected from lesson hierarchy.',
         ],
+        'mpcs_learning_resource_type' => [
+            'label' => 'Learning Resource Type (auto)',
+            'type' => 'text',
+            'description' => 'Auto-detected content type: Video (embedded videos), Quiz (forms/assessments), Tutorial (step-by-step), Reading (text-heavy), Lecture (video+text), Lesson (default). Maps to learningResourceType.',
+        ],
+        'mpcs_interactivity_type' => [
+            'label' => 'Interactivity Type (auto)',
+            'type' => 'text',
+            'description' => 'Auto-detected interactivity: active (quizzes/forms), expositive (video/reading), mixed (both). Maps to interactivityType.',
+        ],
     ];
 
     /**
@@ -482,6 +492,8 @@ class MemberPressCoursesIntegration
                 'mpcs_lesson_position' => $this->getLessonPositionValue($post),
                 'mpcs_parent_course_name' => $this->getParentCourseName($post),
                 'mpcs_parent_course_url' => $this->getParentCourseUrl($post),
+                'mpcs_learning_resource_type' => $this->detectLearningResourceType($post),
+                'mpcs_interactivity_type' => $this->detectInteractivityType($post),
                 default => $value,
             };
         }
@@ -532,6 +544,205 @@ class MemberPressCoursesIntegration
         }
 
         return get_permalink($course);
+    }
+
+    /**
+     * Detect learning resource type from lesson content
+     *
+     * Priority:
+     * 1. Quiz - If quiz/assessment elements detected
+     * 2. Video - If video is the primary content
+     * 3. Exercise - If has interactive elements with code blocks
+     * 4. Tutorial - If has step-by-step structure
+     * 5. Lecture - If video exists but with substantial text
+     * 6. Reading - If primarily text
+     * 7. Lesson - Default fallback
+     *
+     * @param WP_Post $lesson The lesson post
+     * @return string Learning resource type
+     */
+    private function detectLearningResourceType(WP_Post $lesson): string
+    {
+        $content = $lesson->post_content;
+        $contentAnalysis = $this->analyzeContent($content);
+        $hasVideo = $this->hasVideoContent($content);
+
+        // 1. Quiz takes priority
+        if ($contentAnalysis['has_quiz']) {
+            return 'Quiz';
+        }
+
+        // 2. Video dominant
+        if ($hasVideo && $contentAnalysis['word_count'] < 300) {
+            return 'Video';
+        }
+
+        // 3. Exercise - Interactive with code
+        if ($contentAnalysis['has_interactive'] && $contentAnalysis['code_blocks'] >= 2) {
+            return 'Exercise';
+        }
+
+        // 4. Tutorial - Step-by-step
+        if ($contentAnalysis['has_tutorial_structure']) {
+            return 'Tutorial';
+        }
+
+        // 5. Lecture - Video + substantial text
+        if ($hasVideo && $contentAnalysis['word_count'] > 300) {
+            return 'Lecture';
+        }
+
+        // 6. Reading - Text heavy
+        if (!$hasVideo && $contentAnalysis['word_count'] > 500 && $contentAnalysis['headings'] >= 2) {
+            return 'Reading';
+        }
+
+        return 'Lesson';
+    }
+
+    /**
+     * Detect interactivity type from lesson content
+     *
+     * @param WP_Post $lesson The lesson post
+     * @return string Interactivity type (active, expositive, mixed)
+     */
+    private function detectInteractivityType(WP_Post $lesson): string
+    {
+        $content = $lesson->post_content;
+        $contentAnalysis = $this->analyzeContent($content);
+        $hasVideo = $this->hasVideoContent($content);
+
+        $hasActiveElements = $contentAnalysis['has_quiz']
+            || $contentAnalysis['has_interactive']
+            || $contentAnalysis['code_blocks'] >= 2;
+
+        $hasExpositiveElements = $hasVideo || $contentAnalysis['word_count'] > 200;
+
+        if ($hasActiveElements && $hasExpositiveElements) {
+            return 'mixed';
+        }
+
+        if ($hasActiveElements) {
+            return 'active';
+        }
+
+        return 'expositive';
+    }
+
+    /**
+     * Analyze content characteristics
+     *
+     * @param string $content Post content
+     * @return array Analysis results
+     */
+    private function analyzeContent(string $content): array
+    {
+        return [
+            'has_quiz' => $this->detectQuizContent($content),
+            'has_tutorial_structure' => $this->detectTutorialStructure($content),
+            'has_interactive' => $this->detectInteractiveElements($content),
+            'word_count' => str_word_count(wp_strip_all_tags($content)),
+            'headings' => preg_match_all('/<h[2-4][^>]*>/i', $content),
+            'code_blocks' => preg_match_all('/```|<pre[^>]*>|<code[^>]*>|<!-- wp:code/i', $content),
+        ];
+    }
+
+    /**
+     * Check if content has video
+     *
+     * @param string $content Post content
+     * @return bool True if video detected
+     */
+    private function hasVideoContent(string $content): bool
+    {
+        return $this->extractYouTubeUrl($content) !== null
+            || $this->extractVimeoUrl($content) !== null;
+    }
+
+    /**
+     * Detect quiz/assessment content
+     *
+     * @param string $content Post content
+     * @return bool True if quiz elements detected
+     */
+    private function detectQuizContent(string $content): bool
+    {
+        $patterns = [
+            '/\[quiz[^\]]*\]/i',
+            '/\[qmn_quiz[^\]]*\]/i',
+            '/\[ld_quiz[^\]]*\]/i',
+            '/\[qsm[^\]]*\]/i',
+            '/\[gravityform[^\]]*\]/i',
+            '/\[wpforms[^\]]*\]/i',
+            '/<!-- wp:quiz/i',
+            '/<!-- wp:learndash\/ld-quiz/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $content)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Detect tutorial structure
+     *
+     * @param string $content Post content
+     * @return bool True if tutorial structure detected
+     */
+    private function detectTutorialStructure(string $content): bool
+    {
+        $score = 0;
+
+        // Step-based headings
+        if (preg_match_all('/step\s*[0-9]+|fase\s*[0-9]+|passo\s*[0-9]+/i', $content) >= 2) {
+            $score += 2;
+        }
+
+        // "How to" style content
+        if (preg_match('/how\s+to|come\s+fare|guida\s+a|tutorial/i', $content)) {
+            $score += 1;
+        }
+
+        // Multiple ordered lists
+        if (preg_match_all('/<ol[^>]*>/i', $content) >= 2) {
+            $score += 1;
+        }
+
+        // Multiple code blocks
+        if (preg_match_all('/```|<pre[^>]*>|<!-- wp:code/i', $content) >= 3) {
+            $score += 1;
+        }
+
+        return $score >= 3;
+    }
+
+    /**
+     * Detect interactive elements
+     *
+     * @param string $content Post content
+     * @return bool True if interactive elements detected
+     */
+    private function detectInteractiveElements(string $content): bool
+    {
+        $patterns = [
+            '/<form[^>]*>/i',
+            '/<!-- wp:button/i',
+            '/<!-- wp:file/i',
+            '/<!-- wp:accordion/i',
+            '/\[download[^\]]*\]/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $content)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

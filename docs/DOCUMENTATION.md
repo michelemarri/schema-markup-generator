@@ -404,9 +404,39 @@ For individual lessons or educational materials.
 **Properties:**
 - `name` - Resource title
 - `description` - Resource description
-- `learningResourceType` - Type (lesson, tutorial, etc.)
+- `learningResourceType` - Type (auto-detected from content, see below)
+- `interactivityType` - Engagement style (auto-detected from content)
 - `isPartOf` - Parent course (auto-detected with MemberPress Courses)
 - `timeRequired` - Completion time (auto-calculated, see below)
+
+**Learning Resource Type Auto-Detection:**
+
+The `learningResourceType` property is automatically detected from content analysis when not explicitly mapped. The detection analyzes:
+
+| Detected Type | Criteria |
+|---------------|----------|
+| **Quiz** | Contains quiz shortcodes (Quiz Master, LearnDash, QSM) or form plugins (Gravity Forms, WPForms) |
+| **Video** | Video is dominant (>80% of estimated time), minimal text |
+| **Exercise** | Has interactive elements + multiple code blocks |
+| **Tutorial** | Step-by-step structure (numbered headings, "Step 1/2/3", ordered lists, code examples) |
+| **Lecture** | Has video + substantial text (>300 words) |
+| **Reading** | Text-heavy (>500 words) with structured headings, no video |
+| **Lesson** | Default fallback for general educational content |
+
+**Interactivity Type Auto-Detection:**
+
+The `interactivityType` property is also automatically detected:
+
+| Type | Meaning | Detection Criteria |
+|------|---------|-------------------|
+| **active** | Learner actively participates | Quiz elements, forms, interactive components, coding exercises |
+| **expositive** | One-way content delivery | Video viewing, text reading |
+| **mixed** | Combination of both | Active elements + video/text content |
+
+Both properties:
+- Show the "AUTO: Content Analysis" indicator in the UI
+- Work without any configuration
+- Can be overridden by mapping a custom field
 
 **Time Required Auto-Calculation:**
 

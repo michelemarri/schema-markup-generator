@@ -49,12 +49,22 @@ class LearningResourceSchema extends AbstractSchema
             $data['image'] = $image;
         }
 
+        // Video (if lesson contains video) - build early to use for type detection and duration
+        $video = $this->buildVideo($post, $mapping);
+        if ($video) {
+            $data['video'] = $video;
+        }
+
+        // Detect content characteristics for auto-population
+        $contentAnalysis = $this->analyzeContentCharacteristics($post);
+
         // Learning Resource Type (Lesson, Video, Quiz, Tutorial, etc.)
+        // Auto-detected from content if not explicitly mapped
         $resourceType = $this->getMappedValue($post, $mapping, 'learningResourceType');
         if ($resourceType) {
             $data['learningResourceType'] = $resourceType;
         } else {
-            $data['learningResourceType'] = 'Lesson';
+            $data['learningResourceType'] = $this->detectLearningResourceType($post, $video, $contentAnalysis);
         }
 
         // isPartOf - Link to parent Course (crucial for hierarchy)
@@ -87,12 +97,6 @@ class LearningResourceSchema extends AbstractSchema
             $data['educationalUse'] = $educationalUse;
         }
 
-        // Video (if lesson contains video) - build early to use duration for timeRequired
-        $video = $this->buildVideo($post, $mapping);
-        if ($video) {
-            $data['video'] = $video;
-        }
-
         // Time Required (ISO 8601 duration)
         // Auto-calculated from reading time + video duration if not mapped
         $timeRequired = $this->getMappedValue($post, $mapping, 'timeRequired');
@@ -105,10 +109,12 @@ class LearningResourceSchema extends AbstractSchema
             }
         }
 
-        // Interactivity Type
+        // Interactivity Type - Auto-detected from content if not explicitly mapped
         $interactivityType = $this->getMappedValue($post, $mapping, 'interactivityType');
         if ($interactivityType) {
             $data['interactivityType'] = $interactivityType;
+        } else {
+            $data['interactivityType'] = $this->detectInteractivityType($video, $contentAnalysis);
         }
 
         // Language
@@ -915,6 +921,271 @@ class LearningResourceSchema extends AbstractSchema
         return $seconds;
     }
 
+    /**
+     * Analyze content characteristics for auto-detection
+     *
+     * Examines the post content to determine:
+     * - Has quiz elements (forms, quiz blocks, shortcodes)
+     * - Has step-by-step tutorial structure
+     * - Has interactive elements
+     * - Content complexity (word count, heading structure)
+     *
+     * @param WP_Post $post The post to analyze
+     * @return array Content analysis results
+     */
+    private function analyzeContentCharacteristics(WP_Post $post): array
+    {
+        $content = $post->post_content;
+
+        return [
+            'has_quiz' => $this->detectQuizContent($content),
+            'has_tutorial_structure' => $this->detectTutorialStructure($content),
+            'has_interactive_elements' => $this->detectInteractiveElements($content),
+            'word_count' => str_word_count(wp_strip_all_tags($content)),
+            'heading_count' => preg_match_all('/<h[2-4][^>]*>/i', $content),
+            'list_count' => preg_match_all('/<[ou]l[^>]*>/i', $content),
+            'code_block_count' => preg_match_all('/```|<pre[^>]*>|<code[^>]*>|<!-- wp:code/i', $content),
+        ];
+    }
+
+    /**
+     * Detect quiz/assessment content
+     *
+     * Looks for:
+     * - Quiz plugin shortcodes (Quiz Master, LearnDash, etc.)
+     * - Form plugins (Gravity Forms, WPForms, Formidable)
+     * - Quiz Gutenberg blocks
+     * - MemberPress Courses quiz elements
+     *
+     * @param string $content Post content
+     * @return bool True if quiz elements detected
+     */
+    private function detectQuizContent(string $content): bool
+    {
+        // Quiz plugin shortcodes
+        $quizPatterns = [
+            // Quiz plugins
+            '/\[quiz[^\]]*\]/i',
+            '/\[qmn_quiz[^\]]*\]/i',
+            '/\[ld_quiz[^\]]*\]/i',
+            '/\[watu[^\]]*\]/i',
+            '/\[qsm[^\]]*\]/i',
+            '/\[question[^\]]*\]/i',
+            // Form plugins that might be used for quizzes
+            '/\[gravityform[^\]]*\]/i',
+            '/\[wpforms[^\]]*\]/i',
+            '/\[formidable[^\]]*\]/i',
+            '/\[ninja_form[^\]]*\]/i',
+            // Quiz blocks
+            '/<!-- wp:quiz/i',
+            '/<!-- wp:learndash\/ld-quiz/i',
+            '/<!-- wp:wpforms/i',
+            '/<!-- wp:gravityforms/i',
+            // MemberPress specific
+            '/<!-- wp:mpcs-quiz/i',
+            '/\[mpcs-quiz[^\]]*\]/i',
+        ];
+
+        foreach ($quizPatterns as $pattern) {
+            if (preg_match($pattern, $content)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Detect tutorial/step-by-step structure
+     *
+     * A tutorial typically has:
+     * - Numbered headings (Step 1, Step 2, etc.)
+     * - Ordered lists with instructions
+     * - Multiple code blocks with explanations
+     * - Sequential heading structure
+     *
+     * @param string $content Post content
+     * @return bool True if tutorial structure detected
+     */
+    private function detectTutorialStructure(string $content): bool
+    {
+        $score = 0;
+
+        // Check for step-based headings
+        $stepPatterns = [
+            '/step\s*[0-9]+/i',
+            '/fase\s*[0-9]+/i',  // Italian
+            '/passo\s*[0-9]+/i', // Italian
+            '/parte\s*[0-9]+/i', // Italian
+            '/part\s*[0-9]+/i',
+            '/#[0-9]+[:\.\s]/i',
+        ];
+
+        foreach ($stepPatterns as $pattern) {
+            if (preg_match_all($pattern, $content) >= 2) {
+                $score += 2;
+                break;
+            }
+        }
+
+        // Check for "how to" style title/content
+        if (preg_match('/how\s+to|come\s+fare|guida\s+a|tutorial/i', $content)) {
+            $score += 1;
+        }
+
+        // Multiple ordered lists suggest step-by-step content
+        $orderedListCount = preg_match_all('/<ol[^>]*>/i', $content);
+        if ($orderedListCount >= 2) {
+            $score += 1;
+        }
+
+        // Multiple code blocks suggest technical tutorial
+        $codeBlockCount = preg_match_all('/```|<pre[^>]*>|<!-- wp:code/i', $content);
+        if ($codeBlockCount >= 3) {
+            $score += 1;
+        }
+
+        // Sequential numbered headings (h2 or h3 with numbers)
+        if (preg_match_all('/<h[23][^>]*>\s*[0-9]+[\.\)]/i', $content) >= 3) {
+            $score += 2;
+        }
+
+        return $score >= 3;
+    }
+
+    /**
+     * Detect interactive elements in content
+     *
+     * @param string $content Post content
+     * @return bool True if interactive elements detected
+     */
+    private function detectInteractiveElements(string $content): bool
+    {
+        $interactivePatterns = [
+            // Forms
+            '/<form[^>]*>/i',
+            // Interactive blocks
+            '/<!-- wp:button/i',
+            '/<!-- wp:file/i',
+            // Accordion/tabs (common in lessons)
+            '/<!-- wp:accordion/i',
+            '/<!-- wp:tabs/i',
+            // Downloadable resources
+            '/\[download[^\]]*\]/i',
+            '/\[file[^\]]*\]/i',
+            // Interactive elements
+            '/data-interactive/i',
+            '/class="[^"]*interactive/i',
+        ];
+
+        foreach ($interactivePatterns as $pattern) {
+            if (preg_match($pattern, $content)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Detect learning resource type from content analysis
+     *
+     * Priority order:
+     * 1. Quiz - If quiz/assessment elements detected
+     * 2. Video - If video is the primary content (>80% video duration vs reading)
+     * 3. Exercise - If has interactive elements with code blocks
+     * 4. Tutorial - If has step-by-step structure
+     * 5. Lecture - If video exists but with substantial text
+     * 6. Reading - If primarily text with minimal interactive elements
+     * 7. Lesson - Default fallback
+     *
+     * @param WP_Post    $post            The post
+     * @param array|null $video           Video data if present
+     * @param array      $contentAnalysis Content analysis results
+     * @return string Learning resource type
+     */
+    private function detectLearningResourceType(WP_Post $post, ?array $video, array $contentAnalysis): string
+    {
+        // 1. Quiz takes priority - it's a specific content type
+        if ($contentAnalysis['has_quiz']) {
+            return 'Quiz';
+        }
+
+        $hasVideo = !empty($video);
+        $wordCount = $contentAnalysis['word_count'];
+
+        // Calculate video vs reading time ratio
+        $videoDominant = false;
+        if ($hasVideo && !empty($video['duration'])) {
+            $videoSeconds = $this->parseIsoDurationToSeconds($video['duration']);
+            $readingSeconds = ($wordCount / 200) * 60; // 200 words/min
+
+            // Video is dominant if it's >80% of total time
+            if ($videoSeconds > 0) {
+                $totalSeconds = $videoSeconds + $readingSeconds;
+                $videoDominant = ($videoSeconds / $totalSeconds) > 0.8;
+            }
+        }
+
+        // 2. Video - Primarily video content
+        if ($hasVideo && $videoDominant) {
+            return 'Video';
+        }
+
+        // 3. Exercise - Interactive with code (programming exercises)
+        if ($contentAnalysis['has_interactive_elements'] && $contentAnalysis['code_block_count'] >= 2) {
+            return 'Exercise';
+        }
+
+        // 4. Tutorial - Step-by-step guides
+        if ($contentAnalysis['has_tutorial_structure']) {
+            return 'Tutorial';
+        }
+
+        // 5. Lecture - Video + substantial text (mixed content)
+        if ($hasVideo && $wordCount > 300) {
+            return 'Lecture';
+        }
+
+        // 6. Reading - Primarily text, well-structured with headings
+        if (!$hasVideo && $wordCount > 500 && $contentAnalysis['heading_count'] >= 2) {
+            return 'Reading';
+        }
+
+        // 7. Default: Lesson
+        return 'Lesson';
+    }
+
+    /**
+     * Detect interactivity type from content analysis
+     *
+     * - active: Learner actively participates (quizzes, exercises, forms)
+     * - expositive: One-way content delivery (video, reading)
+     * - mixed: Combination of both
+     *
+     * @param array|null $video           Video data if present
+     * @param array      $contentAnalysis Content analysis results
+     * @return string Interactivity type
+     */
+    private function detectInteractivityType(?array $video, array $contentAnalysis): string
+    {
+        $hasActiveElements = $contentAnalysis['has_quiz']
+            || $contentAnalysis['has_interactive_elements']
+            || $contentAnalysis['code_block_count'] >= 2;
+
+        $hasExpositiveElements = !empty($video) || $contentAnalysis['word_count'] > 200;
+
+        if ($hasActiveElements && $hasExpositiveElements) {
+            return 'mixed';
+        }
+
+        if ($hasActiveElements) {
+            return 'active';
+        }
+
+        return 'expositive';
+    }
+
     public function getRequiredProperties(): array
     {
         return ['name', 'description', 'learningResourceType'];
@@ -951,6 +1222,9 @@ class LearningResourceSchema extends AbstractSchema
                 'example' => __('Lesson for written content, Video for video lessons, Quiz for assessments, Tutorial for step-by-step guides', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/learningResourceType',
                 'options' => ['Lesson', 'Video', 'Quiz', 'Tutorial', 'Exercise', 'Lecture', 'Reading', 'Assignment'],
+                'auto' => 'content_analysis',
+                'auto_integration' => 'Content Analysis',
+                'auto_description' => __('Auto-detected: Video (embedded videos), Quiz (forms/assessments), Tutorial (step-by-step), Reading (text-heavy), Lecture (video+text)', 'schema-markup-generator'),
             ],
             'isPartOf' => [
                 'type' => 'post',
@@ -1008,6 +1282,9 @@ class LearningResourceSchema extends AbstractSchema
                 'example' => __('active for interactive content, expositive for presentations/readings, mixed for combination', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/interactivityType',
                 'options' => ['active', 'expositive', 'mixed'],
+                'auto' => 'content_analysis',
+                'auto_integration' => 'Content Analysis',
+                'auto_description' => __('Auto-detected: active (quizzes/forms), expositive (video/reading), mixed (both)', 'schema-markup-generator'),
             ],
             'author' => [
                 'type' => 'text',

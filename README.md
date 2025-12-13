@@ -236,6 +236,13 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.36.0
+- **New**: LearningResource `learningResourceType` now auto-detected from content analysis
+- **New**: Auto-detection rules: Video (embedded videos), Quiz (forms/assessments), Tutorial (step-by-step structure), Exercise (code blocks + interactive), Reading (text-heavy), Lecture (video+text), Lesson (fallback)
+- **New**: LearningResource `interactivityType` now auto-detected: active (quizzes/forms), expositive (video/reading), mixed (both)
+- **New**: Virtual fields `mpcs_learning_resource_type` and `mpcs_interactivity_type` for MemberPress Courses lessons
+- **Improved**: Content analysis detects quiz plugins (Quiz Master, LearnDash, WPForms, Gravity Forms), tutorial structure, code blocks, interactive elements
+
 ### 1.35.1
 - **Improved**: Auto-populated properties now show the integration name (e.g., "Auto: MemberPress Courses")
 - **Improved**: Custom CSS-only tooltip appears instantly on hover with detailed description
