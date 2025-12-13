@@ -180,9 +180,9 @@ class LearningResourceSchema extends AbstractSchema
         }
 
         // Position in course (lesson number)
-        $position = $this->getMappedValue($post, $mapping, 'position');
-        if ($position) {
-            $data['position'] = (int) $position;
+        $position = $this->buildPosition($post, $mapping);
+        if ($position !== null) {
+            $data['position'] = $position;
         }
 
         // Learning Outcome
@@ -257,6 +257,32 @@ class LearningResourceSchema extends AbstractSchema
          * @param array      $mapping      Field mapping configuration
          */
         return apply_filters('smg_learning_resource_parent_course', null, $post, $mapping);
+    }
+
+    /**
+     * Build position/order within course
+     *
+     * Priority:
+     * 1. Mapped value from field mapping
+     * 2. Auto-detected from integrations (e.g., MemberPress Courses)
+     */
+    private function buildPosition(WP_Post $post, array $mapping): ?int
+    {
+        // Check for mapped position
+        $position = $this->getMappedValue($post, $mapping, 'position');
+
+        if ($position !== null && $position !== '') {
+            return (int) $position;
+        }
+
+        /**
+         * Filter to get lesson position from integrations (e.g., MemberPress Courses, LearnDash)
+         *
+         * @param int|null $position Current position (may be null)
+         * @param WP_Post  $post     The lesson post
+         * @param array    $mapping  Field mapping configuration
+         */
+        return apply_filters('smg_learning_resource_position', null, $post, $mapping);
     }
 
     /**
@@ -844,6 +870,8 @@ class LearningResourceSchema extends AbstractSchema
                 'description_long' => __('Links this resource to its parent course. This is critical for establishing content hierarchy, helping LLMs understand the learning path and context of this resource within a larger curriculum.', 'schema-markup-generator'),
                 'example' => __('Select the parent course from the dropdown, or leave empty for standalone resources', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/isPartOf',
+                'auto' => 'integration',
+                'auto_description' => __('Auto-detected from MemberPress Courses lesson hierarchy (lesson → section → course)', 'schema-markup-generator'),
             ],
             'teaches' => [
                 'type' => 'textarea',
@@ -910,6 +938,8 @@ class LearningResourceSchema extends AbstractSchema
                 'description_long' => __('The position or order of this resource within its parent course. Helps LLMs understand the learning sequence and prerequisites.', 'schema-markup-generator'),
                 'example' => __('1, 2, 3 (lesson number within course)', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/position',
+                'auto' => 'integration',
+                'auto_description' => __('Auto-detected from MemberPress Courses lesson order', 'schema-markup-generator'),
             ],
             'keywords' => [
                 'type' => 'text',

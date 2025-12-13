@@ -572,8 +572,15 @@ When MemberPress Courses is active, the plugin automatically enhances schema gen
 1. **Parent Course Detection**
    - Lessons (`mpcs-lesson`) automatically include their parent course in the `isPartOf` property
    - The course hierarchy (Lesson → Section → Course) is traversed automatically
+   - Displayed with "AUTO" badge in the schema property mapping UI
 
-2. **Course Enhancement**
+2. **Lesson Position Detection**
+   - Lessons automatically include their global position within the entire course curriculum
+   - Counts all lessons across all sections to provide course-wide numbering
+   - Position is 1-based (first lesson = 1, second = 2, etc., continuing across sections)
+   - Displayed with "AUTO" badge in the schema property mapping UI
+
+3. **Course Enhancement**
    - Courses (`mpcs-course`) can include curriculum structure with sections and lessons (configurable)
    - Lesson count is automatically calculated
 
@@ -588,7 +595,7 @@ In **Settings → Schema Markup → Integrations**, you can configure:
 
 ### Available Virtual Fields
 
-The following computed fields are available for mapping to Course schema properties:
+**Course Fields (`mpcs-course`):**
 
 | Field | Type | Description | Suggested Mapping |
 |-------|------|-------------|-------------------|
@@ -601,6 +608,16 @@ The following computed fields are available for mapping to Course schema propert
 | `mpcs_availability` | text | Default: "InStock" (always available) | `availability` |
 | `mpcs_price_free` | number | Default: 0 (free course) | `price` |
 | `mpcs_is_free` | boolean | Default: true | `isAccessibleForFree` |
+
+**Lesson Fields (`mpcs-lesson`):**
+
+| Field | Type | Description | Suggested Mapping |
+|-------|------|-------------|-------------------|
+| `mpcs_lesson_position` | number | Global position of the lesson within the entire course curriculum | `position` |
+| `mpcs_parent_course_name` | text | Name of the parent course | - |
+| `mpcs_parent_course_url` | url | URL of the parent course | - |
+
+**Note:** The `isPartOf` and `position` properties are automatically populated for lessons without requiring manual mapping. They show an "AUTO" badge in the UI.
 
 **Pro Tip:** The Course schema automatically uses sensible defaults (free, online, always available). Use these virtual fields only if you need to explicitly map them or override the defaults.
 
@@ -619,6 +636,7 @@ The following computed fields are available for mapping to Course schema propert
   "@type": "LearningResource",
   "name": "Introduction to SEO",
   "learningResourceType": "Lesson",
+  "position": 1,
   "isPartOf": {
     "@type": "Course",
     "name": "Digital Marketing Fundamentals",

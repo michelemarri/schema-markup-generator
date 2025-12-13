@@ -236,6 +236,13 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.34.0
+- **New**: LearningResource auto-populates `isPartOf` from MemberPress Courses lesson hierarchy (lesson → section → course)
+- **New**: LearningResource auto-populates `position` with global curriculum position (counts all lessons across all sections)
+- **New**: Virtual fields for MemberPress Courses lessons: `mpcs_lesson_position`, `mpcs_parent_course_name`, `mpcs_parent_course_url`
+- **Improved**: Schema properties now show "AUTO" badge when auto-populated from integrations
+- **Improved**: UI clearly indicates which properties are automatically handled by MemberPress Courses integration
+
 ### 1.33.3
 - **Improved**: LearningResource schema now auto-fetches video duration via YouTube Data API when video is detected in content
 - **Improved**: YouTube API takes precedence over oEmbed for more accurate video duration (oEmbed as fallback for Vimeo/others)

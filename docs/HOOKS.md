@@ -122,6 +122,26 @@ add_filter('smg_learning_resource_parent_course', function(?array $parentCourse,
 
 ---
 
+#### `smg_learning_resource_position`
+
+Filter the position/order for LearningResource schemas (MemberPress Courses).
+
+```php
+add_filter('smg_learning_resource_position', function(?int $position, WP_Post $post, array $mapping): ?int {
+    // Return custom position (1-based)
+    return get_post_meta($post->ID, 'custom_lesson_order', true);
+}, 10, 3);
+```
+
+**Parameters:**
+- `$position` (int|null) - Current position (1-based)
+- `$post` (WP_Post) - The lesson post
+- `$mapping` (array) - Field mapping configuration
+
+**Note:** MemberPress Courses integration automatically provides position from `_mpcs_lesson_lesson_order` meta.
+
+---
+
 #### `smg_product_schema_data` (MemberPress Membership)
 
 The Product schema filter is automatically enhanced for `memberpressproduct` posts.

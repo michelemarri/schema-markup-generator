@@ -26,7 +26,7 @@ class MemberPressCoursesIntegration
     /**
      * Virtual/computed fields for courses
      */
-    private const VIRTUAL_FIELDS = [
+    private const COURSE_VIRTUAL_FIELDS = [
         'mpcs_curriculum' => [
             'label' => 'Course Curriculum',
             'type' => 'text',
@@ -86,6 +86,27 @@ class MemberPressCoursesIntegration
     ];
 
     /**
+     * Virtual/computed fields for lessons
+     */
+    private const LESSON_VIRTUAL_FIELDS = [
+        'mpcs_lesson_position' => [
+            'label' => 'Lesson Position (auto)',
+            'type' => 'number',
+            'description' => 'Global position of the lesson within the entire course curriculum (counting all sections). Maps to position.',
+        ],
+        'mpcs_parent_course_name' => [
+            'label' => 'Parent Course Name (auto)',
+            'type' => 'text',
+            'description' => 'Name of the parent course. Auto-detected from lesson hierarchy.',
+        ],
+        'mpcs_parent_course_url' => [
+            'label' => 'Parent Course URL (auto)',
+            'type' => 'url',
+            'description' => 'URL of the parent course. Auto-detected from lesson hierarchy.',
+        ],
+    ];
+
+    /**
      * Initialize integration
      */
     public function init(): void
@@ -93,6 +114,7 @@ class MemberPressCoursesIntegration
         // Register filters always - availability is checked when filters are called
         // This avoids timing issues with post type registration
         add_filter('smg_learning_resource_parent_course', [$this, 'getParentCourse'], 10, 3);
+        add_filter('smg_learning_resource_position', [$this, 'getLessonPosition'], 10, 3);
         add_filter('smg_course_schema_data', [$this, 'enhanceCourseSchema'], 10, 3);
 
         // Add course fields to discovery
@@ -161,6 +183,110 @@ class MemberPressCoursesIntegration
         }
 
         return $this->getCourseFromLesson($post);
+    }
+
+    /**
+     * Get lesson position for a MemberPress Courses lesson
+     *
+     * @param int|null $position Current position (may be null)
+     * @param WP_Post  $post     The lesson post
+     * @param array    $mapping  Field mapping configuration
+     * @return int|null Position (1-based) or null
+     */
+    public function getLessonPosition(?int $position, WP_Post $post, array $mapping): ?int
+    {
+        // If already resolved by mapping, return that
+        if ($position !== null) {
+            return $position;
+        }
+
+        // Check availability at runtime
+        if (!$this->isAvailable()) {
+            return null;
+        }
+
+        // Only handle MemberPress Courses lessons
+        if ($post->post_type !== self::LESSON_POST_TYPE) {
+            return null;
+        }
+
+        return $this->calculateGlobalLessonPosition($post);
+    }
+
+    /**
+     * Calculate the global position of a lesson within the entire course curriculum
+     *
+     * This counts all lessons in previous sections plus the lesson's position
+     * in its current section to give a course-wide position number.
+     *
+     * @param WP_Post $lesson The lesson post
+     * @return int|null Global position (1-based) or null
+     */
+    private function calculateGlobalLessonPosition(WP_Post $lesson): ?int
+    {
+        global $wpdb;
+        $tableName = $wpdb->prefix . 'mpcs_sections';
+
+        // Get the lesson's section ID and order within section
+        $sectionId = get_post_meta($lesson->ID, '_mpcs_lesson_section_id', true);
+        $lessonOrder = get_post_meta($lesson->ID, '_mpcs_lesson_lesson_order', true);
+
+        if (!$sectionId || $lessonOrder === '' || $lessonOrder === false) {
+            return null;
+        }
+
+        $sectionId = (int) $sectionId;
+        $lessonOrder = (int) $lessonOrder;
+
+        // Get section info including course_id and section_order
+        $section = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT course_id, section_order FROM {$tableName} WHERE id = %d",
+                $sectionId
+            )
+        );
+
+        if (!$section) {
+            return null;
+        }
+
+        $courseId = (int) $section->course_id;
+        $currentSectionOrder = (int) $section->section_order;
+
+        // Get all section IDs that come before this section (lower section_order)
+        $previousSectionIds = $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT id FROM {$tableName} WHERE course_id = %d AND section_order < %d",
+                $courseId,
+                $currentSectionOrder
+            )
+        );
+
+        // Count lessons in all previous sections
+        $lessonsInPreviousSections = 0;
+
+        if (!empty($previousSectionIds)) {
+            $previousLessons = get_posts([
+                'post_type' => self::LESSON_POST_TYPE,
+                'posts_per_page' => -1,
+                'post_status' => 'publish',
+                'meta_query' => [
+                    [
+                        'key' => '_mpcs_lesson_section_id',
+                        'value' => $previousSectionIds,
+                        'compare' => 'IN',
+                    ],
+                ],
+                'fields' => 'ids',
+                'update_post_meta_cache' => false,
+                'update_post_term_cache' => false,
+            ]);
+
+            $lessonsInPreviousSections = count($previousLessons);
+        }
+
+        // Global position = lessons in previous sections + position in current section (1-based)
+        return $lessonsInPreviousSections + $lessonOrder + 1;
     }
 
     /**
@@ -253,7 +379,7 @@ class MemberPressCoursesIntegration
     }
 
     /**
-     * Add course fields to discovered fields for the course post type
+     * Add course/lesson fields to discovered fields
      *
      * @param array  $fields   Current discovered fields
      * @param string $postType The post type being queried
@@ -261,37 +387,52 @@ class MemberPressCoursesIntegration
      */
     public function addCourseFields(array $fields, string $postType): array
     {
-        // Only add fields for course post type
-        if ($postType !== self::COURSE_POST_TYPE) {
-            return $fields;
-        }
-
         // Check availability
         if (!$this->isAvailable()) {
             return $fields;
         }
 
-        // Add virtual/computed fields
-        foreach (self::VIRTUAL_FIELDS as $key => $config) {
-            $fields[] = [
-                'key' => $key,
-                'name' => $key,
-                'label' => $config['label'],
-                'type' => $config['type'],
-                'source' => 'mpcs_virtual',
-                'plugin' => 'memberpress_courses',
-                'plugin_label' => 'MemberPress Courses (Computed)',
-                'plugin_priority' => 15,
-                'description' => $config['description'] ?? '',
-                'virtual' => true,
-            ];
+        // Add virtual/computed fields for courses
+        if ($postType === self::COURSE_POST_TYPE) {
+            foreach (self::COURSE_VIRTUAL_FIELDS as $key => $config) {
+                $fields[] = [
+                    'key' => $key,
+                    'name' => $key,
+                    'label' => $config['label'],
+                    'type' => $config['type'],
+                    'source' => 'mpcs_virtual',
+                    'plugin' => 'memberpress_courses',
+                    'plugin_label' => 'MemberPress Courses (Computed)',
+                    'plugin_priority' => 15,
+                    'description' => $config['description'] ?? '',
+                    'virtual' => true,
+                ];
+            }
+        }
+
+        // Add virtual/computed fields for lessons
+        if ($postType === self::LESSON_POST_TYPE) {
+            foreach (self::LESSON_VIRTUAL_FIELDS as $key => $config) {
+                $fields[] = [
+                    'key' => $key,
+                    'name' => $key,
+                    'label' => $config['label'],
+                    'type' => $config['type'],
+                    'source' => 'mpcs_virtual',
+                    'plugin' => 'memberpress_courses',
+                    'plugin_label' => 'MemberPress Courses (Computed)',
+                    'plugin_priority' => 15,
+                    'description' => $config['description'] ?? '',
+                    'virtual' => true,
+                ];
+            }
         }
 
         return $fields;
     }
 
     /**
-     * Resolve course field values
+     * Resolve course/lesson field values
      *
      * @param mixed  $value    Current resolved value
      * @param int    $postId   The post ID
@@ -306,9 +447,8 @@ class MemberPressCoursesIntegration
             return $value;
         }
 
-        // Check if this is a course post
         $post = get_post($postId);
-        if (!$post || $post->post_type !== self::COURSE_POST_TYPE) {
+        if (!$post) {
             return $value;
         }
 
@@ -317,21 +457,81 @@ class MemberPressCoursesIntegration
             return $value;
         }
 
-        return match ($fieldKey) {
-            'mpcs_curriculum' => $this->getCurriculumText($postId),
-            'mpcs_curriculum_html' => $this->getCurriculumHtml($postId),
-            'mpcs_lesson_count' => $this->getLessonCount($postId),
-            'mpcs_section_count' => $this->getSectionCount($postId),
-            'mpcs_enrollment_count' => $this->getEnrollmentCount($postId),
-            'mpcs_total_duration' => $this->getTotalDuration($postId),
-            'mpcs_total_duration_hours' => $this->getTotalDurationHours($postId),
-            // Default values for Course schema properties
-            'mpcs_course_mode' => 'online',
-            'mpcs_availability' => 'InStock',
-            'mpcs_price_free' => 0,
-            'mpcs_is_free' => true,
-            default => $value,
-        };
+        // Handle course fields
+        if ($post->post_type === self::COURSE_POST_TYPE) {
+            return match ($fieldKey) {
+                'mpcs_curriculum' => $this->getCurriculumText($postId),
+                'mpcs_curriculum_html' => $this->getCurriculumHtml($postId),
+                'mpcs_lesson_count' => $this->getLessonCount($postId),
+                'mpcs_section_count' => $this->getSectionCount($postId),
+                'mpcs_enrollment_count' => $this->getEnrollmentCount($postId),
+                'mpcs_total_duration' => $this->getTotalDuration($postId),
+                'mpcs_total_duration_hours' => $this->getTotalDurationHours($postId),
+                // Default values for Course schema properties
+                'mpcs_course_mode' => 'online',
+                'mpcs_availability' => 'InStock',
+                'mpcs_price_free' => 0,
+                'mpcs_is_free' => true,
+                default => $value,
+            };
+        }
+
+        // Handle lesson fields
+        if ($post->post_type === self::LESSON_POST_TYPE) {
+            return match ($fieldKey) {
+                'mpcs_lesson_position' => $this->getLessonPositionValue($post),
+                'mpcs_parent_course_name' => $this->getParentCourseName($post),
+                'mpcs_parent_course_url' => $this->getParentCourseUrl($post),
+                default => $value,
+            };
+        }
+
+        return $value;
+    }
+
+    /**
+     * Get lesson position within the entire course curriculum
+     *
+     * @param WP_Post $lesson The lesson post
+     * @return int|null Global position (1-based) or null
+     */
+    private function getLessonPositionValue(WP_Post $lesson): ?int
+    {
+        return $this->calculateGlobalLessonPosition($lesson);
+    }
+
+    /**
+     * Get parent course name for a lesson
+     *
+     * @param WP_Post $lesson The lesson post
+     * @return string|null Course name or null
+     */
+    private function getParentCourseName(WP_Post $lesson): ?string
+    {
+        $course = $this->getCourseByLessonId($lesson->ID);
+        
+        if (!$course) {
+            return null;
+        }
+
+        return html_entity_decode(get_the_title($course), ENT_QUOTES, 'UTF-8');
+    }
+
+    /**
+     * Get parent course URL for a lesson
+     *
+     * @param WP_Post $lesson The lesson post
+     * @return string|null Course URL or null
+     */
+    private function getParentCourseUrl(WP_Post $lesson): ?string
+    {
+        $course = $this->getCourseByLessonId($lesson->ID);
+        
+        if (!$course) {
+            return null;
+        }
+
+        return get_permalink($course);
     }
 
     /**
