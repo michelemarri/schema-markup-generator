@@ -129,10 +129,22 @@ class MetaBoxPropertiesHandler
                             <span class="smg-field-override-name">
                                 <?php echo esc_html($propName); ?>
                                 <?php if ($hasAuto): ?>
-                                <span class="smg-auto-badge" title="<?php echo esc_attr($propDef['auto_description'] ?? __('Auto-populated from WordPress', 'schema-markup-generator')); ?>">
-                                    <span class="dashicons dashicons-yes-alt"></span>
-                                    <?php echo esc_html($propDef['auto']); ?>
-                                </span>
+                                    <?php 
+                                    $autoSource = !empty($propDef['auto_integration']) ? $propDef['auto_integration'] : $propDef['auto'];
+                                    $autoDescription = $propDef['auto_description'] ?? '';
+                                    ?>
+                                    <span class="smg-auto-badge-wrapper">
+                                        <span class="smg-auto-badge-integration">
+                                            <span class="dashicons dashicons-yes-alt"></span>
+                                            <span class="smg-auto-label"><?php esc_html_e('Auto:', 'schema-markup-generator'); ?></span>
+                                            <span class="smg-auto-source"><?php echo esc_html($autoSource); ?></span>
+                                        </span>
+                                        <?php if ($autoDescription): ?>
+                                        <span class="smg-auto-tooltip">
+                                            <?php echo esc_html($autoDescription); ?>
+                                        </span>
+                                        <?php endif; ?>
+                                    </span>
                                 <?php endif; ?>
                             </span>
                             <?php if (!empty($propDef['description'])): ?>

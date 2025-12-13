@@ -236,6 +236,19 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.35.1
+- **Improved**: Auto-populated properties now show the integration name (e.g., "Auto: MemberPress Courses")
+- **Improved**: Custom CSS-only tooltip appears instantly on hover with detailed description
+- **Improved**: Clearer indication of which integration provides each auto-populated value
+- **Improved**: UI consistency across MetaBox, PostTypesTab, and SchemaPropertiesHandler
+
+### 1.35.0
+- **New**: LearningResource `timeRequired` now auto-calculated when not mapped
+- **New**: Auto-calculation combines text reading time (~200 words/minute) + embedded video duration
+- **New**: Filter `smg_learning_resource_auto_time_required` to customize auto-calculated time
+- **Improved**: `timeRequired` property shows "AUTO" badge indicating automatic calculation
+- **Improved**: More accurate learning time estimates that account for both reading and watching
+
 ### 1.34.0
 - **New**: LearningResource auto-populates `isPartOf` from MemberPress Courses lesson hierarchy (lesson → section → course)
 - **New**: LearningResource auto-populates `position` with global curriculum position (counts all lessons across all sections)

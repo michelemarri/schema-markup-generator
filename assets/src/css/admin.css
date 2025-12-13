@@ -1544,6 +1544,78 @@
   @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded;
 }
 
+/* Auto badge with tooltip on hover */
+.smg-auto-badge-wrapper {
+  @apply relative inline-flex items-center;
+}
+
+.smg-auto-badge-integration {
+  @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-700 rounded;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 1px solid #bbf7d0;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+/* When tooltip exists, show pointer cursor */
+.smg-auto-badge-wrapper:has(.smg-auto-tooltip) .smg-auto-badge-integration {
+  cursor: help;
+}
+
+.smg-auto-badge-wrapper:hover .smg-auto-badge-integration {
+  border-color: #86efac;
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+}
+
+.smg-auto-badge-integration .dashicons {
+  font-size: 12px;
+  width: 12px;
+  height: 12px;
+  @apply text-green-500;
+}
+
+.smg-auto-badge-integration .smg-auto-label {
+  @apply text-green-600;
+}
+
+.smg-auto-badge-integration .smg-auto-source {
+  @apply font-semibold text-green-700;
+}
+
+/* Tooltip - appears immediately on hover of the badge */
+.smg-auto-tooltip {
+  @apply absolute left-0 bottom-full mb-2 px-3 py-2 text-xs text-white bg-gray-900 rounded-lg shadow-lg whitespace-normal;
+  min-width: 180px;
+  max-width: 280px;
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 150ms ease, transform 150ms ease, visibility 150ms ease;
+  pointer-events: none;
+  line-height: 1.5;
+}
+
+.smg-auto-tooltip::after {
+  content: '';
+  @apply absolute left-4 top-full border-4 border-transparent;
+  border-top-color: #171717;
+}
+
+.smg-auto-badge-wrapper:hover .smg-auto-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Right-aligned tooltip variant */
+.smg-auto-tooltip-right {
+  @apply left-auto right-0;
+}
+
+.smg-auto-tooltip-right::after {
+  @apply left-auto right-4;
+}
+
 /* ========================================
    Utility Classes
    ======================================== */

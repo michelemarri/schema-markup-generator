@@ -142,6 +142,41 @@ add_filter('smg_learning_resource_position', function(?int $position, WP_Post $p
 
 ---
 
+#### `smg_learning_resource_auto_time_required`
+
+Filter the auto-calculated `timeRequired` for LearningResource schemas. This filter is called when no explicit `timeRequired` is mapped, allowing customization of the automatic calculation.
+
+```php
+add_filter('smg_learning_resource_auto_time_required', function(int $minutes, WP_Post $post, array $breakdown): int {
+    // Adjust the calculated time
+    // $breakdown contains: word_count, reading_minutes, video_minutes
+    
+    // Example: Add extra time for exercises
+    $exerciseTime = get_post_meta($post->ID, 'exercise_duration', true);
+    if ($exerciseTime) {
+        $minutes += (int) $exerciseTime;
+    }
+    
+    return $minutes;
+}, 10, 3);
+```
+
+**Parameters:**
+- `$minutes` (int) - Calculated time in minutes (reading time + video duration)
+- `$post` (WP_Post) - The lesson/resource post
+- `$breakdown` (array) - Calculation breakdown:
+  - `word_count` (int) - Number of words in content
+  - `reading_minutes` (int) - Estimated reading time at 200 wpm
+  - `video_minutes` (int) - Video duration in minutes (if video present)
+
+**Calculation method:**
+- **Reading time**: Content word count ÷ 200 words/minute (average web reading speed)
+- **Video duration**: Extracted from embedded YouTube/Vimeo videos via API
+
+**Note:** If you map a field to `timeRequired`, the auto-calculation is skipped entirely.
+
+---
+
 #### `smg_product_schema_data` (MemberPress Membership)
 
 The Product schema filter is automatically enhanced for `memberpressproduct` posts.

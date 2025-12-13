@@ -325,16 +325,24 @@ class PostTypesTab extends AbstractTab
                                                     <td>
                                                         <?php if (!empty($propDef['auto'])): ?>
                                                             <?php 
-                                                            $autoTitle = $propDef['auto_description'] ?? __('Auto-populated from WordPress', 'schema-markup-generator');
-                                                            $autoLabel = $propDef['auto'];
+                                                            $autoSource = !empty($propDef['auto_integration']) ? $propDef['auto_integration'] : $propDef['auto'];
                                                             // For content-based auto fields, show a more descriptive label
                                                             if ($propDef['auto'] === 'post_content' && !empty($propDef['auto_description'])) {
-                                                                $autoLabel = __('Auto', 'schema-markup-generator');
+                                                                $autoSource = __('content', 'schema-markup-generator');
                                                             }
+                                                            $autoDescription = $propDef['auto_description'] ?? '';
                                                             ?>
-                                                            <span class="smg-auto-badge" title="<?php echo esc_attr($autoTitle); ?>">
-                                                                <span class="dashicons dashicons-yes-alt"></span>
-                                                                <?php echo esc_html($autoLabel); ?>
+                                                            <span class="smg-auto-badge-wrapper">
+                                                                <span class="smg-auto-badge-integration">
+                                                                    <span class="dashicons dashicons-yes-alt"></span>
+                                                                    <span class="smg-auto-label"><?php esc_html_e('Auto:', 'schema-markup-generator'); ?></span>
+                                                                    <span class="smg-auto-source"><?php echo esc_html($autoSource); ?></span>
+                                                                </span>
+                                                                <?php if ($autoDescription): ?>
+                                                                <span class="smg-auto-tooltip smg-auto-tooltip-right">
+                                                                    <?php echo esc_html($autoDescription); ?>
+                                                                </span>
+                                                                <?php endif; ?>
                                                             </span>
                                                         <?php else: ?>
                                                             <span class="smg-manual-badge">

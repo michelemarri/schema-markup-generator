@@ -87,10 +87,22 @@ class LearningResourceSchema extends AbstractSchema
             $data['educationalUse'] = $educationalUse;
         }
 
+        // Video (if lesson contains video) - build early to use duration for timeRequired
+        $video = $this->buildVideo($post, $mapping);
+        if ($video) {
+            $data['video'] = $video;
+        }
+
         // Time Required (ISO 8601 duration)
+        // Auto-calculated from reading time + video duration if not mapped
         $timeRequired = $this->getMappedValue($post, $mapping, 'timeRequired');
         if ($timeRequired) {
             $data['timeRequired'] = $this->formatDuration($timeRequired);
+        } else {
+            $autoTimeRequired = $this->calculateAutoTimeRequired($post, $video);
+            if ($autoTimeRequired > 0) {
+                $data['timeRequired'] = $this->formatDuration($autoTimeRequired);
+            }
         }
 
         // Interactivity Type
@@ -144,12 +156,6 @@ class LearningResourceSchema extends AbstractSchema
         $encodingFormat = $this->getMappedValue($post, $mapping, 'encodingFormat');
         if ($encodingFormat) {
             $data['encodingFormat'] = $encodingFormat;
-        }
-
-        // Video (if lesson contains video)
-        $video = $this->buildVideo($post, $mapping);
-        if ($video) {
-            $data['video'] = $video;
         }
 
         // Keywords (useful for LLMs)
@@ -827,6 +833,88 @@ class LearningResourceSchema extends AbstractSchema
         return "PT{$duration}";
     }
 
+    /**
+     * Calculate time required automatically from content
+     *
+     * Combines:
+     * - Reading time: estimated at 200 words per minute (average web reading speed)
+     * - Video duration: extracted from embedded videos
+     *
+     * @param WP_Post    $post  The post object
+     * @param array|null $video Video data if available
+     * @return int Total time in minutes (0 if cannot be calculated)
+     */
+    private function calculateAutoTimeRequired(WP_Post $post, ?array $video): int
+    {
+        $totalMinutes = 0;
+
+        // 1. Calculate reading time from text content
+        // Strip HTML, shortcodes, and blocks to get plain text
+        $content = $post->post_content;
+        $content = strip_shortcodes($content);
+        $content = wp_strip_all_tags($content);
+        $content = preg_replace('/\s+/', ' ', $content); // Normalize whitespace
+
+        $wordCount = str_word_count($content);
+
+        // Average reading speed: 200 words per minute (web content)
+        // Use 200 wpm as it accounts for comprehension, not just scanning
+        if ($wordCount > 0) {
+            $readingMinutes = (int) ceil($wordCount / 200);
+            $totalMinutes += $readingMinutes;
+        }
+
+        // 2. Add video duration if present
+        if ($video && !empty($video['duration'])) {
+            $videoSeconds = $this->parseIsoDurationToSeconds($video['duration']);
+            if ($videoSeconds > 0) {
+                $videoMinutes = (int) ceil($videoSeconds / 60);
+                $totalMinutes += $videoMinutes;
+            }
+        }
+
+        /**
+         * Filter auto-calculated time required
+         *
+         * @param int     $totalMinutes Calculated time in minutes
+         * @param WP_Post $post         The post object
+         * @param array   $breakdown    Breakdown of time calculation
+         */
+        return (int) apply_filters('smg_learning_resource_auto_time_required', $totalMinutes, $post, [
+            'word_count' => $wordCount ?? 0,
+            'reading_minutes' => $readingMinutes ?? 0,
+            'video_minutes' => $videoMinutes ?? 0,
+        ]);
+    }
+
+    /**
+     * Parse ISO 8601 duration to seconds
+     *
+     * @param string $duration ISO 8601 duration (e.g., PT1H30M45S)
+     * @return int Duration in seconds
+     */
+    private function parseIsoDurationToSeconds(string $duration): int
+    {
+        if (!str_starts_with($duration, 'P')) {
+            return 0;
+        }
+
+        $seconds = 0;
+
+        // Match hours, minutes, seconds
+        if (preg_match('/(\d+)H/', $duration, $matches)) {
+            $seconds += (int) $matches[1] * 3600;
+        }
+        if (preg_match('/(\d+)M/', $duration, $matches)) {
+            $seconds += (int) $matches[1] * 60;
+        }
+        if (preg_match('/(\d+)S/', $duration, $matches)) {
+            $seconds += (int) $matches[1];
+        }
+
+        return $seconds;
+    }
+
     public function getRequiredProperties(): array
     {
         return ['name', 'description', 'learningResourceType'];
@@ -871,7 +959,8 @@ class LearningResourceSchema extends AbstractSchema
                 'example' => __('Select the parent course from the dropdown, or leave empty for standalone resources', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/isPartOf',
                 'auto' => 'integration',
-                'auto_description' => __('Auto-detected from MemberPress Courses lesson hierarchy (lesson → section → course)', 'schema-markup-generator'),
+                'auto_integration' => 'MemberPress Courses',
+                'auto_description' => __('Detected from lesson hierarchy (lesson → section → course)', 'schema-markup-generator'),
             ],
             'teaches' => [
                 'type' => 'textarea',
@@ -893,6 +982,8 @@ class LearningResourceSchema extends AbstractSchema
                 'description_long' => __('The estimated time to complete this learning resource, in minutes. Helps learners plan their study sessions and set expectations.', 'schema-markup-generator'),
                 'example' => __('15, 30, 45, 60 (minutes)', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/timeRequired',
+                'auto' => 'calculated',
+                'auto_description' => __('Auto-calculated from text reading time (~200 words/min) + video duration', 'schema-markup-generator'),
             ],
             'educationalLevel' => [
                 'type' => 'select',
@@ -939,7 +1030,8 @@ class LearningResourceSchema extends AbstractSchema
                 'example' => __('1, 2, 3 (lesson number within course)', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/position',
                 'auto' => 'integration',
-                'auto_description' => __('Auto-detected from MemberPress Courses lesson order', 'schema-markup-generator'),
+                'auto_integration' => 'MemberPress Courses',
+                'auto_description' => __('Detected from lesson order within section', 'schema-markup-generator'),
             ],
             'keywords' => [
                 'type' => 'text',

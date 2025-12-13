@@ -406,6 +406,22 @@ For individual lessons or educational materials.
 - `description` - Resource description
 - `learningResourceType` - Type (lesson, tutorial, etc.)
 - `isPartOf` - Parent course (auto-detected with MemberPress Courses)
+- `timeRequired` - Completion time (auto-calculated, see below)
+
+**Time Required Auto-Calculation:**
+
+The `timeRequired` property is automatically calculated when not explicitly mapped. The calculation combines:
+
+1. **Reading time**: Content word count ÷ 200 words/minute (average web reading speed)
+2. **Video duration**: Duration of embedded YouTube/Vimeo videos (fetched via API)
+
+For example, a lesson with 1,000 words and a 15-minute video would have `timeRequired` set to `PT20M` (5 min reading + 15 min video).
+
+This auto-calculation:
+- Shows the "AUTO" badge in the schema property mapping UI
+- Works without any configuration
+- Can be overridden by mapping a custom field to `timeRequired`
+- Can be customized via the `smg_learning_resource_auto_time_required` filter
 
 **Video Auto-Detection:**
 
