@@ -338,10 +338,25 @@ class CourseSchema extends AbstractSchema
         // Offers (pricing) - belongs to CourseInstance
         $courseInstance['offers'] = $offersData['offer'];
 
-        // Course workload (if mapped)
+        // Course workload - required by Google for CourseInstance
+        // Use mapped value, or generate from timeRequired, or use default
         $workload = $this->getMappedValue($post, $mapping, 'courseWorkload');
         if ($workload) {
             $courseInstance['courseWorkload'] = $workload;
+        } else {
+            // Try to generate from duration
+            $duration = $this->getMappedValue($post, $mapping, 'duration');
+            if ($duration && is_numeric($duration)) {
+                $hours = (int) $duration;
+                $courseInstance['courseWorkload'] = sprintf(
+                    'Approximately %d %s of self-paced learning',
+                    $hours,
+                    $hours === 1 ? 'hour' : 'hours'
+                );
+            } else {
+                // Default for online self-paced courses
+                $courseInstance['courseWorkload'] = 'Self-paced online learning';
+            }
         }
 
         return $courseInstance;
@@ -591,10 +606,12 @@ class CourseSchema extends AbstractSchema
             ],
             'courseWorkload' => [
                 'type' => 'text',
-                'description' => __('Expected workload per week. Goes into CourseInstance per schema.org.', 'schema-markup-generator'),
-                'description_long' => __('The expected workload for students, typically expressed as hours per week. This property belongs to CourseInstance per schema.org specification.', 'schema-markup-generator'),
-                'example' => __('2 hours of lectures, 1 hour of lab, 3 hours of independent study per week', 'schema-markup-generator'),
+                'description' => __('Expected workload description. Required by Google. Auto-generated if not set.', 'schema-markup-generator'),
+                'description_long' => __('The expected workload for students. Required by Google for CourseInstance. If not mapped, auto-generates based on course duration (e.g., "Approximately 10 hours of self-paced learning") or defaults to "Self-paced online learning".', 'schema-markup-generator'),
+                'example' => __('2 hours of lectures, 1 hour of lab per week; Approximately 10 hours of self-paced learning', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/courseWorkload',
+                'auto' => 'duration_based',
+                'auto_description' => __('Auto-generated from course duration or defaults to "Self-paced online learning"', 'schema-markup-generator'),
             ],
             'inLanguage' => [
                 'type' => 'text',

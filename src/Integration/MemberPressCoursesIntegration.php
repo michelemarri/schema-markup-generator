@@ -913,18 +913,13 @@ class MemberPressCoursesIntegration
         $includeCurriculum = $settings['mpcs_include_curriculum'] ?? false;
 
         // Add course curriculum (sections and lessons) only if setting is enabled
+        // Uses hasPart with LearningResource (semantically correct for course modules/content)
         if ($includeCurriculum) {
             $curriculum = $this->getCourseCurriculum($post->ID);
 
             if (!empty($curriculum)) {
-                $data['hasCourseInstance'] = $curriculum;
+                $data['hasPart'] = $curriculum;
             }
-        }
-
-        // Add lesson count (always useful, lightweight)
-        $lessonCount = $this->getLessonCount($post->ID);
-        if ($lessonCount > 0) {
-            $data['numberOfLessons'] = $lessonCount;
         }
 
         // Auto-calculate total duration from lesson videos if not already set
@@ -965,10 +960,13 @@ class MemberPressCoursesIntegration
     }
 
     /**
-     * Get course curriculum (sections with lessons)
+     * Get course curriculum (sections with lessons) as LearningResource items
+     *
+     * Returns LearningResource objects for hasPart property (semantically correct).
+     * Sections are marked as "module" type, lessons as individual LearningResource items.
      *
      * @param int $courseId The course ID
-     * @return array Curriculum data
+     * @return array Curriculum data as LearningResource array
      */
     public function getCourseCurriculum(int $courseId): array
     {
@@ -987,23 +985,29 @@ class MemberPressCoursesIntegration
         }
 
         $curriculum = [];
+        $position = 1;
 
         foreach ($sections as $section) {
+            // Sections are LearningResource with type "module" or "unit"
             $sectionData = [
-                '@type' => 'CourseInstance',
+                '@type' => 'LearningResource',
                 'name' => $section->title,
-                'courseMode' => 'online',
+                'learningResourceType' => 'module',
+                'position' => $position++,
             ];
 
             // Get lessons in this section
             $lessons = $this->getLessonsInSection((int) $section->id);
 
             if (!empty($lessons)) {
-                $sectionData['hasPart'] = array_map(function ($lesson) {
+                $lessonPosition = 1;
+                $sectionData['hasPart'] = array_map(function ($lesson) use (&$lessonPosition) {
                     return [
                         '@type' => 'LearningResource',
                         'name' => html_entity_decode(get_the_title($lesson), ENT_QUOTES, 'UTF-8'),
                         'url' => get_permalink($lesson),
+                        'learningResourceType' => 'Lesson',
+                        'position' => $lessonPosition++,
                     ];
                 }, $lessons);
             }

@@ -236,6 +236,20 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.37.0
+- **Breaking**: Course curriculum now uses semantically correct `hasPart` with `LearningResource` instead of `hasCourseInstance`
+- **Improved**: Course sections are now `LearningResource` with `learningResourceType: "module"` and `position`
+- **Improved**: Course lessons include `learningResourceType: "Lesson"` and `position` within their section
+- **Improved**: `hasCourseInstance` is now reserved for the main course offering (with pricing, instructor, schedule)
+- **Note**: Google deprecated Course rich results in June 2024, but schema remains useful for LLMs and other search engines
+
+### 1.36.2
+- **Fixed**: CourseInstance now includes required `courseWorkload` property
+- **New**: `courseWorkload` auto-generated from course duration (e.g., "Approximately 10 hours of self-paced learning")
+
+### 1.36.1
+- **Fixed**: Removed invalid `numberOfLessons` property from Course schema (not recognized by Schema.org vocabulary)
+
 ### 1.36.0
 - **New**: LearningResource `learningResourceType` now auto-detected from content analysis
 - **New**: Auto-detection rules: Video (embedded videos), Quiz (forms/assessments), Tutorial (step-by-step structure), Exercise (code blocks + interactive), Reading (text-heavy), Lecture (video+text), Lesson (fallback)

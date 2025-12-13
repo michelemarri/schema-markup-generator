@@ -696,26 +696,39 @@ In **Settings → Schema Markup → Integrations**, you can configure:
 {
   "@type": "Course",
   "name": "Digital Marketing Fundamentals",
-  "numberOfLessons": 12,
-  "hasCourseInstance": [
+  "hasCourseInstance": {
+    "@type": "CourseInstance",
+    "courseMode": "online",
+    "courseWorkload": "Approximately 10 hours of self-paced learning",
+    "offers": {
+      "@type": "Offer",
+      "price": 0,
+      "priceCurrency": "EUR",
+      "availability": "https://schema.org/InStock"
+    }
+  },
+  "hasPart": [
     {
-      "@type": "CourseInstance",
+      "@type": "LearningResource",
       "name": "Module 1: SEO Basics",
+      "learningResourceType": "module",
+      "position": 1,
       "hasPart": [
-        { "@type": "LearningResource", "name": "What is SEO?" },
-        { "@type": "LearningResource", "name": "Keywords Research" }
+        { "@type": "LearningResource", "name": "What is SEO?", "learningResourceType": "Lesson", "position": 1 },
+        { "@type": "LearningResource", "name": "Keywords Research", "learningResourceType": "Lesson", "position": 2 }
       ]
     }
   ]
 }
 ```
 
+> **Note:** Course modules/sections use `hasPart` with `LearningResource` (semantically correct for course content), while `hasCourseInstance` is reserved for the course offering with pricing, schedule, and instructor information.
+
 **Course with Syllabus (mapped from `mpcs_curriculum`):**
 ```json
 {
   "@type": "Course",
   "name": "Digital Marketing Fundamentals",
-  "numberOfLessons": 12,
   "syllabus": "Section 1: SEO Basics. 1.1 What is SEO?. 1.2 Keywords Research. Section 2: Content Marketing. 2.1 Content Strategy. 2.2 Writing for the Web."
 }
 ```
