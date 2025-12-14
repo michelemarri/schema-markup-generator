@@ -114,6 +114,11 @@ class MemberPressCoursesIntegration
             'type' => 'text',
             'description' => 'Auto-detected interactivity: active (quizzes/forms), expositive (video/reading), mixed (both). Maps to interactivityType.',
         ],
+        'mpcs_lesson_transcription' => [
+            'label' => 'Video Transcription (auto)',
+            'type' => 'textarea',
+            'description' => 'Video transcript from lesson_transcription meta field. Auto-extracted and cleaned for VideoObject schema.',
+        ],
     ];
 
     /**
@@ -494,6 +499,7 @@ class MemberPressCoursesIntegration
                 'mpcs_parent_course_url' => $this->getParentCourseUrl($post),
                 'mpcs_learning_resource_type' => $this->detectLearningResourceType($post),
                 'mpcs_interactivity_type' => $this->detectInteractivityType($post),
+                'mpcs_lesson_transcription' => $this->getLessonTranscription($post),
                 default => $value,
             };
         }
@@ -544,6 +550,76 @@ class MemberPressCoursesIntegration
         }
 
         return get_permalink($course);
+    }
+
+    /**
+     * Get lesson transcription from meta field
+     *
+     * Retrieves and cleans the video transcript from the 'lesson_transcription' meta field.
+     * Removes HTML, timestamps, and speaker labels for clean schema output.
+     *
+     * @param WP_Post $lesson The lesson post
+     * @return string|null Cleaned transcript or null
+     */
+    private function getLessonTranscription(WP_Post $lesson): ?string
+    {
+        $maxLength = 5000;
+
+        // Get transcript from meta field
+        $transcript = get_post_meta($lesson->ID, 'lesson_transcription', true);
+
+        if (empty($transcript)) {
+            // Try ACF field as fallback
+            if (function_exists('get_field')) {
+                $transcript = get_field('lesson_transcription', $lesson->ID);
+            }
+        }
+
+        if (empty($transcript) || !is_string($transcript)) {
+            return null;
+        }
+
+        // Clean the transcript
+        $cleaned = $this->cleanTranscriptText($transcript);
+
+        if (empty($cleaned) || strlen($cleaned) < 50) {
+            return null;
+        }
+
+        // Truncate if too long
+        if (strlen($cleaned) > $maxLength) {
+            $truncated = substr($cleaned, 0, $maxLength);
+            $lastSpace = strrpos($truncated, ' ');
+            if ($lastSpace !== false) {
+                $truncated = substr($truncated, 0, $lastSpace);
+            }
+            return $truncated . '...';
+        }
+
+        return $cleaned;
+    }
+
+    /**
+     * Clean transcript text by removing HTML, timestamps, and speaker labels
+     *
+     * @param string $text Raw transcript text
+     * @return string Cleaned text
+     */
+    private function cleanTranscriptText(string $text): string
+    {
+        // Remove HTML tags
+        $text = wp_strip_all_tags($text);
+
+        // Remove timestamp patterns: [00:00:01.20] or [00:00:01]
+        $text = preg_replace('/\[\d{2}:\d{2}:\d{2}(?:\.\d{2})?\]/', '', $text);
+
+        // Remove speaker labels: "- Speaker 1", "Speaker 1:", etc.
+        $text = preg_replace('/(?:^|\n)\s*-?\s*Speaker\s*\d+\s*:?\s*/i', ' ', $text);
+
+        // Remove excessive whitespace
+        $text = preg_replace('/\s+/', ' ', $text);
+
+        return trim($text);
     }
 
     /**

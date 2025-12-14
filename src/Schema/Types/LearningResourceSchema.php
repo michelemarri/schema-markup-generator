@@ -570,13 +570,58 @@ class LearningResourceSchema extends AbstractSchema
             $video['hasPart'] = $chapters;
         }
 
-        // Try to extract transcript from content
-        $transcript = $this->extractTranscriptFromContent($post->post_content);
+        // Try to get transcript - priority order:
+        // 1. Meta field 'lesson_transcription' (MemberPress Courses)
+        // 2. ACF field 'lesson_transcription'
+        // 3. Extract from post content (heading/timestamp/class patterns)
+        $transcript = $this->getTranscript($post);
         if ($transcript) {
             $video['transcript'] = $transcript;
         }
 
         return $video;
+    }
+
+    /**
+     * Get video transcript from various sources
+     *
+     * Priority:
+     * 1. Meta field 'lesson_transcription' (MemberPress Courses)
+     * 2. ACF field 'lesson_transcription' or 'transcript'
+     * 3. Extract from post content (heading/timestamp/class patterns)
+     *
+     * @param WP_Post $post The post object
+     * @return string|null Cleaned transcript text or null
+     */
+    private function getTranscript(WP_Post $post): ?string
+    {
+        $maxLength = 5000;
+
+        // 1. Check meta field 'lesson_transcription' (MemberPress Courses stores it here)
+        $metaTranscript = get_post_meta($post->ID, 'lesson_transcription', true);
+        if (!empty($metaTranscript)) {
+            $cleaned = $this->cleanTranscriptText($metaTranscript);
+            if (!empty($cleaned) && strlen($cleaned) > 50) {
+                return $this->truncateTranscript($cleaned, $maxLength);
+            }
+        }
+
+        // 2. Check ACF fields if available
+        if (function_exists('get_field')) {
+            $acfFields = ['lesson_transcription', 'transcript', 'video_transcript', 'transcription'];
+            foreach ($acfFields as $fieldName) {
+                $acfValue = get_field($fieldName, $post->ID);
+                if (!empty($acfValue) && is_string($acfValue)) {
+                    $cleaned = $this->cleanTranscriptText($acfValue);
+                    if (!empty($cleaned) && strlen($cleaned) > 50) {
+                        return $this->truncateTranscript($cleaned, $maxLength);
+                    }
+                }
+            }
+        }
+
+        // 3. Fallback: extract from post content
+        return $this->extractTranscriptFromContent($post->post_content);
     }
 
     /**
