@@ -38,10 +38,18 @@ class LearningResourceSchema extends AbstractSchema
     {
         $data = $this->buildBase($post, $mapping);
 
+        // Entity identification - critical for LLM understanding and cross-referencing
+        $postUrl = $this->getPostUrl($post);
+        $data['@id'] = $postUrl . '#learningresource';
+        $data['url'] = $postUrl;
+        $data['mainEntityOfPage'] = [
+            '@type' => 'WebPage',
+            '@id' => $postUrl,
+        ];
+
         // Core properties
         $data['name'] = html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8');
         $data['description'] = $this->getPostDescription($post);
-        $data['url'] = $this->getPostUrl($post);
 
         // Image
         $image = $this->getFeaturedImage($post);
@@ -213,6 +221,9 @@ class LearningResourceSchema extends AbstractSchema
 
     /**
      * Build parent course reference
+     * 
+     * Uses @id reference pattern to avoid SEO tools validating the nested Course
+     * as a complete standalone Course entity (which would require hasCourseInstance, offers, etc.)
      */
     private function buildParentCourse(WP_Post $post, array $mapping): ?array
     {
@@ -221,11 +232,12 @@ class LearningResourceSchema extends AbstractSchema
 
         if ($course) {
             if (is_array($course)) {
+                $courseUrl = $course['url'] ?? '';
                 return [
                     '@type' => 'Course',
+                    '@id' => $courseUrl . '#course',
                     'name' => $course['name'] ?? '',
-                    'url' => $course['url'] ?? '',
-                    'description' => $course['description'] ?? '',
+                    'url' => $courseUrl,
                 ];
             }
 
@@ -233,16 +245,17 @@ class LearningResourceSchema extends AbstractSchema
             if (is_numeric($course)) {
                 $coursePost = get_post((int) $course);
                 if ($coursePost) {
+                    $courseUrl = get_permalink($coursePost);
                     return [
                         '@type' => 'Course',
+                        '@id' => $courseUrl . '#course',
                         'name' => html_entity_decode(get_the_title($coursePost), ENT_QUOTES, 'UTF-8'),
-                        'url' => get_permalink($coursePost),
-                        'description' => $this->getPostDescription($coursePost),
+                        'url' => $courseUrl,
                     ];
                 }
             }
 
-            // If it's just a name
+            // If it's just a name - can't create @id without URL
             return [
                 '@type' => 'Course',
                 'name' => $course,
@@ -253,10 +266,12 @@ class LearningResourceSchema extends AbstractSchema
         if ($post->post_parent) {
             $parent = get_post($post->post_parent);
             if ($parent) {
+                $parentUrl = get_permalink($parent);
                 return [
                     '@type' => 'Course',
+                    '@id' => $parentUrl . '#course',
                     'name' => html_entity_decode(get_the_title($parent), ENT_QUOTES, 'UTF-8'),
-                    'url' => get_permalink($parent),
+                    'url' => $parentUrl,
                 ];
             }
         }

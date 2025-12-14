@@ -79,8 +79,11 @@ class CourseSchema extends AbstractSchema
         $inLanguage = $this->getMappedValue($post, $mapping, 'inLanguage');
         $data['inLanguage'] = $inLanguage ?: get_bloginfo('language');
 
-        // Build offers data (needed for both Course and CourseInstance)
+        // Build offers data (needed for both Course root and CourseInstance)
         $offersData = $this->buildOffers($post, $mapping);
+
+        // offers at root level (required by Semrush and other SEO tools)
+        $data['offers'] = $offersData['offer'];
 
         // isAccessibleForFree - Google recommended property for free courses (stays on Course level)
         if ($offersData['isFree']) {
@@ -88,7 +91,7 @@ class CourseSchema extends AbstractSchema
         }
 
         // ========================================
-        // CourseInstance (instructor, courseMode, offers belong here per schema.org)
+        // CourseInstance (instructor, courseMode also have offers per schema.org)
         // ========================================
         $courseInstance = $this->buildDefaultCourseInstance($post, $mapping, $offersData);
 
@@ -545,35 +548,35 @@ class CourseSchema extends AbstractSchema
             ],
 
             // ========================================
-            // Pricing & Availability (placed in CourseInstance.offers)
+            // Pricing & Availability (placed in both Course root and CourseInstance.offers)
             // ========================================
             'price' => [
                 'type' => 'number',
-                'description' => __('Course price. Goes into CourseInstance.offers. Use 0 for free courses.', 'schema-markup-generator'),
-                'description_long' => __('The price of the course. Use 0 for free courses (this will set isAccessibleForFree on Course). Price information is placed in CourseInstance.offers per schema.org specification.', 'schema-markup-generator'),
+                'description' => __('Course price. Use 0 for free courses.', 'schema-markup-generator'),
+                'description_long' => __('The price of the course. Use 0 for free courses (this will set isAccessibleForFree on Course). Price information is placed at Course root level and in CourseInstance.offers for maximum SEO tool compatibility.', 'schema-markup-generator'),
                 'example' => __('0 (free), 49.99, 199.00, 499.00', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/price',
                 'auto' => '0 (Free)',
-                'auto_description' => __('Defaults to 0 (Free). Placed in CourseInstance.offers.', 'schema-markup-generator'),
+                'auto_description' => __('Defaults to 0 (Free). Placed in Course.offers and CourseInstance.offers.', 'schema-markup-generator'),
             ],
             'priceCurrency' => [
                 'type' => 'text',
-                'description' => __('Currency code (EUR, USD, etc.). Goes into CourseInstance.offers.', 'schema-markup-generator'),
-                'description_long' => __('The currency of the course price in ISO 4217 format. Placed in CourseInstance.offers per schema.org specification.', 'schema-markup-generator'),
+                'description' => __('Currency code (EUR, USD, etc.).', 'schema-markup-generator'),
+                'description_long' => __('The currency of the course price in ISO 4217 format. Placed at Course root level and in CourseInstance.offers for maximum SEO tool compatibility.', 'schema-markup-generator'),
                 'example' => __('EUR, USD, GBP', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/priceCurrency',
                 'auto' => 'site_currency',
-                'auto_description' => __('Auto-detected from WooCommerce/MemberPress or EUR. Placed in CourseInstance.offers.', 'schema-markup-generator'),
+                'auto_description' => __('Auto-detected from WooCommerce/MemberPress or EUR. Placed in Course.offers and CourseInstance.offers.', 'schema-markup-generator'),
             ],
             'availability' => [
                 'type' => 'select',
-                'description' => __('Course availability status. Goes into CourseInstance.offers.', 'schema-markup-generator'),
-                'description_long' => __('The availability status of the course. Use InStock for open enrollment, PreOrder for upcoming courses, or SoldOut if enrollment is closed. Placed in CourseInstance.offers per schema.org specification.', 'schema-markup-generator'),
+                'description' => __('Course availability status.', 'schema-markup-generator'),
+                'description_long' => __('The availability status of the course. Use InStock for open enrollment, PreOrder for upcoming courses, or SoldOut if enrollment is closed. Placed at Course root level and in CourseInstance.offers for maximum SEO tool compatibility.', 'schema-markup-generator'),
                 'example' => __('InStock (open enrollment), PreOrder (coming soon)', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/availability',
                 'options' => ['InStock', 'SoldOut', 'PreOrder', 'Discontinued'],
                 'auto' => 'InStock',
-                'auto_description' => __('Defaults to InStock. Placed in CourseInstance.offers.', 'schema-markup-generator'),
+                'auto_description' => __('Defaults to InStock. Placed in Course.offers and CourseInstance.offers.', 'schema-markup-generator'),
             ],
 
             // ========================================

@@ -236,6 +236,11 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.37.1
+- **Improved**: LearningResource now includes `@id` and `mainEntityOfPage` for proper entity identification
+- **Improved**: Nested Course in `isPartOf` now uses `@id` reference pattern to avoid SEO tools validating it as incomplete
+- **Note**: Google deprecated Course rich results in 2024 - LearningResource is now the recommended schema for lessons
+
 ### 1.37.0
 - **Breaking**: Course curriculum now uses semantically correct `hasPart` with `LearningResource` instead of `hasCourseInstance`
 - **Improved**: Course sections are now `LearningResource` with `learningResourceType: "module"` and `position`
