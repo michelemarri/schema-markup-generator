@@ -9,6 +9,7 @@ Automatic schema.org structured data generation for WordPress, optimized for sea
 ## Features
 
 - **Auto-Discovery** - Automatically detects all post types, custom fields, and taxonomies
+- **Auto-detect Videos** - Automatically adds VideoObject schema when YouTube/Vimeo videos are detected in content
 - **18 Schema Types** - Article, Product, Organization, Person, FAQ, HowTo, Event, Recipe, Review, Course, LearningResource, WebApplication, FinancialProduct and more
 - **additionalType Support** - Add more specific Schema.org types to any schema (e.g., add "MobileApplication" to SoftwareApplication)
 - **Smart Schema Suggestions** - Recommends schema types based on post type names
@@ -235,6 +236,21 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - [Metodo.dev](https://metodo.dev)
 
 ## Changelog
+
+### 1.38.1
+- **New**: Auto-extract video transcript from page content for VideoObject schema
+- **New**: Detects transcript sections by heading ("Video Transcription", "Transcript", "Trascrizione")
+- **New**: Detects transcript by timestamp patterns (`[00:00:01]` format)
+- **New**: Detects transcript by CSS class (`.transcript`, `.video-transcript`)
+- **Improved**: Cleans transcript by removing timestamps and speaker labels for clean schema output
+- **Note**: Transcript limited to 5000 characters to keep schema size reasonable
+
+### 1.38.0
+- **New**: Auto-detect video schema - Automatically adds VideoObject schema when YouTube or Vimeo videos are detected in content
+- **New**: Toggle option in General Settings to enable/disable video auto-detection
+- **New**: YouTube API integration for auto-detected videos (fetches duration and thumbnail if API key is configured)
+- **New**: Support for WordPress video blocks and self-hosted videos detection
+- **New**: Filter `smg_auto_detected_video_schema` to customize auto-detected video schema data
 
 ### 1.37.3
 - **Fixed**: Nested Offer `category` field now always included (fixes Semrush "A value for the category field is required for a nested Offer" error)

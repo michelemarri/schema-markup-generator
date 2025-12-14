@@ -127,6 +127,12 @@ class SchemaRenderer
             }
         }
 
+        // Auto-detect video in content (if enabled and no VideoObject schema already)
+        $autoDetectedVideo = $this->maybeAutoDetectVideo($post, $schemaType);
+        if ($autoDetectedVideo) {
+            $schemas[] = $autoDetectedVideo;
+        }
+
         // Add global schemas (WebSite, Breadcrumb)
         $globalSchemas = $this->buildGlobalSchemas($post);
         $schemas = array_merge($schemas, $globalSchemas);
@@ -145,6 +151,315 @@ class SchemaRenderer
         $this->logger->debug("Generated " . count($schemas) . " schemas for post {$post->ID}");
 
         return $schemas;
+    }
+
+    /**
+     * Auto-detect video in post content and build VideoObject schema
+     *
+     * @param WP_Post $post The post object
+     * @param string|null $currentSchemaType The currently configured schema type
+     * @return array|null VideoObject schema data or null
+     */
+    private function maybeAutoDetectVideo(WP_Post $post, ?string $currentSchemaType): ?array
+    {
+        // Skip if already using VideoObject schema
+        if ($currentSchemaType === 'VideoObject') {
+            return null;
+        }
+
+        // Check if auto-detect is enabled
+        $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('general');
+        if (empty($settings['auto_detect_video'])) {
+            return null;
+        }
+
+        // Detect video in content
+        $videoData = $this->detectVideoInContent($post->post_content);
+        if (!$videoData) {
+            return null;
+        }
+
+        $this->logger->debug("Auto-detected {$videoData['platform']} video in post {$post->ID}");
+
+        // Build VideoObject schema
+        $videoSchema = $this->schemaFactory->create('VideoObject');
+        if (!$videoSchema) {
+            return null;
+        }
+
+        // Create mapping with detected video data
+        $mapping = [
+            'embedUrl' => $videoData['embed_url'],
+        ];
+
+        // Try to get additional data from YouTube API if available
+        if ($videoData['platform'] === 'youtube' && !empty($videoData['video_id'])) {
+            $youtubeData = $this->getYouTubeVideoData($videoData['video_id']);
+            if ($youtubeData) {
+                if (!empty($youtubeData['duration'])) {
+                    $mapping['duration'] = $youtubeData['duration'];
+                }
+                if (!empty($youtubeData['thumbnail'])) {
+                    $mapping['thumbnailUrl'] = $youtubeData['thumbnail'];
+                }
+            }
+        }
+
+        // Try to extract transcript from content
+        $transcript = $this->extractTranscriptFromContent($post->post_content);
+        if ($transcript) {
+            $mapping['transcript'] = $transcript;
+            $this->logger->debug("Auto-extracted transcript for post {$post->ID} (" . strlen($transcript) . " chars)");
+        }
+
+        $schemaData = $videoSchema->build($post, $mapping);
+
+        /**
+         * Filter auto-detected video schema data
+         *
+         * @param array   $schemaData The schema data
+         * @param WP_Post $post       The post object
+         * @param array   $videoData  The detected video data
+         */
+        $schemaData = apply_filters('smg_auto_detected_video_schema', $schemaData, $post, $videoData);
+
+        return !empty($schemaData) ? $schemaData : null;
+    }
+
+    /**
+     * Detect video embeds in post content
+     *
+     * @param string $content The post content
+     * @return array|null Video data or null if no video found
+     */
+    private function detectVideoInContent(string $content): ?array
+    {
+        // YouTube patterns
+        $youtubePatterns = [
+            // youtube.com/watch?v=VIDEO_ID
+            '/youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/',
+            // youtu.be/VIDEO_ID
+            '/youtu\.be\/([a-zA-Z0-9_-]{11})/',
+            // youtube.com/embed/VIDEO_ID
+            '/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/',
+            // youtube-nocookie.com/embed/VIDEO_ID
+            '/youtube-nocookie\.com\/embed\/([a-zA-Z0-9_-]{11})/',
+            // youtube.com/live/VIDEO_ID
+            '/youtube\.com\/live\/([a-zA-Z0-9_-]{11})/',
+            // WordPress YouTube embed block
+            '/<!-- wp:embed {"url":"https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})"/',
+        ];
+
+        foreach ($youtubePatterns as $pattern) {
+            if (preg_match($pattern, $content, $matches)) {
+                return [
+                    'platform' => 'youtube',
+                    'video_id' => $matches[1],
+                    'embed_url' => 'https://www.youtube.com/embed/' . $matches[1],
+                ];
+            }
+        }
+
+        // Vimeo patterns
+        $vimeoPatterns = [
+            // vimeo.com/VIDEO_ID
+            '/vimeo\.com\/(\d+)/',
+            // player.vimeo.com/video/VIDEO_ID
+            '/player\.vimeo\.com\/video\/(\d+)/',
+            // WordPress Vimeo embed block
+            '/<!-- wp:embed {"url":"https?:\/\/(?:www\.)?vimeo\.com\/(\d+)"/',
+        ];
+
+        foreach ($vimeoPatterns as $pattern) {
+            if (preg_match($pattern, $content, $matches)) {
+                return [
+                    'platform' => 'vimeo',
+                    'video_id' => $matches[1],
+                    'embed_url' => 'https://player.vimeo.com/video/' . $matches[1],
+                ];
+            }
+        }
+
+        // WordPress video block with self-hosted video
+        if (preg_match('/<!-- wp:video.*?"src":"([^"]+)"/', $content, $matches)) {
+            return [
+                'platform' => 'self-hosted',
+                'video_id' => null,
+                'embed_url' => null,
+                'content_url' => $matches[1],
+            ];
+        }
+
+        // HTML5 video tag
+        if (preg_match('/<video[^>]+src=["\']([^"\']+)["\']/', $content, $matches)) {
+            return [
+                'platform' => 'self-hosted',
+                'video_id' => null,
+                'embed_url' => null,
+                'content_url' => $matches[1],
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Extract video transcript from post content
+     *
+     * Looks for common transcript patterns:
+     * - Headings with "Transcript", "Transcription", "Trascrizione"
+     * - Content with timestamp patterns [00:00:00]
+     *
+     * @param string $content The post content
+     * @return string|null Cleaned transcript text or null
+     */
+    private function extractTranscriptFromContent(string $content): ?string
+    {
+        // Maximum transcript length (characters)
+        $maxLength = 5000;
+
+        // Pattern 1: Look for heading with transcript keywords
+        // Matches: <h2>Video Transcription</h2>, <h3>Transcript</h3>, <h4>Trascrizione</h4>, etc.
+        $headingPattern = '/<h[2-6][^>]*>.*?(?:Video\s+)?(?:Transcript(?:ion)?|Trascrizione|Full\s+Text).*?<\/h[2-6]>/is';
+
+        if (preg_match($headingPattern, $content, $headingMatch, PREG_OFFSET_CAPTURE)) {
+            $startPos = $headingMatch[0][1] + strlen($headingMatch[0][0]);
+            
+            // Find the next heading or end of content
+            $remainingContent = substr($content, $startPos);
+            
+            // Look for next heading to determine end of transcript section
+            if (preg_match('/<h[2-6][^>]*>/i', $remainingContent, $nextHeading, PREG_OFFSET_CAPTURE)) {
+                $transcriptHtml = substr($remainingContent, 0, $nextHeading[0][1]);
+            } else {
+                $transcriptHtml = $remainingContent;
+            }
+
+            $transcript = $this->cleanTranscriptText($transcriptHtml);
+            
+            if (!empty($transcript) && strlen($transcript) > 50) {
+                return $this->truncateTranscript($transcript, $maxLength);
+            }
+        }
+
+        // Pattern 2: Look for content with timestamp patterns (even without heading)
+        // Matches: [00:00:01.20] or [00:00:01] followed by text
+        $timestampPattern = '/\[(\d{2}:\d{2}:\d{2}(?:\.\d{2})?)\]\s*(?:-\s*(?:Speaker\s*\d+|[A-Za-z]+)\s*)?(.+?)(?=\[\d{2}:\d{2}|\z)/s';
+        
+        if (preg_match_all($timestampPattern, $content, $matches, PREG_SET_ORDER)) {
+            if (count($matches) >= 3) { // At least 3 timestamped segments = likely a transcript
+                $transcriptParts = [];
+                foreach ($matches as $match) {
+                    $text = trim($match[2]);
+                    if (!empty($text)) {
+                        $transcriptParts[] = $text;
+                    }
+                }
+                
+                if (!empty($transcriptParts)) {
+                    $transcript = implode(' ', $transcriptParts);
+                    $transcript = $this->cleanTranscriptText($transcript);
+                    
+                    if (strlen($transcript) > 50) {
+                        return $this->truncateTranscript($transcript, $maxLength);
+                    }
+                }
+            }
+        }
+
+        // Pattern 3: Look for div/section with transcript class
+        $classPattern = '/<(?:div|section)[^>]*class=["\'][^"\']*(?:transcript|transcription|video-transcript)[^"\']*["\'][^>]*>(.*?)<\/(?:div|section)>/is';
+        
+        if (preg_match($classPattern, $content, $matches)) {
+            $transcript = $this->cleanTranscriptText($matches[1]);
+            
+            if (!empty($transcript) && strlen($transcript) > 50) {
+                return $this->truncateTranscript($transcript, $maxLength);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Clean transcript text by removing HTML, timestamps, and speaker labels
+     *
+     * @param string $text Raw transcript text
+     * @return string Cleaned text
+     */
+    private function cleanTranscriptText(string $text): string
+    {
+        // Remove HTML tags
+        $text = wp_strip_all_tags($text);
+        
+        // Remove timestamp patterns: [00:00:01.20] or [00:00:01]
+        $text = preg_replace('/\[\d{2}:\d{2}:\d{2}(?:\.\d{2})?\]/', '', $text);
+        
+        // Remove speaker labels: "- Speaker 1", "Speaker 1:", etc.
+        $text = preg_replace('/(?:^|\n)\s*-?\s*Speaker\s*\d+\s*:?\s*/i', ' ', $text);
+        
+        // Remove excessive whitespace
+        $text = preg_replace('/\s+/', ' ', $text);
+        
+        // Trim and return
+        return trim($text);
+    }
+
+    /**
+     * Truncate transcript to maximum length at word boundary
+     *
+     * @param string $transcript The transcript text
+     * @param int $maxLength Maximum length
+     * @return string Truncated transcript
+     */
+    private function truncateTranscript(string $transcript, int $maxLength): string
+    {
+        if (strlen($transcript) <= $maxLength) {
+            return $transcript;
+        }
+
+        // Truncate at word boundary
+        $truncated = substr($transcript, 0, $maxLength);
+        $lastSpace = strrpos($truncated, ' ');
+        
+        if ($lastSpace !== false) {
+            $truncated = substr($truncated, 0, $lastSpace);
+        }
+
+        return $truncated . '...';
+    }
+
+    /**
+     * Get YouTube video data via API (if available)
+     *
+     * @param string $videoId YouTube video ID
+     * @return array|null Video data or null
+     */
+    private function getYouTubeVideoData(string $videoId): ?array
+    {
+        // Check if YouTube integration is available
+        if (!class_exists(\Metodo\SchemaMarkupGenerator\Integration\YouTubeIntegration::class)) {
+            return null;
+        }
+
+        $youtube = new \Metodo\SchemaMarkupGenerator\Integration\YouTubeIntegration();
+        
+        if (!$youtube->isAvailable()) {
+            return null;
+        }
+
+        $details = $youtube->getVideoDetails($videoId);
+        
+        if (!$details) {
+            return null;
+        }
+
+        return [
+            'duration' => $details['duration_seconds'],
+            'thumbnail' => $details['thumbnail'],
+            'title' => $details['title'],
+            'description' => $details['description'],
+        ];
     }
 
     /**

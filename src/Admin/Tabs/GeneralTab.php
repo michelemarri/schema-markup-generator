@@ -39,6 +39,7 @@ class GeneralTab extends AbstractTab
                     'enabled' => true,
                     'enable_website_schema' => true,
                     'enable_breadcrumb_schema' => true,
+                    'auto_detect_video' => false,
                     'output_format' => 'json-ld',
                 ],
             ],
@@ -56,6 +57,7 @@ class GeneralTab extends AbstractTab
             'enabled' => !empty($input['enabled']),
             'enable_website_schema' => !empty($input['enable_website_schema']),
             'enable_breadcrumb_schema' => !empty($input['enable_breadcrumb_schema']),
+            'auto_detect_video' => !empty($input['auto_detect_video']),
             'output_format' => sanitize_text_field($input['output_format'] ?? 'json-ld'),
         ];
     }
@@ -93,6 +95,13 @@ class GeneralTab extends AbstractTab
                         $settings['enable_breadcrumb_schema'] ?? true,
                         __('Breadcrumb Schema', 'schema-markup-generator'),
                         __('Add BreadcrumbList schema for navigation trails.', 'schema-markup-generator')
+                    );
+
+                    $this->renderToggle(
+                        'smg_general_settings[auto_detect_video]',
+                        $settings['auto_detect_video'] ?? false,
+                        __('Auto-detect Videos', 'schema-markup-generator'),
+                        __('Automatically add VideoObject schema when YouTube or Vimeo videos are detected in the content.', 'schema-markup-generator')
                     );
                 }, 'dashicons-editor-code');
                 ?>

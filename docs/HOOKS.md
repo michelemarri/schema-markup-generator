@@ -88,6 +88,32 @@ add_filter('smg_article_schema_data', function(array $data, WP_Post $post, array
 #### `smg_recipe_schema_data`
 #### `smg_review_schema_data`
 #### `smg_video_schema_data`
+#### `smg_auto_detected_video_schema`
+
+Filter auto-detected video schema data. This filter is called when a video is automatically detected in post content.
+
+```php
+add_filter('smg_auto_detected_video_schema', function(array $data, WP_Post $post, array $videoData): array {
+    // $videoData contains:
+    // - 'platform' => 'youtube'|'vimeo'|'self-hosted'
+    // - 'video_id' => The video ID (null for self-hosted)
+    // - 'embed_url' => The embed URL
+    // - 'content_url' => The video file URL (for self-hosted)
+    
+    // Add custom property
+    $data['isAccessibleForFree'] = true;
+    
+    return $data;
+}, 10, 3);
+```
+
+**Parameters:**
+- `$data` (array) - The VideoObject schema data
+- `$post` (WP_Post) - The post object
+- `$videoData` (array) - Detected video information (platform, video_id, embed_url)
+
+---
+
 #### `smg_course_schema_data`
 #### `smg_learning_resource_schema_data`
 #### `smg_software_schema_data`
