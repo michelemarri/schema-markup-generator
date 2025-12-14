@@ -237,6 +237,12 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.38.5
+- **New**: Auto-fetch thumbnail from YouTube/Vimeo when no featured image is set (fixes Google Search Console "No thumbnail URL provided" error)
+- **New**: Uses YouTube API for high-quality thumbnails (if API key configured), otherwise uses standard YouTube thumbnail URLs
+- **New**: Vimeo thumbnail support via oEmbed API (no authentication required)
+- **Improved**: Thumbnail fallback chain: mapped field → featured image → YouTube/Vimeo thumbnail
+
 ### 1.38.4
 - **Improved**: Description length now optimized per schema type (Google recommended limits)
 - **Improved**: VideoObject description increased to 2048 chars (was 160)

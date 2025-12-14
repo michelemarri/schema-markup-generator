@@ -54,6 +54,17 @@ class VideoObjectSchema extends AbstractSchema
             }
         }
 
+        // If still no thumbnail, try to extract from video embed (YouTube/Vimeo)
+        if (empty($data['thumbnailUrl'])) {
+            $embedUrl = $data['embedUrl'] ?? $this->extractEmbedUrl($post);
+            if ($embedUrl) {
+                $videoThumbnail = $this->getVideoThumbnailFromEmbed($embedUrl);
+                if ($videoThumbnail) {
+                    $data['thumbnailUrl'] = $videoThumbnail;
+                }
+            }
+        }
+
         // Content URL (video file)
         $contentUrl = $this->getMappedValue($post, $mapping, 'contentUrl');
         if ($contentUrl) {
@@ -241,6 +252,137 @@ class VideoObjectSchema extends AbstractSchema
             return $matches[1];
         }
 
+        return null;
+    }
+
+    /**
+     * Get video thumbnail from embed URL (YouTube or Vimeo)
+     *
+     * For YouTube: First tries the YouTube API (if configured), then falls back
+     * to predictable YouTube thumbnail URLs.
+     * For Vimeo: Uses the oEmbed API (no authentication required).
+     *
+     * @param string $embedUrl The embed URL
+     * @return string|null Thumbnail URL or null
+     */
+    private function getVideoThumbnailFromEmbed(string $embedUrl): ?string
+    {
+        // Try YouTube first
+        $youtubeThumbnail = $this->getYouTubeThumbnail($embedUrl);
+        if ($youtubeThumbnail) {
+            return $youtubeThumbnail;
+        }
+
+        // Try Vimeo
+        $vimeoThumbnail = $this->getVimeoThumbnail($embedUrl);
+        if ($vimeoThumbnail) {
+            return $vimeoThumbnail;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get YouTube thumbnail from embed URL
+     *
+     * @param string $embedUrl The embed URL
+     * @return string|null Thumbnail URL or null
+     */
+    private function getYouTubeThumbnail(string $embedUrl): ?string
+    {
+        // Extract YouTube video ID from various URL formats
+        $videoId = null;
+
+        if (preg_match('/youtube(?:-nocookie)?\.com\/embed\/([a-zA-Z0-9_-]{11})/', $embedUrl, $matches)) {
+            $videoId = $matches[1];
+        } elseif (preg_match('/youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/', $embedUrl, $matches)) {
+            $videoId = $matches[1];
+        } elseif (preg_match('/youtu\.be\/([a-zA-Z0-9_-]{11})/', $embedUrl, $matches)) {
+            $videoId = $matches[1];
+        }
+
+        if (!$videoId) {
+            return null;
+        }
+
+        // Try YouTube API first (if available) for verified high-quality thumbnail
+        if (class_exists(\Metodo\SchemaMarkupGenerator\Integration\YouTubeIntegration::class)) {
+            $youtube = new \Metodo\SchemaMarkupGenerator\Integration\YouTubeIntegration();
+
+            if ($youtube->isAvailable()) {
+                $details = $youtube->getVideoDetails($videoId);
+
+                if (!empty($details['thumbnail'])) {
+                    return $details['thumbnail'];
+                }
+            }
+        }
+
+        // Fallback: Use predictable YouTube thumbnail URLs (no API needed)
+        // YouTube provides thumbnails at these predictable URLs:
+        // - maxresdefault.jpg (1280x720) - may not exist for all videos
+        // - sddefault.jpg (640x480)
+        // - hqdefault.jpg (480x360) - guaranteed to exist
+        // - mqdefault.jpg (320x180)
+        // - default.jpg (120x90)
+        //
+        // We use hqdefault.jpg as it's guaranteed to exist for all videos
+        // and meets Google's minimum requirement of 120x120px
+        return 'https://img.youtube.com/vi/' . $videoId . '/hqdefault.jpg';
+    }
+
+    /**
+     * Get Vimeo thumbnail using oEmbed API (no authentication required)
+     *
+     * @param string $embedUrl The embed URL
+     * @return string|null Thumbnail URL or null
+     */
+    private function getVimeoThumbnail(string $embedUrl): ?string
+    {
+        // Extract Vimeo video ID
+        if (!preg_match('/vimeo\.com\/(?:video\/)?(\d+)/', $embedUrl, $matches)) {
+            if (!preg_match('/player\.vimeo\.com\/video\/(\d+)/', $embedUrl, $matches)) {
+                return null;
+            }
+        }
+
+        $videoId = $matches[1];
+
+        // Check cache first
+        $cacheKey = 'smg_vimeo_thumb_' . $videoId;
+        $cached = get_transient($cacheKey);
+
+        if ($cached !== false) {
+            return $cached ?: null;
+        }
+
+        // Use Vimeo oEmbed API (no authentication required)
+        $oembedUrl = 'https://vimeo.com/api/oembed.json?url=' . urlencode('https://vimeo.com/' . $videoId);
+
+        $response = wp_remote_get($oembedUrl, [
+            'timeout' => 10,
+        ]);
+
+        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+            // Cache empty result to avoid repeated failed requests
+            set_transient($cacheKey, '', HOUR_IN_SECONDS);
+            return null;
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+
+        if (!empty($data['thumbnail_url'])) {
+            // Get larger thumbnail by modifying the URL
+            // Vimeo thumbnails can be resized by changing the dimensions in the URL
+            $thumbnail = preg_replace('/_\d+x\d+/', '_1280x720', $data['thumbnail_url']);
+
+            // Cache for 1 week
+            set_transient($cacheKey, $thumbnail, WEEK_IN_SECONDS);
+
+            return $thumbnail;
+        }
+
+        set_transient($cacheKey, '', HOUR_IN_SECONDS);
         return null;
     }
 
