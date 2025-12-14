@@ -237,6 +237,12 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.38.2
+- **Fixed**: Duration and transcript now auto-extracted for ALL VideoObject schemas (configured or auto-detected)
+- **Fixed**: VideoObject standalone not duplicated when schema is already configured as VideoObject
+- **Improved**: Moved duration/transcript extraction logic to VideoObjectSchema for consistent behavior
+- **Improved**: YouTube API duration fetch now works for any VideoObject with YouTube embed URL
+
 ### 1.38.1
 - **New**: Auto-extract video transcript from page content for VideoObject schema
 - **New**: Detects transcript sections by heading ("Video Transcription", "Transcript", "Trascrizione")

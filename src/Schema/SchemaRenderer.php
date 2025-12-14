@@ -192,26 +192,20 @@ class SchemaRenderer
             'embedUrl' => $videoData['embed_url'],
         ];
 
-        // Try to get additional data from YouTube API if available
+        // Try to get thumbnail from YouTube API if available
         if ($videoData['platform'] === 'youtube' && !empty($videoData['video_id'])) {
             $youtubeData = $this->getYouTubeVideoData($videoData['video_id']);
-            if ($youtubeData) {
-                if (!empty($youtubeData['duration'])) {
-                    $mapping['duration'] = $youtubeData['duration'];
-                }
-                if (!empty($youtubeData['thumbnail'])) {
-                    $mapping['thumbnailUrl'] = $youtubeData['thumbnail'];
-                }
+            if ($youtubeData && !empty($youtubeData['thumbnail'])) {
+                $mapping['thumbnailUrl'] = $youtubeData['thumbnail'];
             }
         }
 
-        // Try to extract transcript from content
-        $transcript = $this->extractTranscriptFromContent($post->post_content);
-        if ($transcript) {
-            $mapping['transcript'] = $transcript;
-            $this->logger->debug("Auto-extracted transcript for post {$post->ID} (" . strlen($transcript) . " chars)");
+        // Add content URL for self-hosted videos
+        if (!empty($videoData['content_url'])) {
+            $mapping['contentUrl'] = $videoData['content_url'];
         }
 
+        // Note: duration and transcript are auto-extracted by VideoObjectSchema
         $schemaData = $videoSchema->build($post, $mapping);
 
         /**
@@ -301,132 +295,6 @@ class SchemaRenderer
         }
 
         return null;
-    }
-
-    /**
-     * Extract video transcript from post content
-     *
-     * Looks for common transcript patterns:
-     * - Headings with "Transcript", "Transcription", "Trascrizione"
-     * - Content with timestamp patterns [00:00:00]
-     *
-     * @param string $content The post content
-     * @return string|null Cleaned transcript text or null
-     */
-    private function extractTranscriptFromContent(string $content): ?string
-    {
-        // Maximum transcript length (characters)
-        $maxLength = 5000;
-
-        // Pattern 1: Look for heading with transcript keywords
-        // Matches: <h2>Video Transcription</h2>, <h3>Transcript</h3>, <h4>Trascrizione</h4>, etc.
-        $headingPattern = '/<h[2-6][^>]*>.*?(?:Video\s+)?(?:Transcript(?:ion)?|Trascrizione|Full\s+Text).*?<\/h[2-6]>/is';
-
-        if (preg_match($headingPattern, $content, $headingMatch, PREG_OFFSET_CAPTURE)) {
-            $startPos = $headingMatch[0][1] + strlen($headingMatch[0][0]);
-            
-            // Find the next heading or end of content
-            $remainingContent = substr($content, $startPos);
-            
-            // Look for next heading to determine end of transcript section
-            if (preg_match('/<h[2-6][^>]*>/i', $remainingContent, $nextHeading, PREG_OFFSET_CAPTURE)) {
-                $transcriptHtml = substr($remainingContent, 0, $nextHeading[0][1]);
-            } else {
-                $transcriptHtml = $remainingContent;
-            }
-
-            $transcript = $this->cleanTranscriptText($transcriptHtml);
-            
-            if (!empty($transcript) && strlen($transcript) > 50) {
-                return $this->truncateTranscript($transcript, $maxLength);
-            }
-        }
-
-        // Pattern 2: Look for content with timestamp patterns (even without heading)
-        // Matches: [00:00:01.20] or [00:00:01] followed by text
-        $timestampPattern = '/\[(\d{2}:\d{2}:\d{2}(?:\.\d{2})?)\]\s*(?:-\s*(?:Speaker\s*\d+|[A-Za-z]+)\s*)?(.+?)(?=\[\d{2}:\d{2}|\z)/s';
-        
-        if (preg_match_all($timestampPattern, $content, $matches, PREG_SET_ORDER)) {
-            if (count($matches) >= 3) { // At least 3 timestamped segments = likely a transcript
-                $transcriptParts = [];
-                foreach ($matches as $match) {
-                    $text = trim($match[2]);
-                    if (!empty($text)) {
-                        $transcriptParts[] = $text;
-                    }
-                }
-                
-                if (!empty($transcriptParts)) {
-                    $transcript = implode(' ', $transcriptParts);
-                    $transcript = $this->cleanTranscriptText($transcript);
-                    
-                    if (strlen($transcript) > 50) {
-                        return $this->truncateTranscript($transcript, $maxLength);
-                    }
-                }
-            }
-        }
-
-        // Pattern 3: Look for div/section with transcript class
-        $classPattern = '/<(?:div|section)[^>]*class=["\'][^"\']*(?:transcript|transcription|video-transcript)[^"\']*["\'][^>]*>(.*?)<\/(?:div|section)>/is';
-        
-        if (preg_match($classPattern, $content, $matches)) {
-            $transcript = $this->cleanTranscriptText($matches[1]);
-            
-            if (!empty($transcript) && strlen($transcript) > 50) {
-                return $this->truncateTranscript($transcript, $maxLength);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Clean transcript text by removing HTML, timestamps, and speaker labels
-     *
-     * @param string $text Raw transcript text
-     * @return string Cleaned text
-     */
-    private function cleanTranscriptText(string $text): string
-    {
-        // Remove HTML tags
-        $text = wp_strip_all_tags($text);
-        
-        // Remove timestamp patterns: [00:00:01.20] or [00:00:01]
-        $text = preg_replace('/\[\d{2}:\d{2}:\d{2}(?:\.\d{2})?\]/', '', $text);
-        
-        // Remove speaker labels: "- Speaker 1", "Speaker 1:", etc.
-        $text = preg_replace('/(?:^|\n)\s*-?\s*Speaker\s*\d+\s*:?\s*/i', ' ', $text);
-        
-        // Remove excessive whitespace
-        $text = preg_replace('/\s+/', ' ', $text);
-        
-        // Trim and return
-        return trim($text);
-    }
-
-    /**
-     * Truncate transcript to maximum length at word boundary
-     *
-     * @param string $transcript The transcript text
-     * @param int $maxLength Maximum length
-     * @return string Truncated transcript
-     */
-    private function truncateTranscript(string $transcript, int $maxLength): string
-    {
-        if (strlen($transcript) <= $maxLength) {
-            return $transcript;
-        }
-
-        // Truncate at word boundary
-        $truncated = substr($transcript, 0, $maxLength);
-        $lastSpace = strrpos($truncated, ' ');
-        
-        if ($lastSpace !== false) {
-            $truncated = substr($truncated, 0, $lastSpace);
-        }
-
-        return $truncated . '...';
     }
 
     /**
