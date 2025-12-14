@@ -570,7 +570,117 @@ class LearningResourceSchema extends AbstractSchema
             $video['hasPart'] = $chapters;
         }
 
+        // Try to extract transcript from content
+        $transcript = $this->extractTranscriptFromContent($post->post_content);
+        if ($transcript) {
+            $video['transcript'] = $transcript;
+        }
+
         return $video;
+    }
+
+    /**
+     * Extract video transcript from post content
+     *
+     * Looks for common transcript patterns:
+     * - Headings with "Transcript", "Transcription", "Trascrizione"
+     * - Content with timestamp patterns [00:00:00]
+     * - Div/section with transcript class
+     *
+     * @param string $content The post content
+     * @return string|null Cleaned transcript text or null
+     */
+    private function extractTranscriptFromContent(string $content): ?string
+    {
+        $maxLength = 5000;
+
+        // Pattern 1: Look for heading with transcript keywords
+        $headingPattern = '/<h[2-6][^>]*>.*?(?:Video\s+)?(?:Transcript(?:ion)?|Trascrizione|Full\s+Text).*?<\/h[2-6]>/is';
+
+        if (preg_match($headingPattern, $content, $headingMatch, PREG_OFFSET_CAPTURE)) {
+            $startPos = $headingMatch[0][1] + strlen($headingMatch[0][0]);
+            $remainingContent = substr($content, $startPos);
+            
+            if (preg_match('/<h[2-6][^>]*>/i', $remainingContent, $nextHeading, PREG_OFFSET_CAPTURE)) {
+                $transcriptHtml = substr($remainingContent, 0, $nextHeading[0][1]);
+            } else {
+                $transcriptHtml = $remainingContent;
+            }
+
+            $transcript = $this->cleanTranscriptText($transcriptHtml);
+            
+            if (!empty($transcript) && strlen($transcript) > 50) {
+                return $this->truncateTranscript($transcript, $maxLength);
+            }
+        }
+
+        // Pattern 2: Look for content with timestamp patterns
+        $timestampPattern = '/\[(\d{2}:\d{2}:\d{2}(?:\.\d{2})?)\]\s*(?:-\s*(?:Speaker\s*\d+|[A-Za-z]+)\s*)?(.+?)(?=\[\d{2}:\d{2}|\z)/s';
+        
+        if (preg_match_all($timestampPattern, $content, $matches, PREG_SET_ORDER)) {
+            if (count($matches) >= 3) {
+                $transcriptParts = [];
+                foreach ($matches as $match) {
+                    $text = trim($match[2]);
+                    if (!empty($text)) {
+                        $transcriptParts[] = $text;
+                    }
+                }
+                
+                if (!empty($transcriptParts)) {
+                    $transcript = implode(' ', $transcriptParts);
+                    $transcript = $this->cleanTranscriptText($transcript);
+                    
+                    if (strlen($transcript) > 50) {
+                        return $this->truncateTranscript($transcript, $maxLength);
+                    }
+                }
+            }
+        }
+
+        // Pattern 3: Look for div/section with transcript class
+        $classPattern = '/<(?:div|section)[^>]*class=["\'][^"\']*(?:transcript|transcription|video-transcript)[^"\']*["\'][^>]*>(.*?)<\/(?:div|section)>/is';
+        
+        if (preg_match($classPattern, $content, $matches)) {
+            $transcript = $this->cleanTranscriptText($matches[1]);
+            
+            if (!empty($transcript) && strlen($transcript) > 50) {
+                return $this->truncateTranscript($transcript, $maxLength);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Clean transcript text by removing HTML, timestamps, and speaker labels
+     */
+    private function cleanTranscriptText(string $text): string
+    {
+        $text = wp_strip_all_tags($text);
+        $text = preg_replace('/\[\d{2}:\d{2}:\d{2}(?:\.\d{2})?\]/', '', $text);
+        $text = preg_replace('/(?:^|\n)\s*-?\s*Speaker\s*\d+\s*:?\s*/i', ' ', $text);
+        $text = preg_replace('/\s+/', ' ', $text);
+        return trim($text);
+    }
+
+    /**
+     * Truncate transcript to maximum length at word boundary
+     */
+    private function truncateTranscript(string $transcript, int $maxLength): string
+    {
+        if (strlen($transcript) <= $maxLength) {
+            return $transcript;
+        }
+
+        $truncated = substr($transcript, 0, $maxLength);
+        $lastSpace = strrpos($truncated, ' ');
+        
+        if ($lastSpace !== false) {
+            $truncated = substr($truncated, 0, $lastSpace);
+        }
+
+        return $truncated . '...';
     }
 
     /**

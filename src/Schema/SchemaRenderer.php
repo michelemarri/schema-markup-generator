@@ -167,6 +167,22 @@ class SchemaRenderer
             return null;
         }
 
+        // Skip if using a schema type that already includes video as a nested property
+        // These schemas build their own VideoObject internally
+        $schemaTypesWithNestedVideo = [
+            'LearningResource',
+            'Article',
+            'HowTo',
+            'Recipe',
+            'Course',
+            'NewsArticle',
+            'BlogPosting',
+        ];
+        
+        if ($currentSchemaType && in_array($currentSchemaType, $schemaTypesWithNestedVideo, true)) {
+            return null;
+        }
+
         // Check if auto-detect is enabled
         $settings = \Metodo\SchemaMarkupGenerator\smg_get_settings('general');
         if (empty($settings['auto_detect_video'])) {

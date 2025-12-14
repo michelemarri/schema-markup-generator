@@ -237,6 +237,11 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.38.3
+- **Fixed**: VideoObject standalone no longer added when schema contains nested video (LearningResource, Article, HowTo, Recipe, Course)
+- **New**: LearningResource video now includes auto-extracted transcript from page content
+- **Improved**: Schemas with nested video property now get transcript extraction automatically
+
 ### 1.38.2
 - **Fixed**: Duration and transcript now auto-extracted for ALL VideoObject schemas (configured or auto-detected)
 - **Fixed**: VideoObject standalone not duplicated when schema is already configured as VideoObject
