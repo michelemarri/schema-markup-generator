@@ -236,6 +236,9 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.37.2
+- **Improved**: Nested Course in `isPartOf` now includes `provider` for complete context
+
 ### 1.37.1
 - **Improved**: LearningResource now includes `@id` and `mainEntityOfPage` for proper entity identification
 - **Improved**: Nested Course in `isPartOf` now uses `@id` reference pattern to avoid SEO tools validating it as incomplete

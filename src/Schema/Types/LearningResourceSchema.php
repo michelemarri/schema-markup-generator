@@ -224,9 +224,13 @@ class LearningResourceSchema extends AbstractSchema
      * 
      * Uses @id reference pattern to avoid SEO tools validating the nested Course
      * as a complete standalone Course entity (which would require hasCourseInstance, offers, etc.)
+     * Includes provider for context.
      */
     private function buildParentCourse(WP_Post $post, array $mapping): ?array
     {
+        // Get provider data once for reuse
+        $provider = $this->getPublisher();
+
         // Check for mapped course
         $course = $this->getMappedValue($post, $mapping, 'isPartOf');
 
@@ -238,6 +242,7 @@ class LearningResourceSchema extends AbstractSchema
                     '@id' => $courseUrl . '#course',
                     'name' => $course['name'] ?? '',
                     'url' => $courseUrl,
+                    'provider' => $provider,
                 ];
             }
 
@@ -251,6 +256,7 @@ class LearningResourceSchema extends AbstractSchema
                         '@id' => $courseUrl . '#course',
                         'name' => html_entity_decode(get_the_title($coursePost), ENT_QUOTES, 'UTF-8'),
                         'url' => $courseUrl,
+                        'provider' => $provider,
                     ];
                 }
             }
@@ -259,6 +265,7 @@ class LearningResourceSchema extends AbstractSchema
             return [
                 '@type' => 'Course',
                 'name' => $course,
+                'provider' => $provider,
             ];
         }
 
@@ -272,6 +279,7 @@ class LearningResourceSchema extends AbstractSchema
                     '@id' => $parentUrl . '#course',
                     'name' => html_entity_decode(get_the_title($parent), ENT_QUOTES, 'UTF-8'),
                     'url' => $parentUrl,
+                    'provider' => $provider,
                 ];
             }
         }
@@ -283,7 +291,14 @@ class LearningResourceSchema extends AbstractSchema
          * @param WP_Post    $post         The lesson post
          * @param array      $mapping      Field mapping configuration
          */
-        return apply_filters('smg_learning_resource_parent_course', null, $post, $mapping);
+        $parentCourse = apply_filters('smg_learning_resource_parent_course', null, $post, $mapping);
+        
+        // Add provider to filtered parent course if it exists
+        if ($parentCourse && !isset($parentCourse['provider'])) {
+            $parentCourse['provider'] = $provider;
+        }
+        
+        return $parentCourse;
     }
 
     /**
