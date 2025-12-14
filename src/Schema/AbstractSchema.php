@@ -174,21 +174,69 @@ abstract class AbstractSchema implements SchemaInterface
 
     /**
      * Get excerpt or generate from content
+     * 
+     * Default limit increased to 320 chars for better schema rich results.
+     * Use getDescriptionLimit() for type-specific limits.
+     * 
+     * Google recommended limits:
+     * - VideoObject: 2048 chars
+     * - Article/NewsArticle: 500 chars
+     * - Product: 5000 chars
+     * - Course/LearningResource: 500 chars
+     * - Default: 320 chars
      */
-    protected function getPostDescription(WP_Post $post, int $maxLength = 160): string
+    protected function getPostDescription(WP_Post $post, ?int $maxLength = null): string
     {
+        // Use type-specific limit if not explicitly provided
+        if ($maxLength === null) {
+            $maxLength = $this->getDescriptionLimit();
+        }
+
         $description = $post->post_excerpt;
 
         if (empty($description)) {
             $description = wp_strip_all_tags($post->post_content);
-            $description = wp_trim_words($description, 30, '...');
+            // Calculate word limit based on char limit (avg 6 chars per word)
+            $wordLimit = max(50, intval($maxLength / 6));
+            $description = wp_trim_words($description, $wordLimit, '');
         }
 
+        // Clean up whitespace
+        $description = preg_replace('/\s+/', ' ', trim($description));
+
         if (mb_strlen($description) > $maxLength) {
-            $description = mb_substr($description, 0, $maxLength - 3) . '...';
+            // Truncate at word boundary
+            $description = mb_substr($description, 0, $maxLength);
+            $lastSpace = mb_strrpos($description, ' ');
+            if ($lastSpace !== false && $lastSpace > $maxLength * 0.8) {
+                $description = mb_substr($description, 0, $lastSpace);
+            }
+            $description = rtrim($description, ' .,;:') . '...';
         }
 
         return $description;
+    }
+
+    /**
+     * Get recommended description length limit for this schema type
+     * 
+     * Based on Google's recommendations for rich results.
+     */
+    protected function getDescriptionLimit(): int
+    {
+        return match ($this->getType()) {
+            'VideoObject' => 2048,
+            'Product' => 5000,
+            'Article', 'NewsArticle', 'BlogPosting' => 500,
+            'Course', 'LearningResource' => 500,
+            'Recipe' => 500,
+            'Event' => 500,
+            'HowTo' => 500,
+            'FAQPage' => 320,
+            'Organization', 'LocalBusiness' => 500,
+            'Person' => 320,
+            default => 320,
+        };
     }
 
     /**

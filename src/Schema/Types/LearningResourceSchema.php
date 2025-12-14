@@ -515,7 +515,7 @@ class LearningResourceSchema extends AbstractSchema
         $video = [
             '@type' => 'VideoObject',
             'name' => html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8'),
-            'description' => $this->getPostDescription($post),
+            'description' => $this->getPostDescription($post, 2048), // VideoObject limit per Google
             'uploadDate' => $this->formatDate($post->post_date),
         ];
 

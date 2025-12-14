@@ -237,6 +237,14 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.38.4
+- **Improved**: Description length now optimized per schema type (Google recommended limits)
+- **Improved**: VideoObject description increased to 2048 chars (was 160)
+- **Improved**: Article/Course/LearningResource description increased to 500 chars
+- **Improved**: Product description increased to 5000 chars
+- **Improved**: Default description increased to 320 chars
+- **Improved**: Smart word-boundary truncation for cleaner output
+
 ### 1.38.3
 - **Fixed**: VideoObject standalone no longer added when schema contains nested video (LearningResource, Article, HowTo, Recipe, Course)
 - **New**: LearningResource video now includes auto-extracted transcript from page content
