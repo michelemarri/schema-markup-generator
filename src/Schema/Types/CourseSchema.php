@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Metodo\SchemaMarkupGenerator\Schema\Types;
 
+use Metodo\SchemaMarkupGenerator\Integration\YouTubeIntegration;
 use Metodo\SchemaMarkupGenerator\Schema\AbstractSchema;
 use WP_Post;
 
@@ -195,6 +196,12 @@ class CourseSchema extends AbstractSchema
             $data['competencyRequired'] = is_array($competency)
                 ? $competency
                 : array_map('trim', explode(',', $competency));
+        }
+
+        // Video (if course contains intro/promo video) - auto-extract from content
+        $video = $this->buildVideo($post, $mapping);
+        if ($video) {
+            $data['video'] = $video;
         }
 
         // Date metadata - Important for content freshness
@@ -682,7 +689,368 @@ class CourseSchema extends AbstractSchema
                 'example' => __('Google Data Analytics Professional Certificate, AWS Certified Developer, Completion Certificate', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/educationalCredentialAwarded',
             ],
+            'videoUrl' => [
+                'type' => 'url',
+                'description' => __('Course intro/promo video URL. Auto-extracted from YouTube/Vimeo embeds.', 'schema-markup-generator'),
+                'description_long' => __('URL of an introductory or promotional video for the course. If you embed YouTube or Vimeo videos in your content, this is automatically extracted.', 'schema-markup-generator'),
+                'example' => __('https://www.youtube.com/watch?v=...', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/video',
+                'auto' => 'post_content',
+                'auto_description' => __('Auto-extracted from embedded YouTube/Vimeo videos with transcript', 'schema-markup-generator'),
+            ],
         ]);
+    }
+
+    /**
+     * Build video data if present in content
+     */
+    private function buildVideo(WP_Post $post, array $mapping): ?array
+    {
+        $videoUrl = $this->getMappedValue($post, $mapping, 'videoUrl');
+
+        // If no mapped video, try to extract from content
+        if (!$videoUrl) {
+            $extractedVideo = $this->extractVideoFromContent($post);
+            if ($extractedVideo) {
+                return $extractedVideo;
+            }
+            return null;
+        }
+
+        $video = [
+            '@type' => 'VideoObject',
+            'contentUrl' => $videoUrl,
+            'name' => $this->getMappedValue($post, $mapping, 'videoName')
+                ?: html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8'),
+        ];
+
+        $videoThumbnail = $this->getMappedValue($post, $mapping, 'videoThumbnail');
+        if ($videoThumbnail) {
+            $video['thumbnailUrl'] = $videoThumbnail;
+        } else {
+            $image = $this->getFeaturedImage($post);
+            if ($image) {
+                $video['thumbnailUrl'] = $image['url'];
+            }
+        }
+
+        $video['uploadDate'] = $this->formatDate($post->post_date);
+
+        return $video;
+    }
+
+    /**
+     * Extract video from post content (YouTube, Vimeo)
+     */
+    private function extractVideoFromContent(WP_Post $post): ?array
+    {
+        $content = $post->post_content;
+
+        // Try YouTube
+        $youtubeData = $this->extractYouTubeVideo($content);
+        if ($youtubeData) {
+            return $this->buildVideoFromEmbed($youtubeData, $post);
+        }
+
+        // Try Vimeo
+        $vimeoData = $this->extractVimeoVideo($content);
+        if ($vimeoData) {
+            return $this->buildVideoFromEmbed($vimeoData, $post);
+        }
+
+        return null;
+    }
+
+    /**
+     * Extract YouTube video data from content
+     */
+    private function extractYouTubeVideo(string $content): ?array
+    {
+        $patterns = [
+            '/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/',
+            '/(?:https?:\/\/)?youtu\.be\/([a-zA-Z0-9_-]{11})/',
+            '/(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/',
+            '/<iframe[^>]+src=["\'](?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})[^"\']*["\'][^>]*>/',
+            '/<!-- wp:embed {"url":"https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})[^"]*","type":"video","providerNameSlug":"youtube"/',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $content, $matches)) {
+                $videoId = $matches[1];
+                return [
+                    'platform' => 'youtube',
+                    'id' => $videoId,
+                    'embedUrl' => 'https://www.youtube.com/embed/' . $videoId,
+                    'contentUrl' => 'https://www.youtube.com/watch?v=' . $videoId,
+                    'thumbnailUrl' => 'https://img.youtube.com/vi/' . $videoId . '/maxresdefault.jpg',
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extract Vimeo video data from content
+     */
+    private function extractVimeoVideo(string $content): ?array
+    {
+        $patterns = [
+            '/(?:https?:\/\/)?(?:www\.)?vimeo\.com\/(\d+)/',
+            '/(?:https?:\/\/)?player\.vimeo\.com\/video\/(\d+)/',
+            '/<iframe[^>]+src=["\'](?:https?:\/\/)?player\.vimeo\.com\/video\/(\d+)[^"\']*["\'][^>]*>/',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $content, $matches)) {
+                $videoId = $matches[1];
+                return [
+                    'platform' => 'vimeo',
+                    'id' => $videoId,
+                    'embedUrl' => 'https://player.vimeo.com/video/' . $videoId,
+                    'contentUrl' => 'https://vimeo.com/' . $videoId,
+                    'thumbnailUrl' => null,
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Build VideoObject from extracted embed data
+     */
+    private function buildVideoFromEmbed(array $embedData, WP_Post $post): array
+    {
+        $video = [
+            '@type' => 'VideoObject',
+            'name' => html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8'),
+            'description' => $this->getPostDescription($post, 2048),
+            'uploadDate' => $this->formatDate($post->post_date),
+        ];
+
+        if (!empty($embedData['embedUrl'])) {
+            $video['embedUrl'] = $embedData['embedUrl'];
+        }
+
+        if (!empty($embedData['contentUrl'])) {
+            $video['contentUrl'] = $embedData['contentUrl'];
+        }
+
+        // Thumbnail
+        if (!empty($embedData['thumbnailUrl'])) {
+            $video['thumbnailUrl'] = $embedData['thumbnailUrl'];
+        } else {
+            $image = $this->getFeaturedImage($post);
+            if ($image) {
+                $video['thumbnailUrl'] = $image['url'];
+            }
+        }
+
+        // Duration from YouTube API
+        if (!empty($embedData['platform']) && $embedData['platform'] === 'youtube' && !empty($embedData['id'])) {
+            $youtubeDuration = $this->getYouTubeVideoDuration($embedData['id']);
+            if ($youtubeDuration > 0) {
+                $video['duration'] = $this->formatVideoDurationISO($youtubeDuration);
+            }
+        }
+
+        // Try oEmbed for additional data
+        $oEmbedData = $this->fetchOEmbedData($embedData);
+        if ($oEmbedData) {
+            if (empty($video['duration']) && !empty($oEmbedData['duration'])) {
+                $video['duration'] = $this->formatVideoDurationISO($oEmbedData['duration']);
+            }
+            if (!empty($oEmbedData['thumbnail_url']) && empty($video['thumbnailUrl'])) {
+                $video['thumbnailUrl'] = $oEmbedData['thumbnail_url'];
+            }
+            if (!empty($oEmbedData['author_name'])) {
+                $video['author'] = [
+                    '@type' => 'Person',
+                    'name' => $oEmbedData['author_name'],
+                ];
+            }
+        }
+
+        // Extract transcript from content
+        $transcript = $this->extractTranscriptFromContent($post->post_content);
+        if ($transcript) {
+            $video['transcript'] = $transcript;
+        }
+
+        return $video;
+    }
+
+    /**
+     * Get YouTube video duration using YouTube Data API v3
+     */
+    private function getYouTubeVideoDuration(string $videoId): int
+    {
+        $youtubeIntegration = $this->getYouTubeIntegration();
+
+        if (!$youtubeIntegration || !$youtubeIntegration->isAvailable()) {
+            return 0;
+        }
+
+        return $youtubeIntegration->getVideoDuration($videoId);
+    }
+
+    /**
+     * Get YouTube Integration instance
+     */
+    private function getYouTubeIntegration(): ?YouTubeIntegration
+    {
+        static $instance = null;
+
+        if ($instance === null) {
+            $instance = new YouTubeIntegration();
+        }
+
+        return $instance;
+    }
+
+    /**
+     * Fetch oEmbed data for video metadata
+     */
+    private function fetchOEmbedData(array $embedData): ?array
+    {
+        if (empty($embedData['contentUrl'])) {
+            return null;
+        }
+
+        $oEmbed = _wp_oembed_get_object();
+        $provider = $oEmbed->get_provider($embedData['contentUrl']);
+
+        if (!$provider) {
+            return null;
+        }
+
+        $data = $oEmbed->fetch($provider, $embedData['contentUrl']);
+
+        if (!$data) {
+            return null;
+        }
+
+        return (array) $data;
+    }
+
+    /**
+     * Format video duration from seconds to ISO 8601
+     */
+    private function formatVideoDurationISO(int $seconds): string
+    {
+        $hours = floor($seconds / 3600);
+        $minutes = floor(($seconds % 3600) / 60);
+        $secs = $seconds % 60;
+
+        $duration = 'PT';
+        if ($hours > 0) {
+            $duration .= "{$hours}H";
+        }
+        if ($minutes > 0) {
+            $duration .= "{$minutes}M";
+        }
+        if ($secs > 0) {
+            $duration .= "{$secs}S";
+        }
+
+        return $duration;
+    }
+
+    /**
+     * Extract video transcript from post content
+     */
+    private function extractTranscriptFromContent(string $content): ?string
+    {
+        $maxLength = 5000;
+
+        // Pattern 1: Heading with transcript keywords
+        $headingPattern = '/<h[2-6][^>]*>.*?(?:Video\s+)?(?:Transcript(?:ion)?|Trascrizione|Full\s+Text).*?<\/h[2-6]>/is';
+
+        if (preg_match($headingPattern, $content, $headingMatch, PREG_OFFSET_CAPTURE)) {
+            $startPos = $headingMatch[0][1] + strlen($headingMatch[0][0]);
+            $remainingContent = substr($content, $startPos);
+
+            if (preg_match('/<h[2-6][^>]*>/i', $remainingContent, $nextHeading, PREG_OFFSET_CAPTURE)) {
+                $transcriptHtml = substr($remainingContent, 0, $nextHeading[0][1]);
+            } else {
+                $transcriptHtml = $remainingContent;
+            }
+
+            $transcript = $this->cleanTranscriptText($transcriptHtml);
+
+            if (!empty($transcript) && strlen($transcript) > 50) {
+                return $this->truncateTranscript($transcript, $maxLength);
+            }
+        }
+
+        // Pattern 2: Timestamp patterns [HH:MM:SS]
+        $timestampPattern = '/\[(\d{2}:\d{2}:\d{2}(?:\.\d{2})?)\]\s*(?:-\s*(?:Speaker\s*\d+|[A-Za-z]+)\s*)?(.+?)(?=\[\d{2}:\d{2}:\d{2}|\z)/s';
+
+        if (preg_match_all($timestampPattern, $content, $matches, PREG_SET_ORDER)) {
+            if (count($matches) >= 3) {
+                $transcriptParts = [];
+                foreach ($matches as $match) {
+                    $text = trim($match[2]);
+                    if (!empty($text)) {
+                        $transcriptParts[] = $text;
+                    }
+                }
+
+                if (!empty($transcriptParts)) {
+                    $transcript = implode(' ', $transcriptParts);
+                    $transcript = $this->cleanTranscriptText($transcript);
+
+                    if (strlen($transcript) > 50) {
+                        return $this->truncateTranscript($transcript, $maxLength);
+                    }
+                }
+            }
+        }
+
+        // Pattern 3: CSS class for transcript
+        $classPattern = '/<(?:div|section|details)[^>]*class=["\'][^"\']*(?:lesson-transcription|transcript(?:ion)?|video-transcript)[^"\']*["\'][^>]*>(.*?)<\/(?:div|section|details)>/is';
+
+        if (preg_match($classPattern, $content, $matches)) {
+            $transcript = $this->cleanTranscriptText($matches[1]);
+
+            if (!empty($transcript) && strlen($transcript) > 50) {
+                return $this->truncateTranscript($transcript, $maxLength);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Clean transcript text
+     */
+    private function cleanTranscriptText(string $text): string
+    {
+        $text = wp_strip_all_tags($text);
+        $text = preg_replace('/\[\d{2}:\d{2}:\d{2}(?:\.\d{2})?\]/', '', $text);
+        $text = preg_replace('/(?:^|\n)\s*-?\s*Speaker\s*\d+\s*:?\s*/i', ' ', $text);
+        $text = preg_replace('/\s+/', ' ', $text);
+        return trim($text);
+    }
+
+    /**
+     * Truncate transcript to maximum length
+     */
+    private function truncateTranscript(string $transcript, int $maxLength): string
+    {
+        if (strlen($transcript) <= $maxLength) {
+            return $transcript;
+        }
+
+        $truncated = substr($transcript, 0, $maxLength);
+        $lastSpace = strrpos($truncated, ' ');
+
+        if ($lastSpace !== false) {
+            $truncated = substr($truncated, 0, $lastSpace);
+        }
+
+        return $truncated . '...';
     }
 }
 
