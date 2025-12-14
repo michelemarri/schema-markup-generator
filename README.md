@@ -236,6 +236,12 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.37.3
+- **Fixed**: Nested Offer `category` field now always included (fixes Semrush "A value for the category field is required for a nested Offer" error)
+- **Fixed**: Event schema `offers.category` defaults to "primary" (tickets from original seller)
+- **Fixed**: Course schema `offers.category` defaults to "Fees" (standard category for course pricing)
+- **New**: `offerCategory` property added to Event and Course schemas for customization
+
 ### 1.37.2
 - **Improved**: Nested Course in `isPartOf` now includes `provider` for complete context
 

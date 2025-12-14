@@ -288,6 +288,11 @@ class CourseSchema extends AbstractSchema
             'url' => $this->getPostUrl($post),
         ];
 
+        // Category - required by Semrush and other SEO validators for nested Offers
+        // Default to "Fees" which is a standard schema.org category for educational courses
+        $offerCategory = $this->getMappedValue($post, $mapping, 'offerCategory');
+        $offer['category'] = $offerCategory ?: 'Fees';
+
         // Availability - default to InStock (always available)
         $availability = $this->getMappedValue($post, $mapping, 'availability');
         $offer['availability'] = 'https://schema.org/' . ($availability ?: 'InStock');
@@ -577,6 +582,15 @@ class CourseSchema extends AbstractSchema
                 'options' => ['InStock', 'SoldOut', 'PreOrder', 'Discontinued'],
                 'auto' => 'InStock',
                 'auto_description' => __('Defaults to InStock. Placed in Course.offers and CourseInstance.offers.', 'schema-markup-generator'),
+            ],
+            'offerCategory' => [
+                'type' => 'text',
+                'description' => __('Offer category. Required by Semrush and SEO validators.', 'schema-markup-generator'),
+                'description_long' => __('A category for the offer. Required by Semrush and other SEO validation tools for nested Offers. For courses, common values include "Fees", "Online Course", "Certification", "Workshop", "Bootcamp".', 'schema-markup-generator'),
+                'example' => __('Fees, Online Course, Certification, Workshop, Bootcamp', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/category',
+                'auto' => 'Fees',
+                'auto_description' => __('Defaults to "Fees" (standard category for course pricing)', 'schema-markup-generator'),
             ],
 
             // ========================================

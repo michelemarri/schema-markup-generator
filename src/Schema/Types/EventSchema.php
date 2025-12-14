@@ -196,6 +196,11 @@ class EventSchema extends AbstractSchema
             'url' => $this->getMappedValue($post, $mapping, 'ticketUrl') ?: $this->getPostUrl($post),
         ];
 
+        // Category is required for Event tickets per Google guidelines
+        // Valid values: primary, resale, combo
+        $category = $this->getMappedValue($post, $mapping, 'offerCategory');
+        $offers['category'] = $category ?: 'primary';
+
         $availability = $this->getMappedValue($post, $mapping, 'availability');
         if ($availability) {
             $offers['availability'] = 'https://schema.org/' . $availability;
@@ -216,7 +221,7 @@ class EventSchema extends AbstractSchema
 
     public function getRecommendedProperties(): array
     {
-        return ['description', 'endDate', 'image', 'offers', 'organizer', 'performer'];
+        return ['description', 'endDate', 'image', 'offers', 'offerCategory', 'organizer', 'performer'];
     }
 
     public function getPropertyDefinitions(): array
@@ -302,6 +307,16 @@ class EventSchema extends AbstractSchema
                 'description_long' => __('The currency of the ticket price in ISO 4217 format. Required whenever a price is specified.', 'schema-markup-generator'),
                 'example' => __('EUR, USD, GBP', 'schema-markup-generator'),
                 'schema_url' => 'https://schema.org/priceCurrency',
+            ],
+            'offerCategory' => [
+                'type' => 'select',
+                'description' => __('Ticket type. Required by Google for Event tickets.', 'schema-markup-generator'),
+                'description_long' => __('The category of ticket offer. Google requires this for Event schema. Use "primary" for tickets from the original seller/organizer, "resale" for secondary market tickets, or "combo" for package deals.', 'schema-markup-generator'),
+                'example' => __('primary (original seller), resale (secondary market), combo (packages)', 'schema-markup-generator'),
+                'schema_url' => 'https://schema.org/category',
+                'options' => ['primary', 'resale', 'combo'],
+                'auto' => 'primary',
+                'auto_description' => __('Defaults to "primary" (tickets from original seller)', 'schema-markup-generator'),
             ],
             'organizer' => [
                 'type' => 'text',
