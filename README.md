@@ -237,6 +237,22 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.39.1
+- **Improved**: Video chapters now extracted from `<p class="video-chapters">` elements
+- **Improved**: Support for timestamps wrapped in HTML tags (`<strong>00:00</strong> – Title`)
+- **Improved**: Better pattern matching for various HTML chapter formats
+
+### 1.39.0
+- **New**: Video Chapters support - Auto-extracts `hasPart` with `Clip` elements for VideoObject schema
+- **New**: Virtual field `mpcs_video_chapters` for MemberPress Courses lessons
+- **New**: Chapters extracted from meta fields: `video_chapters`, `lesson_video_chapters` (standard meta or ACF)
+- **New**: Chapters extracted from content timestamp patterns (e.g., "0:00 Introduction", "1:30 Main Topic")
+- **New**: Chapters extracted from "Video Chapters" / "Timestamps" / "Capitoli" content sections
+- **New**: Filter `smg_video_chapters` to provide chapters from integrations
+- **Improved**: Chapter URLs use `#t=offset` format for embedded video player navigation
+- **Improved**: Pattern matching now supports `<br>`, `<li>` elements in addition to newlines
+- **SEO Impact**: Google shows "Key Moments" in video search results for videos with chapters
+
 ### 1.38.7
 - **New**: Transcript now extracted from `lesson_transcription` meta field (MemberPress Courses)
 - **New**: HowToSchema now auto-extracts video from content with transcript

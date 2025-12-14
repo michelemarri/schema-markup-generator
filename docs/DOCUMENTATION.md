@@ -482,6 +482,77 @@ Video duration is automatically fetched based on the platform:
 
 **Note:** The YouTube Data API provides more accurate duration data than oEmbed. Configure your API key in the Integrations tab for automatic YouTube video duration extraction. Results are cached for 1 week.
 
+**Video Chapters Auto-Extraction (hasPart with Clip):**
+
+Video chapters are automatically extracted from multiple sources and added to the VideoObject as `hasPart` with `Clip` elements. This enables Google's "Key Moments" feature in video search results.
+
+**Sources (in priority order):**
+
+1. **Meta fields**: `video_chapters`, `lesson_video_chapters`, `_video_chapters`, `_lesson_video_chapters`
+2. **ACF fields**: `video_chapters`, `lesson_video_chapters`, `chapters`
+3. **Content sections**: Headings containing "Video Chapters", "Chapters", "Timestamps", "Capitoli", "Key Moments"
+4. **Content timestamp patterns**: Lines matching `0:00 Introduction`, `1:30 - Main Topic`, `00:05:30 Advanced`
+
+**Supported chapter formats:**
+
+| Format | Example |
+|--------|---------|
+| MM:SS Title | `0:00 Introduction` |
+| MM:SS - Title | `1:30 - Getting Started` |
+| HH:MM:SS Title | `00:05:30 Advanced Topics` |
+| Seconds Title | `80 Crypto becoming investable` |
+| HTML with tags | `<strong>00:00</strong> – Title` |
+| HTML class | `<p class="video-chapters">...</p>` |
+| Array of objects | `[{name: "Intro", startOffset: 0}, ...]` |
+| JSON string | `'[{"name": "Intro", "time": "0:00"}]'` |
+
+**HTML format example:**
+
+```html
+<p class="video-chapters">
+  <strong>00:00</strong> – Why crypto and why now<br>
+  <strong>00:26</strong> – Introducing crypto intelligence<br>
+  <strong>01:20</strong> – Crypto becoming investable<br>
+  <strong>02:07</strong> – Cutting through noise<br>
+  <strong>02:44</strong> – Growth of the derivative market
+</p>
+```
+
+**Generated schema structure:**
+
+```json
+{
+  "@type": "VideoObject",
+  "name": "Lesson Title",
+  "hasPart": [
+    {
+      "@type": "Clip",
+      "name": "Why crypto and why now",
+      "startOffset": 0,
+      "position": 1,
+      "url": "https://example.com/lessons/my-lesson/#t=0"
+    },
+    {
+      "@type": "Clip",
+      "name": "Crypto becoming investable",
+      "startOffset": 80,
+      "position": 2,
+      "url": "https://example.com/lessons/my-lesson/#t=80"
+    }
+  ]
+}
+```
+
+**URL format:**
+- For learning resources (lessons), URLs use the page URL with `#t=offset` for embedded player navigation
+- For standalone YouTube videos, URLs use `youtube.com/watch?v=ID&t=offset`
+
+**SEO Impact:**
+- Google shows "Key Moments" in video rich results
+- Users can click to jump directly to specific sections
+- Improves video CTR by +10-20% (estimated)
+- AI platforms can reference specific timestamps when citing content
+
 ---
 
 ## Field Mapping

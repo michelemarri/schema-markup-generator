@@ -203,6 +203,63 @@ add_filter('smg_learning_resource_auto_time_required', function(int $minutes, WP
 
 ---
 
+#### `smg_video_chapters`
+
+Filter video chapters for VideoObject `hasPart` property. This filter allows integrations to provide video chapters (Clip elements) for videos embedded in learning resources or other content.
+
+```php
+add_filter('smg_video_chapters', function(?array $chapters, WP_Post $post, array $embedData): ?array {
+    // Return chapters from custom source
+    $customChapters = get_post_meta($post->ID, 'my_video_chapters', true);
+    
+    if (!empty($customChapters)) {
+        $lessonUrl = get_permalink($post);
+        $result = [];
+        $position = 1;
+        
+        foreach ($customChapters as $chapter) {
+            $result[] = [
+                '@type' => 'Clip',
+                'name' => $chapter['title'],
+                'startOffset' => (int) $chapter['start_seconds'],
+                'position' => $position++,
+                'url' => $lessonUrl . '#t=' . $chapter['start_seconds'],
+            ];
+        }
+        
+        return $result;
+    }
+    
+    return $chapters;
+}, 10, 3);
+```
+
+**Parameters:**
+- `$chapters` (array|null) - Current chapters array (null if not yet populated)
+- `$post` (WP_Post) - The post object
+- `$embedData` (array) - Video embed data containing:
+  - `platform` (string) - Video platform (youtube, vimeo, other)
+  - `id` (string) - Video ID
+  - `embedUrl` (string) - Embed URL
+  - `contentUrl` (string) - Direct video URL
+
+**Return value:** Array of Clip objects, each containing:
+- `@type` (string) - Always "Clip"
+- `name` (string) - Chapter title
+- `startOffset` (int) - Start time in seconds
+- `position` (int) - Chapter position (1-based)
+- `url` (string) - URL with timestamp fragment (e.g., `#t=120`)
+
+**Auto-detection sources (MemberPress Courses):**
+1. Meta fields: `video_chapters`, `lesson_video_chapters`
+2. ACF fields: `video_chapters`, `lesson_video_chapters`, `chapters`
+3. Content timestamp patterns: `0:00 Introduction`, `1:30 - Main Topic`
+4. Content sections with headings: "Video Chapters", "Timestamps", "Capitoli"
+
+**SEO Impact:** Google shows "Key Moments" in video search results for videos with chapters.
+
+---
+
 #### `smg_product_schema_data` (MemberPress Membership)
 
 The Product schema filter is automatically enhanced for `memberpressproduct` posts.

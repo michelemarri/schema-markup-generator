@@ -119,6 +119,11 @@ class MemberPressCoursesIntegration
             'type' => 'textarea',
             'description' => 'Video transcript from lesson_transcription meta field. Auto-extracted and cleaned for VideoObject schema.',
         ],
+        'mpcs_video_chapters' => [
+            'label' => 'Video Chapters (auto)',
+            'type' => 'repeater',
+            'description' => 'Video chapters/segments from video_chapters or lesson_video_chapters meta field. Creates Clip elements for hasPart in VideoObject schema.',
+        ],
     ];
 
     /**
@@ -137,6 +142,9 @@ class MemberPressCoursesIntegration
 
         // Resolve course field values
         add_filter('smg_resolve_field_value', [$this, 'resolveFieldValue'], 10, 4);
+
+        // Provide video chapters for lessons
+        add_filter('smg_video_chapters', [$this, 'provideVideoChapters'], 10, 3);
 
         // Recalculate course duration when lessons are saved
         add_action('save_post_' . self::LESSON_POST_TYPE, [$this, 'onLessonSave'], 10, 1);
@@ -500,6 +508,7 @@ class MemberPressCoursesIntegration
                 'mpcs_learning_resource_type' => $this->detectLearningResourceType($post),
                 'mpcs_interactivity_type' => $this->detectInteractivityType($post),
                 'mpcs_lesson_transcription' => $this->getLessonTranscription($post),
+                'mpcs_video_chapters' => $this->getVideoChapters($post),
                 default => $value,
             };
         }
@@ -597,6 +606,443 @@ class MemberPressCoursesIntegration
         }
 
         return $cleaned;
+    }
+
+    /**
+     * Provide video chapters for MemberPress Courses lessons
+     *
+     * Filter callback for smg_video_chapters.
+     *
+     * @param array|null $chapters  Current chapters (may be null)
+     * @param WP_Post    $post      The post object
+     * @param array      $embedData Embed data with platform info
+     * @return array|null Chapters array or null
+     */
+    public function provideVideoChapters(?array $chapters, WP_Post $post, array $embedData): ?array
+    {
+        // If already resolved, return
+        if (!empty($chapters)) {
+            return $chapters;
+        }
+
+        // Check availability at runtime
+        if (!$this->isAvailable()) {
+            return null;
+        }
+
+        // Only handle MemberPress Courses lessons
+        if ($post->post_type !== self::LESSON_POST_TYPE) {
+            return null;
+        }
+
+        return $this->getVideoChapters($post);
+    }
+
+    /**
+     * Get video chapters from meta field
+     *
+     * Retrieves video chapters from various meta fields:
+     * 1. 'video_chapters' (standard meta field)
+     * 2. 'lesson_video_chapters' (MemberPress specific)
+     * 3. ACF fields 'video_chapters' or 'lesson_video_chapters'
+     *
+     * Supports formats:
+     * - Array of objects: [{name: "Intro", startOffset: 0}, ...]
+     * - Array of strings: ["0:00 Intro", "1:30 Main Topic", ...]
+     * - JSON string of the above
+     * - Plain text with timestamp format (one per line)
+     *
+     * @param WP_Post $lesson The lesson post
+     * @return array|null Array of chapter data or null
+     */
+    private function getVideoChapters(WP_Post $lesson): ?array
+    {
+        $chapters = null;
+
+        // Meta field names to check
+        $metaFields = ['video_chapters', 'lesson_video_chapters', '_video_chapters', '_lesson_video_chapters'];
+
+        // 1. Try standard meta fields
+        foreach ($metaFields as $field) {
+            $value = get_post_meta($lesson->ID, $field, true);
+            if (!empty($value)) {
+                $chapters = $this->parseChaptersValue($value, $lesson);
+                if (!empty($chapters)) {
+                    break;
+                }
+            }
+        }
+
+        // 2. Try ACF fields if available and no chapters found yet
+        if (empty($chapters) && function_exists('get_field')) {
+            $acfFields = ['video_chapters', 'lesson_video_chapters', 'chapters'];
+            foreach ($acfFields as $field) {
+                $value = get_field($field, $lesson->ID);
+                if (!empty($value)) {
+                    $chapters = $this->parseChaptersValue($value, $lesson);
+                    if (!empty($chapters)) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 3. Try to extract from post content if no meta field found
+        if (empty($chapters)) {
+            $chapters = $this->extractChaptersFromContent($lesson->post_content, $lesson);
+        }
+
+        return !empty($chapters) ? $chapters : null;
+    }
+
+    /**
+     * Parse chapters value from various formats
+     *
+     * @param mixed   $value  Raw chapters value
+     * @param WP_Post $lesson The lesson post (for URL generation)
+     * @return array Parsed chapters array
+     */
+    private function parseChaptersValue(mixed $value, WP_Post $lesson): array
+    {
+        $chapters = [];
+        $lessonUrl = get_permalink($lesson);
+
+        // JSON string
+        if (is_string($value) && (str_starts_with(trim($value), '[') || str_starts_with(trim($value), '{'))) {
+            $decoded = json_decode($value, true);
+            if (is_array($decoded)) {
+                $value = $decoded;
+            }
+        }
+
+        // Plain text with timestamps (one per line or comma-separated)
+        if (is_string($value)) {
+            $lines = preg_split('/[\n,]/', $value);
+            $position = 1;
+
+            foreach ($lines as $line) {
+                $parsed = $this->parseChapterLine(trim($line), $lessonUrl, $position);
+                if ($parsed) {
+                    $chapters[] = $parsed;
+                    $position++;
+                }
+            }
+
+            return $chapters;
+        }
+
+        // Array of chapters
+        if (is_array($value)) {
+            $position = 1;
+
+            foreach ($value as $chapter) {
+                $parsed = $this->parseChapterItem($chapter, $lessonUrl, $position);
+                if ($parsed) {
+                    $chapters[] = $parsed;
+                    $position++;
+                }
+            }
+        }
+
+        return $chapters;
+    }
+
+    /**
+     * Parse a single chapter line in timestamp format
+     *
+     * Supports formats:
+     * - "0:00 Introduction"
+     * - "1:30 - Getting Started"
+     * - "00:05:30 Advanced Topics"
+     * - "80 Crypto becoming investable" (seconds only)
+     *
+     * @param string $line      Raw chapter line
+     * @param string $lessonUrl Base lesson URL
+     * @param int    $position  Chapter position
+     * @return array|null Parsed chapter or null
+     */
+    private function parseChapterLine(string $line, string $lessonUrl, int $position): ?array
+    {
+        if (empty($line)) {
+            return null;
+        }
+
+        // Pattern: HH:MM:SS or MM:SS followed by optional separator and title
+        if (preg_match('/^(?:(\d{1,2}):)?(\d{1,2}):(\d{2})\s*[-–—:]?\s*(.+)$/u', $line, $match)) {
+            $hours = !empty($match[1]) ? (int) $match[1] : 0;
+            $minutes = (int) $match[2];
+            $seconds = (int) $match[3];
+            $title = trim($match[4]);
+
+            if (strlen($title) < 3) {
+                return null;
+            }
+
+            $startOffset = ($hours * 3600) + ($minutes * 60) + $seconds;
+
+            return [
+                '@type' => 'Clip',
+                'name' => $title,
+                'startOffset' => $startOffset,
+                'position' => $position,
+                'url' => $lessonUrl . '#t=' . $startOffset,
+            ];
+        }
+
+        // Pattern: seconds only followed by title (e.g., "80 Crypto becoming investable")
+        if (preg_match('/^(\d+)\s+(.+)$/u', $line, $match)) {
+            $startOffset = (int) $match[1];
+            $title = trim($match[2]);
+
+            if (strlen($title) < 3 || $startOffset > 86400) { // Max 24 hours
+                return null;
+            }
+
+            return [
+                '@type' => 'Clip',
+                'name' => $title,
+                'startOffset' => $startOffset,
+                'position' => $position,
+                'url' => $lessonUrl . '#t=' . $startOffset,
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Parse a single chapter item from array/object format
+     *
+     * Supports formats:
+     * - {name: "Intro", startOffset: 0}
+     * - {title: "Intro", time: "0:00"}
+     * - {name: "Intro", time: 0, url: "..."}
+     *
+     * @param mixed  $chapter   Chapter data
+     * @param string $lessonUrl Base lesson URL
+     * @param int    $position  Chapter position
+     * @return array|null Parsed chapter or null
+     */
+    private function parseChapterItem(mixed $chapter, string $lessonUrl, int $position): ?array
+    {
+        // String format (treat as line)
+        if (is_string($chapter)) {
+            return $this->parseChapterLine($chapter, $lessonUrl, $position);
+        }
+
+        if (!is_array($chapter)) {
+            return null;
+        }
+
+        // Get name
+        $name = $chapter['name'] ?? $chapter['title'] ?? $chapter['label'] ?? null;
+        if (empty($name) || strlen($name) < 3) {
+            return null;
+        }
+
+        // Get start offset
+        $startOffset = null;
+
+        if (isset($chapter['startOffset'])) {
+            $startOffset = $this->parseTimeToSeconds($chapter['startOffset']);
+        } elseif (isset($chapter['time'])) {
+            $startOffset = $this->parseTimeToSeconds($chapter['time']);
+        } elseif (isset($chapter['start'])) {
+            $startOffset = $this->parseTimeToSeconds($chapter['start']);
+        } elseif (isset($chapter['seconds'])) {
+            $startOffset = (int) $chapter['seconds'];
+        }
+
+        if ($startOffset === null) {
+            return null;
+        }
+
+        $result = [
+            '@type' => 'Clip',
+            'name' => $name,
+            'startOffset' => $startOffset,
+            'position' => $position,
+        ];
+
+        // URL: use provided or generate from lesson URL
+        if (!empty($chapter['url'])) {
+            $result['url'] = $chapter['url'];
+        } else {
+            $result['url'] = $lessonUrl . '#t=' . $startOffset;
+        }
+
+        // Optional end offset
+        if (isset($chapter['endOffset'])) {
+            $result['endOffset'] = $this->parseTimeToSeconds($chapter['endOffset']);
+        } elseif (isset($chapter['end'])) {
+            $result['endOffset'] = $this->parseTimeToSeconds($chapter['end']);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Extract video chapters from post content
+     *
+     * Looks for timestamp patterns in content like:
+     * - 0:00 Introduction
+     * - 1:30 - Getting Started
+     * - 00:05:30 Advanced Topics
+     * - <strong>00:00</strong> – Title (with HTML tags around timestamp)
+     * - <p class="video-chapters">...</p> (dedicated chapters element)
+     * - Video Chapters section with list of timestamps
+     *
+     * @param string  $content Post content
+     * @param WP_Post $lesson  The lesson post
+     * @return array Array of chapter data
+     */
+    private function extractChaptersFromContent(string $content, WP_Post $lesson): array
+    {
+        $chapters = [];
+        $lessonUrl = get_permalink($lesson);
+
+        // 1. First, try to find elements with "video-chapters" class
+        // Matches: <p class="video-chapters">...</p>, <div class="video-chapters">...</div>
+        $classPattern = '/<(?:p|div|ul|ol)[^>]*class=["\'][^"\']*video-chapters[^"\']*["\'][^>]*>(.*?)<\/(?:p|div|ul|ol)>/is';
+
+        if (preg_match($classPattern, $content, $classMatch)) {
+            $chaptersContent = $classMatch[1];
+            $extractedFromClass = $this->extractTimestampsFromHtml($chaptersContent, $lessonUrl);
+            if (!empty($extractedFromClass)) {
+                return $extractedFromClass;
+            }
+        }
+
+        // 2. Try to find a dedicated "chapters" or "timestamps" heading section
+        // Look for headings like "Video Chapters", "Chapters", "Timestamps", "Indice"
+        $sectionPattern = '/<h[2-6][^>]*>.*?(?:Video\s+)?(?:Chapters?|Timestamps?|Indice|Capitoli|Key\s+Moments?).*?<\/h[2-6]>(.*?)(?=<h[2-6]|$)/is';
+
+        if (preg_match($sectionPattern, $content, $sectionMatch)) {
+            $sectionContent = $sectionMatch[1];
+            $extractedFromSection = $this->extractTimestampsFromHtml($sectionContent, $lessonUrl);
+            if (!empty($extractedFromSection)) {
+                return $extractedFromSection;
+            }
+        }
+
+        // 3. Look for timestamps anywhere in content (generic pattern)
+        $chapters = $this->extractTimestampsFromHtml($content, $lessonUrl);
+
+        return $chapters;
+    }
+
+    /**
+     * Extract timestamps from HTML content
+     *
+     * Supports various formats:
+     * - Plain text: 0:00 Introduction
+     * - With separator: 1:30 - Getting Started
+     * - With HTML tags: <strong>00:00</strong> – Title
+     * - In lists: <li>0:00 Introduction</li>
+     * - With line breaks: 0:00 Intro<br>1:30 Next
+     *
+     * @param string $html      HTML content
+     * @param string $lessonUrl Base lesson URL
+     * @return array Array of chapters
+     */
+    private function extractTimestampsFromHtml(string $html, string $lessonUrl): array
+    {
+        $chapters = [];
+
+        // Pattern 1: Timestamps wrapped in HTML tags (e.g., <strong>00:00</strong> – Title)
+        // This catches: <strong>00:00</strong> – Why crypto and why now<br>
+        $htmlPattern = '/<(?:strong|b|span)[^>]*>\s*(?:(\d{1,2}):)?(\d{1,2}):(\d{2})\s*<\/(?:strong|b|span)>\s*[-–—:]*\s*([^<\n]+)/i';
+
+        if (preg_match_all($htmlPattern, $html, $matches, PREG_SET_ORDER)) {
+            if (count($matches) >= 2) {
+                $position = 1;
+
+                foreach ($matches as $match) {
+                    $hours = !empty($match[1]) ? (int) $match[1] : 0;
+                    $minutes = (int) $match[2];
+                    $seconds = (int) $match[3];
+                    $title = trim(strip_tags($match[4]));
+
+                    if (strlen($title) < 3 || preg_match('/^\d+:\d+/', $title)) {
+                        continue;
+                    }
+
+                    $startOffset = ($hours * 3600) + ($minutes * 60) + $seconds;
+
+                    $chapters[] = [
+                        '@type' => 'Clip',
+                        'name' => $title,
+                        'startOffset' => $startOffset,
+                        'position' => $position++,
+                        'url' => $lessonUrl . '#t=' . $startOffset,
+                    ];
+                }
+
+                if (!empty($chapters)) {
+                    return $chapters;
+                }
+            }
+        }
+
+        // Pattern 2: Plain text timestamps (possibly with <br> or newlines as separators)
+        // Matches: 0:00 Introduction, 1:30 - Getting Started, etc.
+        $plainPattern = '/(?:^|\n|<br\s*\/?>\s*|<li[^>]*>)\s*(?:(\d{1,2}):)?(\d{1,2}):(\d{2})\s*[-–—:]?\s*([^\n<]+)/mi';
+
+        if (preg_match_all($plainPattern, $html, $matches, PREG_SET_ORDER)) {
+            if (count($matches) >= 2) {
+                $position = 1;
+
+                foreach ($matches as $match) {
+                    $hours = !empty($match[1]) ? (int) $match[1] : 0;
+                    $minutes = (int) $match[2];
+                    $seconds = (int) $match[3];
+                    $title = trim(strip_tags($match[4]));
+
+                    if (strlen($title) < 3 || preg_match('/^\d+:\d+/', $title)) {
+                        continue;
+                    }
+
+                    $startOffset = ($hours * 3600) + ($minutes * 60) + $seconds;
+
+                    $chapters[] = [
+                        '@type' => 'Clip',
+                        'name' => $title,
+                        'startOffset' => $startOffset,
+                        'position' => $position++,
+                        'url' => $lessonUrl . '#t=' . $startOffset,
+                    ];
+                }
+            }
+        }
+
+        return $chapters;
+    }
+
+    /**
+     * Parse time string or number to seconds
+     *
+     * @param mixed $time Time value (seconds, MM:SS, HH:MM:SS)
+     * @return int Seconds
+     */
+    private function parseTimeToSeconds(mixed $time): int
+    {
+        if (is_numeric($time)) {
+            return (int) $time;
+        }
+
+        if (is_string($time)) {
+            // HH:MM:SS format
+            if (preg_match('/^(\d{1,2}):(\d{2}):(\d{2})$/', $time, $match)) {
+                return ((int) $match[1] * 3600) + ((int) $match[2] * 60) + (int) $match[3];
+            }
+
+            // MM:SS format
+            if (preg_match('/^(\d{1,3}):(\d{2})$/', $time, $match)) {
+                return ((int) $match[1] * 60) + (int) $match[2];
+            }
+        }
+
+        return 0;
     }
 
     /**

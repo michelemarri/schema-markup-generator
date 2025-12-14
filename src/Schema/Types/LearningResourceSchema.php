@@ -564,8 +564,13 @@ class LearningResourceSchema extends AbstractSchema
             }
         }
 
-        // Try to extract chapters from content
-        $chapters = $this->extractChaptersFromContent($post->post_content, $embedData);
+        // Try to get chapters - priority order:
+        // 1. Filter (from integrations like MemberPress Courses)
+        // 2. Extract from content
+        $chapters = apply_filters('smg_video_chapters', null, $post, $embedData);
+        if (empty($chapters)) {
+            $chapters = $this->extractChaptersFromContent($post->post_content, $embedData, $post);
+        }
         if (!empty($chapters)) {
             $video['hasPart'] = $chapters;
         }
@@ -823,23 +828,33 @@ class LearningResourceSchema extends AbstractSchema
      * - 0:00 Introduction
      * - 1:30 - Getting Started
      * - 00:05:30 Advanced Topics
+     *
+     * @param string       $content   Post content
+     * @param array        $embedData Embed data with platform info
+     * @param WP_Post|null $post      The post object for URL generation
+     * @return array Array of chapter Clip objects
      */
-    private function extractChaptersFromContent(string $content, array $embedData): array
+    private function extractChaptersFromContent(string $content, array $embedData, ?WP_Post $post = null): array
     {
         $chapters = [];
         
         // Pattern to match chapter timestamps
         // Matches: 0:00, 1:30, 00:05:30, etc. followed by chapter title
-        $pattern = '/(?:^|\n)\s*(?:(\d{1,2}):)?(\d{1,2}):(\d{2})\s*[-–—:]?\s*(.+?)(?=\n|$)/m';
+        $pattern = '/(?:^|\n|<br\s*\/?>\s*|<li[^>]*>)\s*(?:(\d{1,2}):)?(\d{1,2}):(\d{2})\s*[-–—:]?\s*([^\n<]+)/mi';
         
         if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
+            // Only include if we find at least 2 chapters (to avoid false positives)
+            if (count($matches) < 2) {
+                return [];
+            }
+
             $position = 1;
             
             foreach ($matches as $match) {
                 $hours = !empty($match[1]) ? (int) $match[1] : 0;
                 $minutes = (int) $match[2];
                 $seconds = (int) $match[3];
-                $title = trim($match[4]);
+                $title = trim(strip_tags($match[4]));
                 
                 // Skip if title is too short or looks like a timestamp
                 if (strlen($title) < 3 || preg_match('/^\d+:\d+/', $title)) {
@@ -855,8 +870,14 @@ class LearningResourceSchema extends AbstractSchema
                     'position' => $position++,
                 ];
                 
-                // Add URL with timestamp if it's YouTube
-                if ($embedData['platform'] === 'youtube' && !empty($embedData['contentUrl'])) {
+                // Generate chapter URL - priority order:
+                // 1. Page URL with #t=offset (for embedded videos on learning pages)
+                // 2. YouTube URL with &t=offset (for YouTube embeds)
+                // 3. No URL
+                if ($post) {
+                    // Use page URL with hash fragment for timestamp
+                    $chapter['url'] = get_permalink($post) . '#t=' . $startOffset;
+                } elseif (!empty($embedData['platform']) && $embedData['platform'] === 'youtube' && !empty($embedData['contentUrl'])) {
                     $chapter['url'] = $embedData['contentUrl'] . '&t=' . $startOffset;
                 }
                 
