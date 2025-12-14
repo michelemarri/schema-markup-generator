@@ -237,6 +237,11 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.39.2
+- **Fixed**: LearningResource `isPartOf` Course reference now uses minimal reference pattern (only `@type`, `@id`, `name`, `url`)
+- **Fixed**: Removed `description` and `provider` from nested Course to prevent Google from confusing LearningResource with standalone Course
+- **Impact**: Resolves Google Search Console warning "Course structured data detected on lesson pages"
+
 ### 1.39.1
 - **Improved**: Video chapters now extracted from `<p class="video-chapters">` elements
 - **Improved**: Support for timestamps wrapped in HTML tags (`<strong>00:00</strong> – Title`)

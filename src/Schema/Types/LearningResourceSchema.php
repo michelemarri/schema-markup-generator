@@ -222,15 +222,15 @@ class LearningResourceSchema extends AbstractSchema
     /**
      * Build parent course reference
      * 
-     * Uses @id reference pattern to avoid SEO tools validating the nested Course
-     * as a complete standalone Course entity (which would require hasCourseInstance, offers, etc.)
-     * Includes provider for context.
+     * Uses minimal @id reference pattern to avoid SEO tools (especially Google)
+     * validating the nested Course as a complete standalone Course entity
+     * (which would require hasCourseInstance, offers, etc.).
+     * 
+     * Only includes: @type, @id, name, url
+     * Excludes: description, provider, offers, hasCourseInstance
      */
     private function buildParentCourse(WP_Post $post, array $mapping): ?array
     {
-        // Get provider data once for reuse
-        $provider = $this->getPublisher();
-
         // Check for mapped course
         $course = $this->getMappedValue($post, $mapping, 'isPartOf');
 
@@ -242,7 +242,6 @@ class LearningResourceSchema extends AbstractSchema
                     '@id' => $courseUrl . '#course',
                     'name' => $course['name'] ?? '',
                     'url' => $courseUrl,
-                    'provider' => $provider,
                 ];
             }
 
@@ -256,7 +255,6 @@ class LearningResourceSchema extends AbstractSchema
                         '@id' => $courseUrl . '#course',
                         'name' => html_entity_decode(get_the_title($coursePost), ENT_QUOTES, 'UTF-8'),
                         'url' => $courseUrl,
-                        'provider' => $provider,
                     ];
                 }
             }
@@ -265,7 +263,6 @@ class LearningResourceSchema extends AbstractSchema
             return [
                 '@type' => 'Course',
                 'name' => $course,
-                'provider' => $provider,
             ];
         }
 
@@ -279,7 +276,6 @@ class LearningResourceSchema extends AbstractSchema
                     '@id' => $parentUrl . '#course',
                     'name' => html_entity_decode(get_the_title($parent), ENT_QUOTES, 'UTF-8'),
                     'url' => $parentUrl,
-                    'provider' => $provider,
                 ];
             }
         }
@@ -287,18 +283,14 @@ class LearningResourceSchema extends AbstractSchema
         /**
          * Filter to get parent course from integrations (e.g., MemberPress Courses, LearnDash)
          *
+         * Integrations should return minimal Course reference with only:
+         * @type, @id, name, url
+         *
          * @param array|null $parentCourse Current parent course data
          * @param WP_Post    $post         The lesson post
          * @param array      $mapping      Field mapping configuration
          */
-        $parentCourse = apply_filters('smg_learning_resource_parent_course', null, $post, $mapping);
-        
-        // Add provider to filtered parent course if it exists
-        if ($parentCourse && !isset($parentCourse['provider'])) {
-            $parentCourse['provider'] = $provider;
-        }
-        
-        return $parentCourse;
+        return apply_filters('smg_learning_resource_parent_course', null, $post, $mapping);
     }
 
     /**

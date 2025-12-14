@@ -367,16 +367,23 @@ class MemberPressCoursesIntegration
     /**
      * Build course schema data from post
      *
+     * Returns a minimal Course reference for isPartOf property.
+     * Uses only @id, name, and url to avoid Google confusing nested Course
+     * with a complete standalone Course entity (which would require
+     * hasCourseInstance, offers, etc.).
+     *
      * @param WP_Post $course The course post
-     * @return array Course schema data
+     * @return array Course schema data (minimal reference)
      */
     private function buildCourseData(WP_Post $course): array
     {
+        $courseUrl = get_permalink($course);
+
         return [
             '@type' => 'Course',
+            '@id' => $courseUrl . '#course',
             'name' => html_entity_decode(get_the_title($course), ENT_QUOTES, 'UTF-8'),
-            'url' => get_permalink($course),
-            'description' => $this->getCourseDescription($course),
+            'url' => $courseUrl,
         ];
     }
 
