@@ -580,8 +580,9 @@ class VideoObjectSchema extends AbstractSchema
             }
         }
 
-        // Pattern 2: Look for content with timestamp patterns
-        $timestampPattern = '/\[(\d{2}:\d{2}:\d{2}(?:\.\d{2})?)\]\s*(?:-\s*(?:Speaker\s*\d+|[A-Za-z]+)\s*)?(.+?)(?=\[\d{2}:\d{2}|\z)/s';
+        // Pattern 2: Look for content with timestamp patterns [HH:MM:SS] or [HH:MM:SS.ms]
+        // Fixed lookahead to match full timestamp format
+        $timestampPattern = '/\[(\d{2}:\d{2}:\d{2}(?:\.\d{2})?)\]\s*(?:-\s*(?:Speaker\s*\d+|[A-Za-z]+)\s*)?(.+?)(?=\[\d{2}:\d{2}:\d{2}|\z)/s';
         
         if (preg_match_all($timestampPattern, $content, $matches, PREG_SET_ORDER)) {
             if (count($matches) >= 3) {
@@ -604,8 +605,9 @@ class VideoObjectSchema extends AbstractSchema
             }
         }
 
-        // Pattern 3: Look for div/section with transcript class
-        $classPattern = '/<(?:div|section)[^>]*class=["\'][^"\']*(?:transcript|transcription|video-transcript)[^"\']*["\'][^>]*>(.*?)<\/(?:div|section)>/is';
+        // Pattern 3: Look for div/section/details with transcript class
+        // Matches: lesson-transcription, transcript, transcription, video-transcript
+        $classPattern = '/<(?:div|section|details)[^>]*class=["\'][^"\']*(?:lesson-transcription|transcript(?:ion)?|video-transcript)[^"\']*["\'][^>]*>(.*?)<\/(?:div|section|details)>/is';
         
         if (preg_match($classPattern, $content, $matches)) {
             $transcript = $this->cleanTranscriptText($matches[1]);

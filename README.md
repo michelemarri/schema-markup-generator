@@ -237,6 +237,13 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.38.6
+- **Fixed**: Transcript extraction regex lookahead was matching `[MM:SS]` instead of full `[HH:MM:SS]` format
+- **Fixed**: Transcript now correctly extracted from content with timestamps like `[00:00:01.20]`
+- **New**: Support for `<details class="lesson-transcription">` accordion elements
+- **Improved**: Pattern 3 now matches `lesson-transcription`, `transcript`, `transcription`, `video-transcript` classes
+- **Improved**: Pattern 3 now supports `<details>` element in addition to `<div>` and `<section>`
+
 ### 1.38.5
 - **New**: Auto-fetch thumbnail from YouTube/Vimeo when no featured image is set (fixes Google Search Console "No thumbnail URL provided" error)
 - **New**: Uses YouTube API for high-quality thumbnails (if API key configured), otherwise uses standard YouTube thumbnail URLs
