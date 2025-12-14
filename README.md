@@ -237,7 +237,7 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
-### 1.38.6
+### 1.38.7
 - **New**: Transcript now extracted from `lesson_transcription` meta field (MemberPress Courses)
 - **New**: HowToSchema now auto-extracts video from content with transcript
 - **New**: RecipeSchema now auto-extracts video from content with transcript

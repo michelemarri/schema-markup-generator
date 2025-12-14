@@ -1,6 +1,6 @@
 {
   "name": "schema-markup-generator",
-  "version": "1.38.6",
+  "version": "1.38.7",
   "description": "WordPress plugin for automatic Schema.org structured data generation",
   "private": true,
   "scripts": {
