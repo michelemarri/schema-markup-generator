@@ -198,7 +198,65 @@ class SchemaPropertiesHandler
                                         <?php endforeach; ?>
                                     </optgroup>
                                 <?php endif; ?>
+                                <?php
+                                // Custom value options
+                                $currentValue = $currentFieldMapping[$propName] ?? '';
+                                $isCustom = str_starts_with($currentValue, 'custom:');
+                                $customType = '';
+                                $customValue = '';
+                                if ($isCustom) {
+                                    $parts = explode(':', $currentValue, 3);
+                                    $customType = $parts[1] ?? '';
+                                    $customValue = $parts[2] ?? '';
+                                }
+                                ?>
+                                <optgroup label="<?php esc_attr_e('Custom Value', 'schema-markup-generator'); ?>">
+                                    <option value="custom:text:" 
+                                            data-custom-type="text"
+                                            <?php selected($isCustom && $customType === 'text', true); ?>
+                                            <?php echo $isCustom && $customType === 'text' ? 'data-custom-value="' . esc_attr($customValue) . '"' : ''; ?>>
+                                        <?php esc_html_e('✏️ Custom Text', 'schema-markup-generator'); ?>
+                                    </option>
+                                    <option value="custom:number:" 
+                                            data-custom-type="number"
+                                            <?php selected($isCustom && $customType === 'number', true); ?>
+                                            <?php echo $isCustom && $customType === 'number' ? 'data-custom-value="' . esc_attr($customValue) . '"' : ''; ?>>
+                                        <?php esc_html_e('🔢 Custom Number', 'schema-markup-generator'); ?>
+                                    </option>
+                                    <option value="custom:date:" 
+                                            data-custom-type="date"
+                                            <?php selected($isCustom && $customType === 'date', true); ?>
+                                            <?php echo $isCustom && $customType === 'date' ? 'data-custom-value="' . esc_attr($customValue) . '"' : ''; ?>>
+                                        <?php esc_html_e('📅 Custom Date', 'schema-markup-generator'); ?>
+                                    </option>
+                                    <option value="custom:url:" 
+                                            data-custom-type="url"
+                                            <?php selected($isCustom && $customType === 'url', true); ?>
+                                            <?php echo $isCustom && $customType === 'url' ? 'data-custom-value="' . esc_attr($customValue) . '"' : ''; ?>>
+                                        <?php esc_html_e('🔗 Custom URL', 'schema-markup-generator'); ?>
+                                    </option>
+                                    <option value="custom:boolean:true" 
+                                            data-custom-type="boolean"
+                                            <?php selected($isCustom && $customType === 'boolean' && $customValue === 'true', true); ?>>
+                                        <?php esc_html_e('✓ Boolean: True', 'schema-markup-generator'); ?>
+                                    </option>
+                                    <option value="custom:boolean:false" 
+                                            data-custom-type="boolean"
+                                            <?php selected($isCustom && $customType === 'boolean' && $customValue === 'false', true); ?>>
+                                        <?php esc_html_e('✗ Boolean: False', 'schema-markup-generator'); ?>
+                                    </option>
+                                </optgroup>
                             </select>
+                            <?php if ($isCustom && in_array($customType, ['text', 'number', 'date', 'url'])): ?>
+                            <div class="smg-custom-value-wrapper" style="margin-top: 8px;">
+                                <input type="<?php echo $customType === 'number' ? 'number' : ($customType === 'date' ? 'date' : ($customType === 'url' ? 'url' : 'text')); ?>"
+                                       class="smg-custom-value-input smg-input"
+                                       data-property="<?php echo esc_attr($propName); ?>"
+                                       value="<?php echo esc_attr($customValue); ?>"
+                                       placeholder="<?php echo esc_attr($this->getCustomPlaceholder($customType)); ?>"
+                                       <?php echo $customType === 'number' ? 'step="any"' : ''; ?>>
+                            </div>
+                            <?php endif; ?>
                         </td>
                         <td>
                             <?php if (!empty($propDef['auto'])): ?>
@@ -288,6 +346,20 @@ class SchemaPropertiesHandler
         </p>
         <?php
         return ob_get_clean();
+    }
+
+    /**
+     * Get placeholder text for custom value input
+     */
+    private function getCustomPlaceholder(string $type): string
+    {
+        return match ($type) {
+            'text' => __('Enter text value...', 'schema-markup-generator'),
+            'number' => __('e.g. 5, 4.5, 100', 'schema-markup-generator'),
+            'date' => __('YYYY-MM-DD', 'schema-markup-generator'),
+            'url' => __('https://...', 'schema-markup-generator'),
+            default => '',
+        };
     }
 }
 

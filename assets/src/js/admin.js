@@ -87,8 +87,24 @@
             document.addEventListener('change', (e) => {
                 if (e.target.classList.contains('smg-field-select')) {
                     this.handleFieldMappingChange(e);
+                    // Also handle custom value display
+                    this.handleCustomValueSelection(e);
                 }
             });
+
+            // Custom value input change
+            document.addEventListener('input', (e) => {
+                if (e.target.classList.contains('smg-custom-value-input')) {
+                    this.handleCustomValueInputChange(e);
+                }
+            });
+
+            // Custom value input blur (save on blur)
+            document.addEventListener('blur', (e) => {
+                if (e.target.classList.contains('smg-custom-value-input')) {
+                    this.handleCustomValueSave(e);
+                }
+            }, true);
 
             // Additional type change (auto-save)
             document.addEventListener('change', (e) => {
@@ -623,6 +639,155 @@
         },
 
         /**
+         * Handle custom value selection
+         * Shows/hides the custom value input based on selection
+         */
+        handleCustomValueSelection(e) {
+            const select = e.target;
+            const selectedOption = select.options[select.selectedIndex];
+            const customType = selectedOption?.dataset.customType;
+            const cell = select.closest('td');
+            
+            // Remove existing custom value wrapper if any
+            const existingWrapper = cell?.querySelector('.smg-custom-value-wrapper');
+            if (existingWrapper) {
+                existingWrapper.remove();
+            }
+
+            // If custom type selected (except boolean which has value built-in)
+            if (customType && !['boolean'].includes(customType)) {
+                // Get property name from select
+                const nameMatch = select.name.match(/smg_field_mappings\[([^\]]+)\]\[([^\]]+)\]/);
+                const property = nameMatch ? nameMatch[2] : '';
+
+                // Create input wrapper
+                const wrapper = document.createElement('div');
+                wrapper.className = 'smg-custom-value-wrapper';
+                wrapper.style.marginTop = '8px';
+
+                // Create input
+                const input = document.createElement('input');
+                input.type = customType === 'number' ? 'number' : (customType === 'date' ? 'date' : (customType === 'url' ? 'url' : 'text'));
+                input.className = 'smg-custom-value-input smg-input';
+                input.dataset.property = property;
+                input.placeholder = this.getCustomPlaceholder(customType);
+                if (customType === 'number') {
+                    input.step = 'any';
+                }
+
+                // If there's a saved value, populate it
+                const savedValue = selectedOption?.dataset.customValue;
+                if (savedValue) {
+                    input.value = savedValue;
+                }
+
+                wrapper.appendChild(input);
+                cell.appendChild(wrapper);
+
+                // Focus the input
+                setTimeout(() => input.focus(), 100);
+            }
+        },
+
+        /**
+         * Get placeholder text for custom input types
+         */
+        getCustomPlaceholder(type) {
+            const placeholders = {
+                'text': 'Enter text value...',
+                'number': 'e.g. 5, 4.5, 100',
+                'date': 'YYYY-MM-DD',
+                'url': 'https://...'
+            };
+            return placeholders[type] || '';
+        },
+
+        /**
+         * Handle custom value input change
+         * Updates the select value with the full custom:type:value format
+         */
+        handleCustomValueInputChange(e) {
+            const input = e.target;
+            const cell = input.closest('td');
+            const select = cell?.querySelector('.smg-field-select');
+            
+            if (!select) return;
+
+            const selectedOption = select.options[select.selectedIndex];
+            const customType = selectedOption?.dataset.customType;
+            
+            if (customType) {
+                // Update the option value with the full custom:type:value format
+                const newValue = `custom:${customType}:${input.value}`;
+                selectedOption.value = newValue;
+                // Also store the custom value for persistence
+                selectedOption.dataset.customValue = input.value;
+            }
+        },
+
+        /**
+         * Handle custom value save on blur
+         */
+        async handleCustomValueSave(e) {
+            const input = e.target;
+            const cell = input.closest('td');
+            const select = cell?.querySelector('.smg-field-select');
+            const card = select?.closest('.smg-post-type-card');
+            const postType = card?.dataset.postType;
+
+            if (!select || !postType) return;
+
+            const selectedOption = select.options[select.selectedIndex];
+            const customType = selectedOption?.dataset.customType;
+            
+            if (!customType) return;
+
+            // Extract property name
+            const nameMatch = select.name.match(/smg_field_mappings\[([^\]]+)\]\[([^\]]+)\]/);
+            if (!nameMatch) return;
+
+            const property = nameMatch[2];
+            const fieldKey = `custom:${customType}:${input.value}`;
+
+            // Show saving state
+            const row = select.closest('.smg-mapping-row, tr');
+            if (row) {
+                row.classList.add('smg-saving');
+            }
+
+            try {
+                await this.saveFieldMapping(postType, property, fieldKey);
+
+                // Show success feedback
+                if (row) {
+                    row.classList.remove('smg-saving');
+                    row.classList.add('smg-saved');
+                    setTimeout(() => {
+                        row.classList.remove('smg-saved');
+                    }, 1500);
+                }
+
+                this.showToast(
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saved
+                        ? smgAdmin.strings.saved
+                        : 'Saved',
+                    'success'
+                );
+            } catch (error) {
+                console.error('Failed to save custom value:', error);
+                if (row) {
+                    row.classList.remove('smg-saving');
+                }
+                this.showToast(
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saveFailed
+                        ? smgAdmin.strings.saveFailed
+                        : 'Failed to save',
+                    'error'
+                );
+            }
+        },
+
+        /**
          * Handle field mapping change
          * 
          * Auto-saves field mapping when selection changes
@@ -641,6 +806,14 @@
 
             const property = nameMatch[2];
             const fieldKey = select.value;
+
+            // For custom values with input, don't save immediately - wait for input blur
+            const selectedOption = select.options[select.selectedIndex];
+            const customType = selectedOption?.dataset.customType;
+            if (customType && !['boolean'].includes(customType) && !fieldKey.match(/^custom:\w+:.+$/)) {
+                // Custom type selected but no value yet, skip save
+                return;
+            }
 
             // Show saving state
             const row = select.closest('.smg-mapping-row, tr');

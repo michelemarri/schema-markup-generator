@@ -606,6 +606,32 @@ All public taxonomies (both built-in and custom) are available for mapping. This
 - Mapping tags to `keywords`
 - Mapping custom taxonomies like "difficulty" or "cuisine" to appropriate schema properties
 
+### Custom Values
+
+For properties that require a fixed/static value, you can use Custom Values instead of mapping to a field. This is especially useful when all posts of a type share the same value.
+
+**Available types:**
+
+| Type | Description | Example Use |
+|------|-------------|-------------|
+| ✏️ Custom Text | Free-form text value | `inLanguage: "en"`, `applicationCategory: "EducationalApplication"` |
+| 🔢 Custom Number | Numeric value (integer or decimal) | `ratingValue: 5`, `reviewCount: 100` |
+| 📅 Custom Date | Date in YYYY-MM-DD format | `datePublished: "2024-01-01"` |
+| 🔗 Custom URL | Full URL | `sameAs: "https://twitter.com/yourhandle"` |
+| ✓ Boolean: True | Boolean true value | `isAccessibleForFree: true` |
+| ✗ Boolean: False | Boolean false value | `requiresSubscription: false` |
+
+**When to use Custom Values:**
+- Properties with the same value for all posts (e.g., `inLanguage`, `isAccessibleForFree`)
+- Default values that rarely change
+- Overriding auto-detected values with a specific static value
+
+**How to use:**
+1. In the field mapping dropdown, scroll to the "Custom Value" group
+2. Select the appropriate type
+3. Enter the value in the input field that appears (for Text, Number, Date, URL)
+4. The value is auto-saved when you click outside the field
+
 **Usage:**
 Taxonomies appear in the "Taxonomies" group in the field mapping dropdown. When mapped, they return a comma-separated list of term names.
 

@@ -317,12 +317,14 @@ abstract class AbstractSchema implements SchemaInterface
             return apply_filters('smg_sanitize_mapped_value', $schemaType, $property, $fieldKey, $post);
         }
 
-        // Handle custom literal values (from per-post overrides)
+        // Handle custom literal values (format: custom:type:value)
         if (is_string($fieldKey) && str_starts_with($fieldKey, 'custom:')) {
-            $value = substr($fieldKey, 7); // Remove 'custom:' prefix
+            $value = $this->resolveCustomValue($fieldKey);
             
-            // Sanitize and return the custom value
-            $value = $this->sanitizeMappedValue($value, $property);
+            // Sanitize and return the custom value (skip sanitization for already typed values)
+            if (is_string($value)) {
+                $value = $this->sanitizeMappedValue($value, $property);
+            }
             
             /**
              * Filter the sanitized mapped value
@@ -438,6 +440,57 @@ abstract class AbstractSchema implements SchemaInterface
 
         // Default to USD
         return 'USD';
+    }
+
+    /**
+     * Resolve custom value from the format custom:type:value
+     * 
+     * @param string $source The source string (e.g., "custom:number:5")
+     * @return mixed The resolved and typed value
+     */
+    protected function resolveCustomValue(string $source): mixed
+    {
+        // Remove 'custom:' prefix
+        $remaining = substr($source, 7);
+        
+        // Find the type (first segment before :)
+        $colonPos = strpos($remaining, ':');
+        if ($colonPos === false) {
+            // Legacy format: just custom:value (no type specified)
+            return $remaining;
+        }
+        
+        $type = substr($remaining, 0, $colonPos);
+        $value = substr($remaining, $colonPos + 1);
+        
+        // Convert value based on type
+        return match ($type) {
+            'number' => is_numeric($value) ? (float) $value : null,
+            'integer' => is_numeric($value) ? (int) $value : null,
+            'boolean' => filter_var($value, FILTER_VALIDATE_BOOLEAN),
+            'date' => $this->formatCustomDate($value),
+            'url' => filter_var($value, FILTER_VALIDATE_URL) ? $value : null,
+            'text', 'string' => $value,
+            default => $value,
+        };
+    }
+
+    /**
+     * Format custom date value to ISO 8601
+     */
+    protected function formatCustomDate(string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+        
+        // Try to parse the date
+        $timestamp = strtotime($value);
+        if ($timestamp === false) {
+            return $value; // Return as-is if can't parse
+        }
+        
+        return date('c', $timestamp);
     }
 
     /**

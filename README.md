@@ -15,6 +15,7 @@ Automatic schema.org structured data generation for WordPress, optimized for sea
 - **Smart Schema Suggestions** - Recommends schema types based on post type names
 - **Property Documentation** - Click any property for detailed description, examples, and schema.org link
 - **Custom Fields Integration** - Full support for ACF and Secure Custom Fields (SCF) with visual field mapping
+- **Custom Values** - Map properties to static values (text, number, date, URL, boolean) without needing custom fields
 - **Rank Math Compatibility** - Prevents duplicate schemas when Rank Math is active
 - **WooCommerce Integration** - Complete WooCommerce product fields available for mapping (40+ fields)
 - **MemberPress Courses Integration** - Automatic Course/Lesson hierarchy for LearningResource schemas
@@ -236,6 +237,17 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - [Metodo.dev](https://metodo.dev)
 
 ## Changelog
+
+### 1.40.1
+- **Fixed**: Custom values now correctly parsed with proper type casting (number, boolean, date, etc.)
+- **Fixed**: AbstractSchema.getMappedValue() now handles `custom:type:value` format correctly
+- **Impact**: Custom values like `custom:number:5` now output as `5` (number) instead of `0`
+
+### 1.40.0
+- **New**: Custom Value options in field mapping dropdowns
+- **New**: Map schema properties to static custom values (Text, Number, Date, URL, Boolean)
+- **New**: Useful for properties like `isAccessibleForFree`, `inLanguage`, or any fixed value
+- **Impact**: Greater flexibility in schema configuration without requiring custom fields
 
 ### 1.39.9
 - **Fixed**: Added `category` field to Offer objects (required by Google for nested Offers)
