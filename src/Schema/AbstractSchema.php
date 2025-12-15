@@ -393,6 +393,8 @@ abstract class AbstractSchema implements SchemaInterface
             'site_language' => get_bloginfo('language'),
             'site_language_code' => explode('-', get_bloginfo('language'))[0],
             'site_currency' => $this->getSiteCurrency(),
+            'site_wordpress_version' => get_bloginfo('version'),
+            'site_theme_version' => wp_get_theme()->get('Version') ?: '',
             default => null, // Not a standard field, return null to continue lookup
         };
     }

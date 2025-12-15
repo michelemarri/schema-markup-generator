@@ -170,6 +170,12 @@ class SchemaPropertiesHandler
                                     <option value="site_currency" <?php selected($currentFieldMapping[$propName] ?? '', 'site_currency'); ?>>
                                         <?php esc_html_e('Site Currency (EUR, USD...)', 'schema-markup-generator'); ?>
                                     </option>
+                                    <option value="site_wordpress_version" <?php selected($currentFieldMapping[$propName] ?? '', 'site_wordpress_version'); ?>>
+                                        <?php esc_html_e('WordPress Version', 'schema-markup-generator'); ?>
+                                    </option>
+                                    <option value="site_theme_version" <?php selected($currentFieldMapping[$propName] ?? '', 'site_theme_version'); ?>>
+                                        <?php esc_html_e('Theme Version', 'schema-markup-generator'); ?>
+                                    </option>
                                 </optgroup>
                                 <?php 
                                 // Render field groups by source/plugin

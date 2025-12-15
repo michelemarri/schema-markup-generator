@@ -321,6 +321,8 @@ class FieldMapper
             'site_language' => get_bloginfo('language'),
             'site_language_code' => $this->getLanguageCode(),
             'site_currency' => $this->getSiteCurrency(),
+            'site_wordpress_version' => $this->getWordPressVersion(),
+            'site_theme_version' => $this->getThemeVersion(),
             default => null,
         };
     }
@@ -333,6 +335,23 @@ class FieldMapper
         $locale = get_bloginfo('language');
         // Extract just the language part (e.g., "it" from "it-IT")
         return explode('-', $locale)[0];
+    }
+
+    /**
+     * Get WordPress version
+     */
+    private function getWordPressVersion(): string
+    {
+        return get_bloginfo('version');
+    }
+
+    /**
+     * Get active theme version
+     */
+    private function getThemeVersion(): string
+    {
+        $theme = wp_get_theme();
+        return $theme->get('Version') ?: '';
     }
 
     /**

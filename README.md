@@ -238,6 +238,11 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.41.0
+- **New**: Virtual fields for software versions (`site_wordpress_version`, `site_theme_version`)
+- **New**: Map `softwareVersion` to dynamically get WordPress or active theme version
+- **Impact**: Useful for SoftwareApplication and WebApplication schema types
+
 ### 1.40.1
 - **Fixed**: Custom values now correctly parsed with proper type casting (number, boolean, date, etc.)
 - **Fixed**: AbstractSchema.getMappedValue() now handles `custom:type:value` format correctly

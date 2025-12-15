@@ -215,6 +215,12 @@ class MetaBoxPropertiesHandler
                                         <option value="site_url" <?php selected($overrideType === 'field' ? $overrideValue : '', 'site_url'); ?>>
                                             <?php esc_html_e('Site URL', 'schema-markup-generator'); ?>
                                         </option>
+                                        <option value="site_wordpress_version" <?php selected($overrideType === 'field' ? $overrideValue : '', 'site_wordpress_version'); ?>>
+                                            <?php esc_html_e('WordPress Version', 'schema-markup-generator'); ?>
+                                        </option>
+                                        <option value="site_theme_version" <?php selected($overrideType === 'field' ? $overrideValue : '', 'site_theme_version'); ?>>
+                                            <?php esc_html_e('Theme Version', 'schema-markup-generator'); ?>
+                                        </option>
                                     </optgroup>
                                     <?php 
                                     foreach ($fieldGroups as $groupKey => $group): 

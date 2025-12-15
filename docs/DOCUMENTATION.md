@@ -579,8 +579,10 @@ Global site information available for mapping:
 | `site_language` | Full locale from WordPress | "it-IT", "en-US" |
 | `site_language_code` | ISO 639-1 language code | "it", "en" |
 | `site_currency` | Currency code (auto-detected from WooCommerce/MemberPress, or EUR) | "EUR", "USD" |
+| `site_wordpress_version` | Current WordPress version | "6.7.1" |
+| `site_theme_version` | Active theme version | "2.5.0" |
 
-**Pro Tip:** Use `site_language_code` for the `inLanguage` property and `site_currency` for `priceCurrency`.
+**Pro Tip:** Use `site_language_code` for the `inLanguage` property, `site_currency` for `priceCurrency`, and `site_wordpress_version`/`site_theme_version` for `softwareVersion` on SoftwareApplication schemas.
 
 ### Custom Fields
 
