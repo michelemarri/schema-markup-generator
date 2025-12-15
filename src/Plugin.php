@@ -57,6 +57,33 @@ class Plugin
         $this->loadSettings();
         $this->registerServices();
         $this->registerHooks();
+
+        // Check if plugin was updated and flush cache if needed
+        $this->maybeFlushCacheOnUpdate();
+    }
+
+    /**
+     * Flush cache if plugin was updated
+     * 
+     * Compares saved version with current version.
+     * If different, flushes all schema cache to ensure fresh generation.
+     */
+    private function maybeFlushCacheOnUpdate(): void
+    {
+        $savedVersion = get_option('smg_version', '');
+
+        if ($savedVersion !== SMG_VERSION) {
+            // Version changed - flush cache
+            if (isset($this->services['cache'])) {
+                $this->services['cache']->flush();
+                $this->services['logger']->info(
+                    "Plugin updated from {$savedVersion} to " . SMG_VERSION . " - cache flushed"
+                );
+            }
+
+            // Update saved version
+            update_option('smg_version', SMG_VERSION);
+        }
     }
 
     /**

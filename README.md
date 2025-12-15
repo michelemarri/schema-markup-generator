@@ -237,6 +237,12 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.39.5
+- **New**: Automatic cache flush on plugin update
+- **Improved**: Schema cache is automatically cleared when plugin version changes
+- **Improved**: Works with any update method (WordPress Updater, FTP, Git)
+- **Improved**: Ensures fresh schema generation after plugin updates
+
 ### 1.39.4
 - **Fixed**: HTML entities in description now decoded (`&nbsp;` → space, `&amp;` → &, etc.)
 - **Fixed**: URLs removed from description text (they belong in `embedUrl`/`contentUrl`, not in description)
