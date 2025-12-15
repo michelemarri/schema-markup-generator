@@ -748,6 +748,9 @@ In **Settings → Schema Markup → Integrations**, you can configure:
 ### Example Output
 
 **Lesson (LearningResource):**
+
+The `isPartOf` Course includes all properties required by Google Rich Results:
+
 ```json
 {
   "@type": "LearningResource",
@@ -756,11 +759,30 @@ In **Settings → Schema Markup → Integrations**, you can configure:
   "position": 1,
   "isPartOf": {
     "@type": "Course",
+    "@id": "https://example.com/courses/digital-marketing/#course",
     "name": "Digital Marketing Fundamentals",
-    "url": "https://example.com/courses/digital-marketing/"
+    "url": "https://example.com/courses/digital-marketing/",
+    "description": "Learn the fundamentals of digital marketing...",
+    "provider": {
+      "@type": "Organization",
+      "name": "Your Site Name",
+      "sameAs": "https://example.com/"
+    },
+    "hasCourseInstance": {
+      "@type": "CourseInstance",
+      "courseMode": "online",
+      "offers": {
+        "@type": "Offer",
+        "price": 0,
+        "priceCurrency": "EUR",
+        "availability": "https://schema.org/InStock"
+      }
+    }
   }
 }
 ```
+
+**Note:** The `description`, `provider`, `hasCourseInstance`, and `offers` properties are automatically added to satisfy Google Rich Results requirements. The currency is auto-detected from MemberPress/WooCommerce settings.
 
 **Course with Curriculum (when setting is enabled):**
 ```json

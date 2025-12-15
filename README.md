@@ -237,6 +237,12 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.39.3
+- **Fixed**: LearningResource `isPartOf` Course now includes all Google-required properties
+- **Fixed**: Parent Course now includes `description`, `provider`, and `hasCourseInstance` with `offers`
+- **Impact**: Resolves Google Rich Results Test errors: "A value for the description/offers/provider/hasCourseInstance field is required"
+- **Note**: Google recognizes nested Course as Course entity regardless of minimal reference, so all required fields are now included
+
 ### 1.39.2
 - **Fixed**: LearningResource `isPartOf` Course reference now uses minimal reference pattern (only `@type`, `@id`, `name`, `url`)
 - **Fixed**: Removed `description` and `provider` from nested Course to prevent Google from confusing LearningResource with standalone Course

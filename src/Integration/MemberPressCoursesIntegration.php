@@ -367,24 +367,68 @@ class MemberPressCoursesIntegration
     /**
      * Build course schema data from post
      *
-     * Returns a minimal Course reference for isPartOf property.
-     * Uses only @id, name, and url to avoid Google confusing nested Course
-     * with a complete standalone Course entity (which would require
-     * hasCourseInstance, offers, etc.).
+     * Returns a complete Course object with all required properties for Google validation:
+     * - @type, @id, name, url (identification)
+     * - description (required by Google)
+     * - provider (required by Google)
+     * - hasCourseInstance with offers (required by Google)
      *
      * @param WP_Post $course The course post
-     * @return array Course schema data (minimal reference)
+     * @return array Course schema data
      */
     private function buildCourseData(WP_Post $course): array
     {
         $courseUrl = get_permalink($course);
+        $siteName = get_bloginfo('name');
+        $siteUrl = home_url('/');
+        $currency = $this->getCourseCurrency();
 
         return [
             '@type' => 'Course',
             '@id' => $courseUrl . '#course',
             'name' => html_entity_decode(get_the_title($course), ENT_QUOTES, 'UTF-8'),
             'url' => $courseUrl,
+            'description' => $this->getCourseDescription($course),
+            'provider' => [
+                '@type' => 'Organization',
+                'name' => $siteName,
+                'sameAs' => $siteUrl,
+            ],
+            'hasCourseInstance' => [
+                '@type' => 'CourseInstance',
+                'courseMode' => 'online',
+                'offers' => [
+                    '@type' => 'Offer',
+                    'price' => 0,
+                    'priceCurrency' => $currency,
+                    'availability' => 'https://schema.org/InStock',
+                ],
+            ],
         ];
+    }
+
+    /**
+     * Get currency for course offers
+     * 
+     * Tries MemberPress currency first, then WooCommerce, then defaults to EUR.
+     */
+    private function getCourseCurrency(): string
+    {
+        // Try MemberPress currency
+        if (class_exists('MeprOptions')) {
+            $options = \MeprOptions::fetch();
+            if (isset($options->currency_code) && !empty($options->currency_code)) {
+                return $options->currency_code;
+            }
+        }
+
+        // Try WooCommerce currency
+        if (function_exists('get_woocommerce_currency')) {
+            return get_woocommerce_currency();
+        }
+
+        // Default to EUR
+        return 'EUR';
     }
 
     /**

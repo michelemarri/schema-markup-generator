@@ -222,60 +222,63 @@ class LearningResourceSchema extends AbstractSchema
     /**
      * Build parent course reference
      * 
-     * Uses minimal @id reference pattern to avoid SEO tools (especially Google)
-     * validating the nested Course as a complete standalone Course entity
-     * (which would require hasCourseInstance, offers, etc.).
-     * 
-     * Only includes: @type, @id, name, url
-     * Excludes: description, provider, offers, hasCourseInstance
+     * Returns a complete Course object with all required properties for Google validation:
+     * - @type, @id, name, url (identification)
+     * - description (required by Google)
+     * - provider (required by Google)
+     * - hasCourseInstance with offers (required by Google)
      */
     private function buildParentCourse(WP_Post $post, array $mapping): ?array
     {
         // Check for mapped course
         $course = $this->getMappedValue($post, $mapping, 'isPartOf');
 
+        $courseData = null;
+
         if ($course) {
             if (is_array($course)) {
                 $courseUrl = $course['url'] ?? '';
-                return [
+                $courseData = [
                     '@type' => 'Course',
                     '@id' => $courseUrl . '#course',
                     'name' => $course['name'] ?? '',
                     'url' => $courseUrl,
+                    'description' => $course['description'] ?? ($course['name'] ?? ''),
                 ];
-            }
-
-            // If it's a post ID
-            if (is_numeric($course)) {
+            } elseif (is_numeric($course)) {
+                // If it's a post ID
                 $coursePost = get_post((int) $course);
                 if ($coursePost) {
                     $courseUrl = get_permalink($coursePost);
-                    return [
+                    $courseData = [
                         '@type' => 'Course',
                         '@id' => $courseUrl . '#course',
                         'name' => html_entity_decode(get_the_title($coursePost), ENT_QUOTES, 'UTF-8'),
                         'url' => $courseUrl,
+                        'description' => $this->getPostDescription($coursePost),
                     ];
                 }
+            } else {
+                // If it's just a name - minimal data
+                $courseData = [
+                    '@type' => 'Course',
+                    'name' => $course,
+                    'description' => $course,
+                ];
             }
-
-            // If it's just a name - can't create @id without URL
-            return [
-                '@type' => 'Course',
-                'name' => $course,
-            ];
         }
 
         // Try to get parent post if hierarchical
-        if ($post->post_parent) {
+        if (!$courseData && $post->post_parent) {
             $parent = get_post($post->post_parent);
             if ($parent) {
                 $parentUrl = get_permalink($parent);
-                return [
+                $courseData = [
                     '@type' => 'Course',
                     '@id' => $parentUrl . '#course',
                     'name' => html_entity_decode(get_the_title($parent), ENT_QUOTES, 'UTF-8'),
                     'url' => $parentUrl,
+                    'description' => $this->getPostDescription($parent),
                 ];
             }
         }
@@ -283,14 +286,54 @@ class LearningResourceSchema extends AbstractSchema
         /**
          * Filter to get parent course from integrations (e.g., MemberPress Courses, LearnDash)
          *
-         * Integrations should return minimal Course reference with only:
-         * @type, @id, name, url
-         *
          * @param array|null $parentCourse Current parent course data
          * @param WP_Post    $post         The lesson post
          * @param array      $mapping      Field mapping configuration
          */
-        return apply_filters('smg_learning_resource_parent_course', null, $post, $mapping);
+        if (!$courseData) {
+            $courseData = apply_filters('smg_learning_resource_parent_course', null, $post, $mapping);
+        }
+
+        // Ensure all required properties are present for Google validation
+        if ($courseData) {
+            $courseData = $this->ensureCourseRequiredProperties($courseData);
+        }
+
+        return $courseData;
+    }
+
+    /**
+     * Ensure course has all required properties for Google validation
+     * 
+     * Google requires: description, provider, offers, hasCourseInstance
+     */
+    private function ensureCourseRequiredProperties(array $courseData): array
+    {
+        // Ensure description exists
+        if (empty($courseData['description'])) {
+            $courseData['description'] = $courseData['name'] ?? '';
+        }
+
+        // Add provider if not present (required by Google)
+        if (empty($courseData['provider'])) {
+            $courseData['provider'] = $this->getPublisher();
+        }
+
+        // Add hasCourseInstance with offers if not present (required by Google)
+        if (empty($courseData['hasCourseInstance'])) {
+            $courseData['hasCourseInstance'] = [
+                '@type' => 'CourseInstance',
+                'courseMode' => 'online',
+                'offers' => [
+                    '@type' => 'Offer',
+                    'price' => 0,
+                    'priceCurrency' => $this->getSiteCurrency(),
+                    'availability' => 'https://schema.org/InStock',
+                ],
+            ];
+        }
+
+        return $courseData;
     }
 
     /**
