@@ -386,6 +386,7 @@ class MemberPressCoursesIntegration
 
         $offerData = [
             '@type' => 'Offer',
+            'category' => 'EducationalMaterial',
             'price' => 0,
             'priceCurrency' => $currency,
             'availability' => 'https://schema.org/InStock',

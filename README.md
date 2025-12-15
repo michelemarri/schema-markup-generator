@@ -237,6 +237,11 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.39.9
+- **Fixed**: Added `category` field to Offer objects (required by Google for nested Offers)
+- **Fixed**: Offer now includes `category: "EducationalMaterial"` for Course offers
+- **Impact**: Resolves Google error "A value for the category field is required for a nested Offer"
+
 ### 1.39.8
 - **Fixed**: Added `offers` directly on Course inside `isPartOf` (not just in `hasCourseInstance`)
 - **Fixed**: Google requires `offers` on the Course entity directly for LearningResource lessons

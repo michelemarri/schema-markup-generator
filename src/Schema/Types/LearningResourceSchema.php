@@ -323,6 +323,7 @@ class LearningResourceSchema extends AbstractSchema
         $currency = $this->getSiteCurrency();
         $offerData = [
             '@type' => 'Offer',
+            'category' => 'EducationalMaterial',
             'price' => 0,
             'priceCurrency' => $currency,
             'availability' => 'https://schema.org/InStock',
