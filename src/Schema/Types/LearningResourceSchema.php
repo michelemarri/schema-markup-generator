@@ -324,6 +324,11 @@ class LearningResourceSchema extends AbstractSchema
             $courseData['hasCourseInstance'] = [
                 '@type' => 'CourseInstance',
                 'courseMode' => 'online',
+                'courseSchedule' => [
+                    '@type' => 'Schedule',
+                    'repeatFrequency' => 'P1D',
+                    'repeatCount' => 365,
+                ],
                 'offers' => [
                     '@type' => 'Offer',
                     'price' => 0,

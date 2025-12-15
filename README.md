@@ -237,6 +237,11 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.39.6
+- **New**: Added `courseSchedule` to `hasCourseInstance` in LearningResource parent Course
+- **Improved**: CourseInstance now includes Schedule with daily repeatFrequency (P1D) and 365 repeatCount
+- **Impact**: More complete CourseInstance data for online courses (on-demand, always available)
+
 ### 1.39.5
 - **New**: Automatic cache flush on plugin update
 - **Improved**: Schema cache is automatically cleared when plugin version changes
