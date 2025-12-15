@@ -371,6 +371,7 @@ class MemberPressCoursesIntegration
      * - @type, @id, name, url (identification)
      * - description (required by Google)
      * - provider (required by Google)
+     * - offers (required by Google - must be directly on Course, not just in hasCourseInstance)
      * - hasCourseInstance with offers (required by Google)
      *
      * @param WP_Post $course The course post
@@ -383,6 +384,13 @@ class MemberPressCoursesIntegration
         $siteUrl = home_url('/');
         $currency = $this->getCourseCurrency();
 
+        $offerData = [
+            '@type' => 'Offer',
+            'price' => 0,
+            'priceCurrency' => $currency,
+            'availability' => 'https://schema.org/InStock',
+        ];
+
         return [
             '@type' => 'Course',
             '@id' => $courseUrl . '#course',
@@ -394,6 +402,7 @@ class MemberPressCoursesIntegration
                 'name' => $siteName,
                 'sameAs' => $siteUrl,
             ],
+            'offers' => $offerData,
             'hasCourseInstance' => [
                 '@type' => 'CourseInstance',
                 'courseMode' => 'online',
@@ -402,12 +411,7 @@ class MemberPressCoursesIntegration
                     'repeatFrequency' => 'P1D',
                     'repeatCount' => 365,
                 ],
-                'offers' => [
-                    '@type' => 'Offer',
-                    'price' => 0,
-                    'priceCurrency' => $currency,
-                    'availability' => 'https://schema.org/InStock',
-                ],
+                'offers' => $offerData,
             ],
         ];
     }

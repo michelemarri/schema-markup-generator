@@ -305,7 +305,8 @@ class LearningResourceSchema extends AbstractSchema
     /**
      * Ensure course has all required properties for Google validation
      * 
-     * Google requires: description, provider, offers, hasCourseInstance
+     * Google requires: description, provider, offers (directly on Course), hasCourseInstance
+     * Note: offers must be on the Course directly, not just inside hasCourseInstance
      */
     private function ensureCourseRequiredProperties(array $courseData): array
     {
@@ -319,6 +320,19 @@ class LearningResourceSchema extends AbstractSchema
             $courseData['provider'] = $this->getPublisher();
         }
 
+        $currency = $this->getSiteCurrency();
+        $offerData = [
+            '@type' => 'Offer',
+            'price' => 0,
+            'priceCurrency' => $currency,
+            'availability' => 'https://schema.org/InStock',
+        ];
+
+        // Add offers directly on Course (required by Google for Course in isPartOf)
+        if (empty($courseData['offers'])) {
+            $courseData['offers'] = $offerData;
+        }
+
         // Add hasCourseInstance with offers if not present (required by Google)
         if (empty($courseData['hasCourseInstance'])) {
             $courseData['hasCourseInstance'] = [
@@ -329,12 +343,7 @@ class LearningResourceSchema extends AbstractSchema
                     'repeatFrequency' => 'P1D',
                     'repeatCount' => 365,
                 ],
-                'offers' => [
-                    '@type' => 'Offer',
-                    'price' => 0,
-                    'priceCurrency' => $this->getSiteCurrency(),
-                    'availability' => 'https://schema.org/InStock',
-                ],
+                'offers' => $offerData,
             ];
         }
 

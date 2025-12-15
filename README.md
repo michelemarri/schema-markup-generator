@@ -237,6 +237,11 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.39.8
+- **Fixed**: Added `offers` directly on Course inside `isPartOf` (not just in `hasCourseInstance`)
+- **Fixed**: Google requires `offers` on the Course entity directly for LearningResource lessons
+- **Impact**: Resolves Google Rich Results Test warning about missing offers on Course in isPartOf
+
 ### 1.39.7
 - **Fixed**: Added `courseSchedule` to MemberPress Courses integration
 - **Fixed**: CourseInstance in MemberPress lessons now includes Schedule (P1D, 365 days)
