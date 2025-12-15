@@ -237,6 +237,13 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.39.4
+- **Fixed**: HTML entities in description now decoded (`&nbsp;` → space, `&amp;` → &, etc.)
+- **Fixed**: URLs removed from description text (they belong in `embedUrl`/`contentUrl`, not in description)
+- **Fixed**: Organization now included in `@graph` when WebSite schema is rendered
+- **Impact**: Resolves "Missing Organization referenced by WebSite" validation error
+- **Impact**: Cleaner description text without HTML artifacts or embedded URLs
+
 ### 1.39.3
 - **Fixed**: LearningResource `isPartOf` Course now includes all Google-required properties
 - **Fixed**: Parent Course now includes `description`, `provider`, and `hasCourseInstance` with `offers`

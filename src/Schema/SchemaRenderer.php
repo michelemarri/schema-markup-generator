@@ -347,7 +347,7 @@ class SchemaRenderer
     }
 
     /**
-     * Build global schemas (WebSite, Breadcrumb)
+     * Build global schemas (WebSite, Organization, Breadcrumb)
      */
     private function buildGlobalSchemas(WP_Post $post): array
     {
@@ -356,6 +356,9 @@ class SchemaRenderer
 
         // WebSite schema (only on home or if enabled globally)
         if (is_front_page() || ($settings['enable_website_schema'] ?? true)) {
+            // Add Organization first (WebSite references it via @id)
+            $schemas[] = $this->buildOrganizationForGraph();
+
             $websiteSchema = $this->schemaFactory->create('WebSite');
             if ($websiteSchema) {
                 $schemas[] = $websiteSchema->build($post);
@@ -374,6 +377,52 @@ class SchemaRenderer
     }
 
     /**
+     * Build Organization schema for the @graph
+     * 
+     * This Organization is referenced by WebSite via @id.
+     * Uses organization settings from plugin configuration.
+     */
+    private function buildOrganizationForGraph(): array
+    {
+        $orgData = \Metodo\SchemaMarkupGenerator\smg_get_organization_data();
+
+        $organization = [
+            '@type' => 'Organization',
+            '@id' => home_url('/#organization'),
+            'name' => $orgData['name'],
+            'url' => $orgData['url'],
+        ];
+
+        // Logo
+        if (!empty($orgData['logo'])) {
+            $organization['logo'] = $orgData['logo'];
+        }
+
+        // Social profiles (sameAs)
+        $advancedSettings = \Metodo\SchemaMarkupGenerator\smg_get_settings('advanced');
+        $sameAs = [];
+
+        // Check for social profile settings
+        $socialFields = ['twitter_url', 'facebook_url', 'linkedin_url', 'youtube_url', 'instagram_url'];
+        foreach ($socialFields as $field) {
+            if (!empty($advancedSettings[$field])) {
+                $sameAs[] = $advancedSettings[$field];
+            }
+        }
+
+        // Also check for sameAs array setting
+        if (!empty($advancedSettings['organization_sameAs']) && is_array($advancedSettings['organization_sameAs'])) {
+            $sameAs = array_merge($sameAs, $advancedSettings['organization_sameAs']);
+        }
+
+        if (!empty($sameAs)) {
+            $organization['sameAs'] = array_values(array_unique(array_filter($sameAs)));
+        }
+
+        return $organization;
+    }
+
+    /**
      * Render global schemas (for non-singular pages)
      */
     private function renderGlobalSchemas(): void
@@ -383,6 +432,9 @@ class SchemaRenderer
 
         // WebSite schema on home page
         if (is_front_page() || is_home()) {
+            // Add Organization first (WebSite references it via @id)
+            $schemas[] = $this->buildOrganizationForGraph();
+
             $websiteSchema = $this->schemaFactory->create('WebSite');
             if ($websiteSchema) {
                 // Create a dummy post for the home page

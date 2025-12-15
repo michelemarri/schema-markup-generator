@@ -201,7 +201,13 @@ abstract class AbstractSchema implements SchemaInterface
             $description = wp_trim_words($description, $wordLimit, '');
         }
 
-        // Clean up whitespace
+        // Decode HTML entities (&nbsp; -> space, &amp; -> &, etc.)
+        $description = html_entity_decode($description, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // Remove URLs (they belong in embedUrl/contentUrl, not in description)
+        $description = preg_replace('/https?:\/\/[^\s]+/i', '', $description);
+
+        // Clean up whitespace (including leftover spaces from URL removal)
         $description = preg_replace('/\s+/', ' ', trim($description));
 
         if (mb_strlen($description) > $maxLength) {
