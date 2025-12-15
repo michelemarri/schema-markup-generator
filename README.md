@@ -237,6 +237,11 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.39.7
+- **Fixed**: Added `courseSchedule` to MemberPress Courses integration
+- **Fixed**: CourseInstance in MemberPress lessons now includes Schedule (P1D, 365 days)
+- **Impact**: MemberPress Courses lessons now have complete CourseInstance with courseSchedule
+
 ### 1.39.6
 - **New**: Added `courseSchedule` to `hasCourseInstance` in LearningResource parent Course
 - **Improved**: CourseInstance now includes Schedule with daily repeatFrequency (P1D) and 365 repeatCount
