@@ -1237,6 +1237,56 @@ add_filter('smg_organization_data', function($data) {
 });
 ```
 
+### Fallback Image {#fallback-image}
+
+Navigate to **Settings → Schema Markup → Advanced** to configure a fallback image for schemas.
+
+Many schema types (Product, Article, Course, Event, etc.) require an `image` property. When a post doesn't have a featured image, the plugin uses a fallback chain:
+
+1. **Featured Image** (post thumbnail)
+2. **Custom Fallback Image** (configured in Advanced settings)
+3. **Site Favicon** (WordPress site icon)
+
+**Setting the Fallback Image:**
+1. Go to **Advanced** tab in plugin settings
+2. Find the **Fallback Image** section
+3. Click "Select Image" to open the Media Library
+4. Choose an image (recommended: at least 1200×630 pixels for social sharing)
+5. Save settings
+
+**Schema Types Using Fallback:**
+- Product, Article, BlogPosting, NewsArticle
+- Course, LearningResource
+- Event, Recipe, HowTo
+- Person, Organization
+- WebPage, SoftwareApplication, WebApplication
+- FinancialProduct, VideoObject (thumbnailUrl)
+
+**Helper Function:**
+
+Use `smg_get_fallback_image()` to retrieve the fallback image programmatically:
+
+```php
+$image = \Metodo\SchemaMarkupGenerator\smg_get_fallback_image();
+// Returns: ['@type' => 'ImageObject', 'url' => string, 'width' => int, 'height' => int] or null
+```
+
+**Filter:**
+
+Customize the fallback image with the `smg_fallback_image` filter:
+
+```php
+add_filter('smg_fallback_image', function($image) {
+    // Use a different image
+    return [
+        '@type' => 'ImageObject',
+        'url' => 'https://example.com/default-image.jpg',
+        'width' => 1200,
+        'height' => 630,
+    ];
+});
+```
+
 ---
 
 ## Caching

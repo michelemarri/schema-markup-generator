@@ -88,8 +88,8 @@ class WebPageSchema extends AbstractSchema
         // Author
         $data['author'] = $this->getAuthor($post);
 
-        // Featured image
-        $image = $this->getFeaturedImage($post);
+        // Featured image (with fallback to custom fallback image or site favicon)
+        $image = $this->getImageWithFallback($post);
         if ($image) {
             $data['primaryImageOfPage'] = $image;
         }

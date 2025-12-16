@@ -272,6 +272,20 @@
                 }
             });
 
+            // Advanced tab: Select fallback image
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('#smg-select-fallback-image')) {
+                    this.handleSelectFallbackImage(e);
+                }
+            });
+
+            // Advanced tab: Remove fallback image
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('#smg-remove-fallback-image')) {
+                    this.handleRemoveFallbackImage(e);
+                }
+            });
+
             // View example button click
             document.addEventListener('click', (e) => {
                 if (e.target.closest('.smg-view-example-btn')) {
@@ -344,11 +358,11 @@
             // Integration settings auto-save (checkboxes and toggles in modals AND cards)
             document.addEventListener('change', (e) => {
                 const input = e.target;
-                
+
                 // Check if input is inside an integration modal OR integration card
                 const modal = input.closest('.smg-integration-modal');
                 const card = input.closest('.smg-integration-card');
-                
+
                 if (!modal && !card) return;
 
                 // Handle checkboxes and toggles
@@ -647,7 +661,7 @@
             const selectedOption = select.options[select.selectedIndex];
             const customType = selectedOption?.dataset.customType;
             const cell = select.closest('td');
-            
+
             // Remove existing custom value wrapper if any
             const existingWrapper = cell?.querySelector('.smg-custom-value-wrapper');
             if (existingWrapper) {
@@ -710,12 +724,12 @@
             const input = e.target;
             const cell = input.closest('td');
             const select = cell?.querySelector('.smg-field-select');
-            
+
             if (!select) return;
 
             const selectedOption = select.options[select.selectedIndex];
             const customType = selectedOption?.dataset.customType;
-            
+
             if (customType) {
                 // Update the option value with the full custom:type:value format
                 const newValue = `custom:${customType}:${input.value}`;
@@ -739,7 +753,7 @@
 
             const selectedOption = select.options[select.selectedIndex];
             const customType = selectedOption?.dataset.customType;
-            
+
             if (!customType) return;
 
             // Extract property name
@@ -2115,6 +2129,102 @@
         },
 
         /**
+         * Handle select fallback image button click
+         */
+        handleSelectFallbackImage(e) {
+            e.preventDefault();
+
+            // Use WordPress media uploader
+            if (!this.state.fallbackImageFrame) {
+                this.state.fallbackImageFrame = wp.media({
+                    title: typeof smgAdmin !== 'undefined' && smgAdmin.strings?.selectFallbackImage
+                        ? smgAdmin.strings.selectFallbackImage
+                        : 'Select Fallback Image',
+                    button: {
+                        text: typeof smgAdmin !== 'undefined' && smgAdmin.strings?.useFallbackImage
+                            ? smgAdmin.strings.useFallbackImage
+                            : 'Use this image'
+                    },
+                    library: {
+                        type: 'image'
+                    },
+                    multiple: false
+                });
+
+                this.state.fallbackImageFrame.on('select', () => {
+                    const attachment = this.state.fallbackImageFrame.state().get('selection').first().toJSON();
+                    this.updateFallbackImagePreview(attachment);
+                });
+            }
+
+            this.state.fallbackImageFrame.open();
+        },
+
+        /**
+         * Handle remove fallback image button click
+         */
+        handleRemoveFallbackImage(e) {
+            e.preventDefault();
+
+            const preview = document.getElementById('smg-fallback-image-preview');
+            const input = document.getElementById('smg-fallback-image');
+            const removeBtn = document.getElementById('smg-remove-fallback-image');
+
+            if (preview) {
+                preview.innerHTML = '<span class="smg-no-image text-gray-400">' +
+                    (typeof smgAdmin !== 'undefined' && smgAdmin.strings?.noFallbackImage
+                        ? smgAdmin.strings.noFallbackImage
+                        : 'No image set (will use favicon)') +
+                    '</span>';
+            }
+
+            if (input) {
+                input.value = '';
+            }
+
+            if (removeBtn) {
+                removeBtn.classList.add('hidden');
+            }
+
+            this.showToast(
+                typeof smgAdmin !== 'undefined' && smgAdmin.strings?.fallbackImageRemoved
+                    ? smgAdmin.strings.fallbackImageRemoved
+                    : 'Fallback image removed. Save settings to apply.',
+                'info'
+            );
+        },
+
+        /**
+         * Update fallback image preview after selection
+         */
+        updateFallbackImagePreview(attachment) {
+            const preview = document.getElementById('smg-fallback-image-preview');
+            const input = document.getElementById('smg-fallback-image');
+            const removeBtn = document.getElementById('smg-remove-fallback-image');
+
+            if (preview && attachment.url) {
+                // Use thumbnail size if available, otherwise use full
+                const url = attachment.sizes?.thumbnail?.url || attachment.url;
+                preview.innerHTML = `<img src="${url}" alt="" class="max-h-16 rounded border border-gray-200">`;
+            }
+
+            if (input) {
+                input.value = attachment.id;
+            }
+
+            if (removeBtn) {
+                removeBtn.classList.remove('hidden');
+            }
+
+            this.showToast(
+                typeof smgAdmin !== 'undefined' && smgAdmin.strings?.fallbackImageSelected
+                    ? smgAdmin.strings.fallbackImageSelected
+                    : 'Fallback image selected. Save settings to apply.',
+                'success'
+            );
+        },
+
+        /**
          * Show toast notification
          */
         showToast(message, type = 'info') {
@@ -2361,7 +2471,7 @@
             progressContainer.classList.remove('hidden');
             resultsContainer.classList.add('hidden');
             progressBar.style.width = '5%';
-            
+
             // Show spinner (in case it was hidden from previous run)
             const spinner = progressContainer.querySelector('.smg-spinner');
             if (spinner) {
@@ -2408,7 +2518,7 @@
 
                 clearInterval(progressInterval);
                 progressBar.style.width = '100%';
-                
+
                 // Hide spinner when complete
                 const spinner = progressContainer.querySelector('.smg-spinner');
                 if (spinner) {
@@ -2449,7 +2559,7 @@
                             ${data.data.message}
                         </div>
                     `;
-                    
+
                     if (data.data.courses && data.data.courses.length > 0) {
                         data.data.courses.forEach(course => {
                             const hasVideo = course.has_video ? 'has-video' : '';
@@ -2481,7 +2591,7 @@
 
                     resultsList.innerHTML = html;
                     resultsContainer.classList.remove('hidden');
-                    
+
                     // Show button again for recalculation
                     button.classList.remove('hidden');
                 } else {

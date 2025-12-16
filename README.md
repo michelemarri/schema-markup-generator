@@ -10,6 +10,7 @@ Automatic schema.org structured data generation for WordPress, optimized for sea
 
 - **Auto-Discovery** - Automatically detects all post types, custom fields, and taxonomies
 - **Auto-detect Videos** - Automatically adds VideoObject schema when YouTube/Vimeo videos are detected in content
+- **Fallback Images** - Automatic fallback to custom image or site favicon when posts lack featured images
 - **18 Schema Types** - Article, Product, Organization, Person, FAQ, HowTo, Event, Recipe, Review, Course, LearningResource, WebApplication, FinancialProduct and more
 - **additionalType Support** - Add more specific Schema.org types to any schema (e.g., add "MobileApplication" to SoftwareApplication)
 - **Smart Schema Suggestions** - Recommends schema types based on post type names
@@ -237,6 +238,15 @@ Contributions are welcome! Please read our contributing guidelines before submit
 - [Metodo.dev](https://metodo.dev)
 
 ## Changelog
+
+### 1.42.0
+- **New**: Fallback image support for schema types that require images
+- **New**: Configurable fallback image in Advanced settings (if not set, uses site favicon)
+- **New**: Image fallback chain: Featured Image → Custom Fallback Image → Site Favicon
+- **New**: `smg_get_fallback_image()` helper function for programmatic access
+- **New**: `smg_fallback_image` filter to customize fallback image
+- **Impact**: Resolves Google "image field is required" warnings for posts without featured images
+- **Schema Types**: Product, Article, Course, LearningResource, Event, Recipe, HowTo, Person, Organization, WebPage, SoftwareApplication, WebApplication, FinancialProduct, VideoObject
 
 ### 1.41.0
 - **New**: Virtual fields for software versions (`site_wordpress_version`, `site_theme_version`)

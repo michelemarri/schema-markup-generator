@@ -42,8 +42,8 @@ class FinancialProductSchema extends AbstractSchema
         $data['description'] = $this->getPostDescription($post);
         $data['url'] = $this->getPostUrl($post);
 
-        // Image
-        $image = $this->getFeaturedImage($post);
+        // Image (with fallback to custom fallback image or site favicon)
+        $image = $this->getImageWithFallback($post);
         if ($image) {
             $data['image'] = $image['url'];
         }

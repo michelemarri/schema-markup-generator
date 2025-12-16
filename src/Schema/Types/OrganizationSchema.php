@@ -51,14 +51,14 @@ class OrganizationSchema extends AbstractSchema
         $data['description'] = $this->getPostDescription($post);
         $data['url'] = $this->getMappedValue($post, $mapping, 'url') ?: $this->getPostUrl($post);
 
-        // Logo
+        // Logo (with fallback to custom fallback image or site favicon)
         $logo = $this->getMappedValue($post, $mapping, 'logo');
         if ($logo) {
             $data['logo'] = is_array($logo) ? $logo['url'] : $logo;
         } else {
-            $image = $this->getFeaturedImage($post);
-            if ($image) {
-                $data['logo'] = $image['url'];
+            $imageWithFallback = $this->getImageWithFallback($post);
+            if ($imageWithFallback) {
+                $data['logo'] = $imageWithFallback['url'];
             }
         }
 

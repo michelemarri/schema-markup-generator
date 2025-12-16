@@ -48,8 +48,8 @@ class RecipeSchema extends AbstractSchema
         // Dates
         $data['datePublished'] = $this->formatDate($post->post_date_gmt);
 
-        // Image
-        $image = $this->getFeaturedImage($post);
+        // Image (with fallback to custom fallback image or site favicon)
+        $image = $this->getImageWithFallback($post);
         if ($image) {
             $data['image'] = $image['url'];
         }

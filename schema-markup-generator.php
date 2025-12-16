@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Plugin Name:       Schema Markup Generator
  * Plugin URI:        https://github.com/michelemarri/schema-markup-generator
  * Description:       Automatic schema markup generation optimized for LLMs. Auto-discovers post types, custom fields, and taxonomies.
- * Version:           1.41.0
+ * Version:           1.42.0
  * Requires at least: 6.0
  * Tested up to:      6.9
  * Requires PHP:      8.2
@@ -28,7 +28,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('SMG_VERSION', '1.41.0');
+define('SMG_VERSION', '1.42.0');
 define('SMG_PLUGIN_FILE', __FILE__);
 define('SMG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SMG_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -70,6 +70,7 @@ function smg_get_settings(string $section): array
             'organization_name' => '',
             'organization_url' => '',
             'organization_logo' => 0,
+            'fallback_image' => 0,
         ],
         'integrations' => [
             'rankmath_disable_all_schemas' => false,
@@ -104,6 +105,51 @@ function smg_get_settings(string $section): array
     }
 
     return array_merge($defaults[$section] ?? [], $settings);
+}
+
+/**
+ * Get fallback image for schema markup
+ *
+ * Returns the fallback image configured in settings, or the site favicon as ultimate fallback.
+ * This is used when a post has no featured image but the schema type requires an image.
+ *
+ * @return array|null Image data array with @type, url, width, height or null if no fallback available
+ */
+function smg_get_fallback_image(): ?array
+{
+    $settings = smg_get_settings('advanced');
+
+    // First try the custom fallback image from settings
+    $fallbackImageId = !empty($settings['fallback_image']) ? (int) $settings['fallback_image'] : 0;
+
+    if ($fallbackImageId) {
+        $imageData = wp_get_attachment_image_src($fallbackImageId, 'full');
+        if ($imageData) {
+            return apply_filters('smg_fallback_image', [
+                '@type' => 'ImageObject',
+                'url' => $imageData[0],
+                'width' => $imageData[1],
+                'height' => $imageData[2],
+            ]);
+        }
+    }
+
+    // Ultimate fallback: use site icon (favicon)
+    $siteIconId = get_option('site_icon');
+    if ($siteIconId) {
+        $iconData = wp_get_attachment_image_src((int) $siteIconId, 'full');
+        if ($iconData) {
+            return apply_filters('smg_fallback_image', [
+                '@type' => 'ImageObject',
+                'url' => $iconData[0],
+                'width' => $iconData[1],
+                'height' => $iconData[2],
+            ]);
+        }
+    }
+
+    // No fallback available
+    return null;
 }
 
 /**

@@ -115,6 +115,41 @@ abstract class AbstractSchema implements SchemaInterface
     }
 
     /**
+     * Get image with fallback
+     *
+     * Tries to get the featured image first, then falls back to the configured
+     * fallback image from settings, and finally to the site favicon.
+     *
+     * @param WP_Post $post The post object
+     * @return array|null Image data array or null if no image available
+     */
+    protected function getImageWithFallback(WP_Post $post): ?array
+    {
+        // First try featured image
+        $image = $this->getFeaturedImage($post);
+        if ($image) {
+            return $image;
+        }
+
+        // Use the global fallback function (custom fallback image → favicon)
+        return \Metodo\SchemaMarkupGenerator\smg_get_fallback_image();
+    }
+
+    /**
+     * Get image URL with fallback
+     *
+     * Similar to getImageWithFallback but returns just the URL string.
+     *
+     * @param WP_Post $post The post object
+     * @return string|null Image URL or null if no image available
+     */
+    protected function getImageUrlWithFallback(WP_Post $post): ?string
+    {
+        $image = $this->getImageWithFallback($post);
+        return $image ? $image['url'] : null;
+    }
+
+    /**
      * Get author data
      */
     protected function getAuthor(WP_Post $post): array

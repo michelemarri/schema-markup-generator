@@ -517,6 +517,44 @@ add_filter('smg_resolve_field_value', function($value, int $postId, string $fiel
 
 ---
 
+### Fallback Image Filter
+
+#### `smg_fallback_image`
+
+Modify the fallback image used when a post has no featured image. This filter is called by `smg_get_fallback_image()` and affects all schema types that require images.
+
+```php
+add_filter('smg_fallback_image', function(?array $image): ?array {
+    // Return a custom fallback image
+    return [
+        '@type' => 'ImageObject',
+        'url' => 'https://example.com/default-image.jpg',
+        'width' => 1200,
+        'height' => 630,
+    ];
+});
+```
+
+**Parameters:**
+- `$image` (array|null) - Image data with keys: `@type`, `url`, `width`, `height`
+
+**Returns:** Array with image data or null for no fallback
+
+**Fallback Chain:**
+1. Post featured image
+2. Custom fallback image (from Advanced settings)
+3. Site favicon (WordPress site icon)
+
+**Schema Types Using Fallback:**
+- Product, Article, BlogPosting, NewsArticle
+- Course, LearningResource
+- Event, Recipe, HowTo
+- Person, Organization
+- WebPage, SoftwareApplication, WebApplication
+- FinancialProduct, VideoObject (thumbnailUrl)
+
+---
+
 ### Organization Data Filters
 
 #### `smg_organization_data`

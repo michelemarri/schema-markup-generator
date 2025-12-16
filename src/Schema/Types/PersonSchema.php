@@ -49,14 +49,14 @@ class PersonSchema extends AbstractSchema
             $data['description'] = $description;
         }
 
-        // Image
+        // Image (with fallback to custom fallback image or site favicon)
         $image = $this->getMappedValue($post, $mapping, 'image');
         if ($image) {
             $data['image'] = is_array($image) ? $image['url'] : $image;
         } else {
-            $featuredImage = $this->getFeaturedImage($post);
-            if ($featuredImage) {
-                $data['image'] = $featuredImage['url'];
+            $imageWithFallback = $this->getImageWithFallback($post);
+            if ($imageWithFallback) {
+                $data['image'] = $imageWithFallback['url'];
             }
         }
 

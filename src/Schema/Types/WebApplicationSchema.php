@@ -42,14 +42,14 @@ class WebApplicationSchema extends AbstractSchema
         $data['description'] = $this->getPostDescription($post);
         $data['url'] = $this->getPostUrl($post);
 
-        // Image/screenshot
+        // Image/screenshot (with fallback to custom fallback image or site favicon)
         $image = $this->getMappedValue($post, $mapping, 'screenshot');
         if ($image) {
             $data['screenshot'] = is_array($image) ? $image['url'] : $image;
         } else {
-            $featuredImage = $this->getFeaturedImage($post);
-            if ($featuredImage) {
-                $data['screenshot'] = $featuredImage['url'];
+            $imageWithFallback = $this->getImageWithFallback($post);
+            if ($imageWithFallback) {
+                $data['screenshot'] = $imageWithFallback['url'];
             }
         }
 

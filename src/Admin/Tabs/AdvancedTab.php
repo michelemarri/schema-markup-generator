@@ -42,6 +42,7 @@ class AdvancedTab extends AbstractTab
                     'organization_name' => '',
                     'organization_url' => '',
                     'organization_logo' => 0,
+                    'fallback_image' => 0,
                 ],
             ],
         ];
@@ -61,6 +62,7 @@ class AdvancedTab extends AbstractTab
             'organization_name' => sanitize_text_field($input['organization_name'] ?? ''),
             'organization_url' => esc_url_raw($input['organization_url'] ?? ''),
             'organization_logo' => absint($input['organization_logo'] ?? 0),
+            'fallback_image' => absint($input['fallback_image'] ?? 0),
         ];
     }
 
@@ -159,6 +161,66 @@ class AdvancedTab extends AbstractTab
                     </div>
                     <?php
                 }, 'dashicons-format-image');
+                ?>
+            </div>
+
+            <?php $this->renderSection(
+                __('Fallback Image', 'schema-markup-generator'),
+                __('Configure a fallback image for schema types that require an image (e.g., Product, Article, Course). If not set, the site favicon will be used.', 'schema-markup-generator')
+            ); ?>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <?php
+                $this->renderCard(__('Fallback Image', 'schema-markup-generator'), function () use ($settings) {
+                    $fallbackImageId = $settings['fallback_image'] ?? 0;
+                    ?>
+                    <div class="smg-field smg-field-media">
+                        <div class="smg-media-field flex items-center gap-4">
+                            <div class="smg-media-preview" id="smg-fallback-image-preview">
+                                <?php
+                                if ($fallbackImageId) {
+                                    $imageUrl = wp_get_attachment_image_url($fallbackImageId, 'thumbnail');
+                                    if ($imageUrl) {
+                                        echo '<img src="' . esc_url($imageUrl) . '" alt="" class="max-h-16 rounded border border-gray-200">';
+                                    }
+                                } else {
+                                    echo '<span class="smg-no-image text-gray-400">' . esc_html__('No image set (will use favicon)', 'schema-markup-generator') . '</span>';
+                                }
+                                ?>
+                            </div>
+                            <div class="smg-media-buttons flex gap-2">
+                                <button type="button" class="smg-btn smg-btn-secondary smg-btn-sm" id="smg-select-fallback-image">
+                                    <span class="dashicons dashicons-upload"></span>
+                                    <?php esc_html_e('Select Image', 'schema-markup-generator'); ?>
+                                </button>
+                                <button type="button" class="smg-btn smg-btn-ghost smg-btn-sm <?php echo $fallbackImageId ? '' : 'hidden'; ?>" id="smg-remove-fallback-image">
+                                    <span class="dashicons dashicons-no-alt"></span>
+                                    <?php esc_html_e('Remove', 'schema-markup-generator'); ?>
+                                </button>
+                            </div>
+                            <input type="hidden" name="smg_advanced_settings[fallback_image]" id="smg-fallback-image" value="<?php echo esc_attr($fallbackImageId); ?>">
+                        </div>
+                        <span class="smg-field-description mt-3">
+                            <?php esc_html_e('This image will be used for schemas that require an image when the post has no featured image. Recommended: at least 1200×630 pixels (social sharing size).', 'schema-markup-generator'); ?>
+                        </span>
+                    </div>
+                    <?php
+                }, 'dashicons-format-image');
+                ?>
+
+                <?php
+                $this->renderCard(__('How it works', 'schema-markup-generator'), function () {
+                    ?>
+                    <div class="smg-info-list text-sm text-gray-600 space-y-2">
+                        <p><span class="dashicons dashicons-yes text-green-500"></span> <?php esc_html_e('First, the featured image of the post is checked', 'schema-markup-generator'); ?></p>
+                        <p><span class="dashicons dashicons-yes text-green-500"></span> <?php esc_html_e('If no featured image, the fallback image is used', 'schema-markup-generator'); ?></p>
+                        <p><span class="dashicons dashicons-yes text-green-500"></span> <?php esc_html_e('If no fallback image, the site favicon is used', 'schema-markup-generator'); ?></p>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4">
+                        <?php esc_html_e('This applies to: Product, Article, Course, LearningResource, Event, Recipe, HowTo, Person, and other schema types that require images.', 'schema-markup-generator'); ?>
+                    </p>
+                    <?php
+                }, 'dashicons-info');
                 ?>
             </div>
 

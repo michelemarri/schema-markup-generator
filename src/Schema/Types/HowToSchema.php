@@ -41,8 +41,8 @@ class HowToSchema extends AbstractSchema
         $data['name'] = html_entity_decode(get_the_title($post), ENT_QUOTES, 'UTF-8');
         $data['description'] = $this->getPostDescription($post);
 
-        // Image
-        $image = $this->getFeaturedImage($post);
+        // Image (with fallback to custom fallback image or site favicon)
+        $image = $this->getImageWithFallback($post);
         if ($image) {
             $data['image'] = $image;
         }

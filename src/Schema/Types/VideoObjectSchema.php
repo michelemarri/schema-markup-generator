@@ -43,14 +43,14 @@ class VideoObjectSchema extends AbstractSchema
         // Dates
         $data['uploadDate'] = $this->formatDate($post->post_date_gmt);
 
-        // Thumbnail
+        // Thumbnail (with fallback to custom fallback image or site favicon)
         $thumbnail = $this->getMappedValue($post, $mapping, 'thumbnailUrl');
         if ($thumbnail) {
             $data['thumbnailUrl'] = is_array($thumbnail) ? $thumbnail['url'] : $thumbnail;
         } else {
-            $image = $this->getFeaturedImage($post);
-            if ($image) {
-                $data['thumbnailUrl'] = $image['url'];
+            $imageWithFallback = $this->getImageWithFallback($post);
+            if ($imageWithFallback) {
+                $data['thumbnailUrl'] = $imageWithFallback['url'];
             }
         }
 
