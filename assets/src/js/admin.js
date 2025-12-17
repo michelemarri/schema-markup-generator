@@ -272,14 +272,14 @@
                 }
             });
 
-            // Advanced tab: Select fallback image
+            // Settings → Organization tab: Select fallback image
             document.addEventListener('click', (e) => {
                 if (e.target.closest('#smg-select-fallback-image')) {
                     this.handleSelectFallbackImage(e);
                 }
             });
 
-            // Advanced tab: Remove fallback image
+            // Settings → Organization tab: Remove fallback image
             document.addEventListener('click', (e) => {
                 if (e.target.closest('#smg-remove-fallback-image')) {
                     this.handleRemoveFallbackImage(e);
@@ -370,6 +370,22 @@
                     this.handleIntegrationSettingChange(input);
                 }
             });
+
+            // Generic auto-save for settings fields
+            document.addEventListener('change', (e) => {
+                if (e.target.classList.contains('smg-autosave-field') && e.target.dataset.autosave === 'true') {
+                    this.handleAutoSaveField(e.target);
+                }
+            });
+
+            // Auto-save on blur for text/number inputs (debounced)
+            document.addEventListener('blur', (e) => {
+                if (e.target.classList.contains('smg-autosave-field') && 
+                    e.target.dataset.autosave === 'true' &&
+                    (e.target.type === 'text' || e.target.type === 'number' || e.target.tagName === 'TEXTAREA')) {
+                    this.handleAutoSaveField(e.target);
+                }
+            }, true);
         },
 
         /**
@@ -2448,6 +2464,142 @@
                     badge.className = 'smg-status-badge detected';
                     badge.innerHTML = '<span class="dashicons dashicons-visibility"></span> Detected';
                 }
+            }
+        },
+
+        /**
+         * Handle auto-save for generic settings fields
+         * 
+         * This is a generic auto-save handler that works with any field
+         * that has data-autosave="true", data-option, and data-key attributes.
+         */
+        async handleAutoSaveField(input) {
+            const optionName = input.dataset.option;
+            const settingKey = input.dataset.key;
+
+            if (!optionName || !settingKey) {
+                console.warn('Auto-save field missing required data attributes:', input);
+                return;
+            }
+
+            // Get the value based on input type
+            let settingValue;
+            if (input.type === 'checkbox') {
+                settingValue = input.checked ? '1' : '0';
+            } else {
+                settingValue = input.value;
+            }
+
+            // Update indicator to saving state
+            this.updateAutoSaveIndicator('saving');
+
+            try {
+                await this.saveAdvancedSetting(optionName, settingKey, settingValue);
+
+                // Update indicator to saved state
+                this.updateAutoSaveIndicator('saved');
+
+                // Reset indicator after a delay
+                setTimeout(() => {
+                    this.updateAutoSaveIndicator('idle');
+                }, 2000);
+
+            } catch (error) {
+                console.error('Failed to save setting:', error);
+                
+                // Update indicator to error state
+                this.updateAutoSaveIndicator('error');
+
+                // Reset indicator after a delay
+                setTimeout(() => {
+                    this.updateAutoSaveIndicator('idle');
+                }, 3000);
+
+                // Show error toast
+                this.showToast(
+                    typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saveFailed
+                        ? smgAdmin.strings.saveFailed
+                        : 'Failed to save',
+                    'error'
+                );
+            }
+        },
+
+        /**
+         * Save advanced setting via AJAX
+         */
+        saveAdvancedSetting(optionName, settingKey, settingValue) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('action', 'smg_save_advanced_setting');
+                formData.append('nonce', typeof smgAdmin !== 'undefined' ? smgAdmin.nonce : '');
+                formData.append('option_name', optionName);
+                formData.append('setting_key', settingKey);
+                formData.append('setting_value', settingValue);
+
+                fetch(typeof smgAdmin !== 'undefined' ? smgAdmin.ajaxUrl : ajaxurl, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            resolve(data);
+                        } else {
+                            reject(new Error(data.data?.message || 'Save failed'));
+                        }
+                    })
+                    .catch(error => reject(error));
+            });
+        },
+
+        /**
+         * Update auto-save indicator state
+         * 
+         * @param {string} state - 'idle', 'saving', 'saved', or 'error'
+         */
+        updateAutoSaveIndicator(state) {
+            const indicator = document.getElementById('smg-autosave-indicator');
+            if (!indicator) return;
+
+            const textEl = indicator.querySelector('.smg-autosave-text');
+            
+            // Remove all state classes
+            indicator.classList.remove('saving', 'saved', 'error');
+
+            switch (state) {
+                case 'saving':
+                    indicator.classList.add('saving');
+                    if (textEl) {
+                        textEl.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saving
+                            ? smgAdmin.strings.saving
+                            : 'Saving...';
+                    }
+                    break;
+                case 'saved':
+                    indicator.classList.add('saved');
+                    if (textEl) {
+                        textEl.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saved
+                            ? smgAdmin.strings.saved
+                            : 'Saved';
+                    }
+                    break;
+                case 'error':
+                    indicator.classList.add('error');
+                    if (textEl) {
+                        textEl.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.saveFailed
+                            ? smgAdmin.strings.saveFailed
+                            : 'Failed to save';
+                    }
+                    break;
+                default: // idle
+                    if (textEl) {
+                        textEl.textContent = typeof smgAdmin !== 'undefined' && smgAdmin.strings?.autoSaveIdle
+                            ? smgAdmin.strings.autoSaveIdle
+                            : 'Changes are saved automatically';
+                    }
+                    break;
             }
         },
 

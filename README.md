@@ -239,6 +239,44 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.47.0
+- **New**: Auto-calculate endOffset for video chapters (Clip schema)
+- **Improved**: Each chapter's endOffset is now automatically set to the next chapter's startOffset
+- **Improved**: Last chapter's endOffset uses total video duration when available
+- **Fixed**: Google Search Console "Missing field endOffset" warning for video clips
+
+### 1.46.0
+- **New**: Content Statistics dashboard on Home tab showing schema coverage
+- **New**: Schema coverage by post type with progress bars
+- **New**: Content breakdown by schema type
+- **New**: Overall coverage percentage summary
+- **New**: Count of posts with individual overrides and disabled schema
+- **Removed**: Quick Start and Useful Links sections (streamlined dashboard)
+
+### 1.45.0
+- **New**: Schema Output settings moved to Settings → General sub-tab for better organization
+- **New**: Home tab now shows plugin status dashboard with quick links and overview
+- **Improved**: Settings menu now has General as first sub-tab (General, Organization, Performance, Debug, Update)
+
+### 1.44.0
+- **New**: Auto-save system for Settings pages - Changes are saved automatically without form submission
+- **New**: Auto-save indicator shows real-time save status (saving, saved, error)
+- **New**: `AbstractTab::isAutoSaveEnabled()` method for enabling auto-save on tabs
+- **New**: `AbstractTab::getAutoSaveOptionName()` method for specifying the option name
+- **New**: `smg_save_advanced_setting` AJAX action for saving individual settings
+- **Improved**: Organization, Performance, and Debug tabs now use auto-save
+- **Improved**: Removed "Save Changes" button on auto-save enabled tabs
+
+### 1.43.0
+- **New**: Settings tab group - Reorganized "Advanced" tab into "Settings" with sub-tabs
+- **New**: Organization sub-tab - Organization info and fallback image configuration
+- **New**: Performance sub-tab - Cache configuration and clear cache functionality
+- **New**: Debug sub-tab - Debug mode, logs, and system information
+- **New**: Update sub-tab - Plugin updates and GitHub authentication (moved from top-level)
+- **Improved**: Reusable tab groups system - Same architecture as Schemas tab, extensible for future tabs
+- **Improved**: Cleaner Tools tab - Cache management moved to Settings → Performance
+- **Removed**: Advanced tab (replaced by Settings sub-tabs)
+
 ### 1.42.0
 - **New**: Fallback image support for schema types that require images
 - **New**: Configurable fallback image in Advanced settings (if not set, uses site favicon)

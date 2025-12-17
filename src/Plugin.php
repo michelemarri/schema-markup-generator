@@ -269,6 +269,7 @@ class Plugin
             add_action('wp_ajax_smg_save_field_mapping', [$this->services['mapping_save_handler'], 'handleSaveFieldMapping']);
             add_action('wp_ajax_smg_save_taxonomy_mapping', [$this->services['mapping_save_handler'], 'handleSaveTaxonomyMapping']);
             add_action('wp_ajax_smg_save_integration_setting', [$this->services['mapping_save_handler'], 'handleSaveIntegrationSetting']);
+            add_action('wp_ajax_smg_save_advanced_setting', [$this->services['mapping_save_handler'], 'handleSaveAdvancedSetting']);
             add_action('wp_ajax_smg_get_random_example', [$this->services['random_example_handler'], 'handle']);
             add_action('wp_ajax_smg_get_metabox_properties', [$this->services['metabox_properties_handler'], 'handle']);
         }
@@ -344,6 +345,7 @@ class Plugin
                 'saved' => __('Saved', 'schema-markup-generator'),
                 'saving' => __('Saving...', 'schema-markup-generator'),
                 'saveFailed' => __('Failed to save', 'schema-markup-generator'),
+                'autoSaveIdle' => __('Changes are saved automatically', 'schema-markup-generator'),
                 'selectLogo' => __('Select Organization Logo', 'schema-markup-generator'),
                 'useLogo' => __('Use this logo', 'schema-markup-generator'),
                 'noLogo' => __('No logo set', 'schema-markup-generator'),

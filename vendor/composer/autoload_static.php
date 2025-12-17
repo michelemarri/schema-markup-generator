@@ -11,14 +11,14 @@ class ComposerStaticInit508961aaa9473d923d9e95aba666bd64
     );
 
     public static $prefixLengthsPsr4 = array (
-        'M' => 
+        'M' =>
         array (
             'Metodo\\SchemaMarkupGenerator\\' => 29,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Metodo\\SchemaMarkupGenerator\\' => 
+        'Metodo\\SchemaMarkupGenerator\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
@@ -26,17 +26,23 @@ class ComposerStaticInit508961aaa9473d923d9e95aba666bd64
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Metodo\\SchemaMarkupGenerator\\Admin\\MappingSaveHandler' => __DIR__ . '/../..' . '/src/Admin/MappingSaveHandler.php',
         'Metodo\\SchemaMarkupGenerator\\Admin\\MetaBox' => __DIR__ . '/../..' . '/src/Admin/MetaBox.php',
+        'Metodo\\SchemaMarkupGenerator\\Admin\\MetaBoxPropertiesHandler' => __DIR__ . '/../..' . '/src/Admin/MetaBoxPropertiesHandler.php',
         'Metodo\\SchemaMarkupGenerator\\Admin\\PreviewHandler' => __DIR__ . '/../..' . '/src/Admin/PreviewHandler.php',
+        'Metodo\\SchemaMarkupGenerator\\Admin\\RandomExampleHandler' => __DIR__ . '/../..' . '/src/Admin/RandomExampleHandler.php',
         'Metodo\\SchemaMarkupGenerator\\Admin\\SchemaPropertiesHandler' => __DIR__ . '/../..' . '/src/Admin/SchemaPropertiesHandler.php',
         'Metodo\\SchemaMarkupGenerator\\Admin\\SettingsPage' => __DIR__ . '/../..' . '/src/Admin/SettingsPage.php',
         'Metodo\\SchemaMarkupGenerator\\Admin\\Tabs\\AbstractTab' => __DIR__ . '/../..' . '/src/Admin/Tabs/AbstractTab.php',
-        'Metodo\\SchemaMarkupGenerator\\Admin\\Tabs\\AdvancedTab' => __DIR__ . '/../..' . '/src/Admin/Tabs/AdvancedTab.php',
         'Metodo\\SchemaMarkupGenerator\\Admin\\Tabs\\GeneralTab' => __DIR__ . '/../..' . '/src/Admin/Tabs/GeneralTab.php',
         'Metodo\\SchemaMarkupGenerator\\Admin\\Tabs\\IntegrationsTab' => __DIR__ . '/../..' . '/src/Admin/Tabs/IntegrationsTab.php',
         'Metodo\\SchemaMarkupGenerator\\Admin\\Tabs\\PagesTab' => __DIR__ . '/../..' . '/src/Admin/Tabs/PagesTab.php',
         'Metodo\\SchemaMarkupGenerator\\Admin\\Tabs\\PostTypesTab' => __DIR__ . '/../..' . '/src/Admin/Tabs/PostTypesTab.php',
         'Metodo\\SchemaMarkupGenerator\\Admin\\Tabs\\SchemaTypesTab' => __DIR__ . '/../..' . '/src/Admin/Tabs/SchemaTypesTab.php',
+        'Metodo\\SchemaMarkupGenerator\\Admin\\Tabs\\Settings\\DebugTab' => __DIR__ . '/../..' . '/src/Admin/Tabs/Settings/DebugTab.php',
+        'Metodo\\SchemaMarkupGenerator\\Admin\\Tabs\\Settings\\OrganizationTab' => __DIR__ . '/../..' . '/src/Admin/Tabs/Settings/OrganizationTab.php',
+        'Metodo\\SchemaMarkupGenerator\\Admin\\Tabs\\Settings\\PerformanceTab' => __DIR__ . '/../..' . '/src/Admin/Tabs/Settings/PerformanceTab.php',
+        'Metodo\\SchemaMarkupGenerator\\Admin\\Tabs\\TaxonomiesTab' => __DIR__ . '/../..' . '/src/Admin/Tabs/TaxonomiesTab.php',
         'Metodo\\SchemaMarkupGenerator\\Admin\\Tabs\\ToolsTab' => __DIR__ . '/../..' . '/src/Admin/Tabs/ToolsTab.php',
         'Metodo\\SchemaMarkupGenerator\\Admin\\Tabs\\UpdateTab' => __DIR__ . '/../..' . '/src/Admin/Tabs/UpdateTab.php',
         'Metodo\\SchemaMarkupGenerator\\Cache\\CacheInterface' => __DIR__ . '/../..' . '/src/Cache/CacheInterface.php',
@@ -44,10 +50,14 @@ class ComposerStaticInit508961aaa9473d923d9e95aba666bd64
         'Metodo\\SchemaMarkupGenerator\\Cache\\TransientCache' => __DIR__ . '/../..' . '/src/Cache/TransientCache.php',
         'Metodo\\SchemaMarkupGenerator\\Discovery\\CustomFieldDiscovery' => __DIR__ . '/../..' . '/src/Discovery/CustomFieldDiscovery.php',
         'Metodo\\SchemaMarkupGenerator\\Discovery\\PostTypeDiscovery' => __DIR__ . '/../..' . '/src/Discovery/PostTypeDiscovery.php',
+        'Metodo\\SchemaMarkupGenerator\\Discovery\\SchemaRecommender' => __DIR__ . '/../..' . '/src/Discovery/SchemaRecommender.php',
         'Metodo\\SchemaMarkupGenerator\\Discovery\\TaxonomyDiscovery' => __DIR__ . '/../..' . '/src/Discovery/TaxonomyDiscovery.php',
         'Metodo\\SchemaMarkupGenerator\\Integration\\ACFIntegration' => __DIR__ . '/../..' . '/src/Integration/ACFIntegration.php',
         'Metodo\\SchemaMarkupGenerator\\Integration\\MemberPressCoursesIntegration' => __DIR__ . '/../..' . '/src/Integration/MemberPressCoursesIntegration.php',
+        'Metodo\\SchemaMarkupGenerator\\Integration\\MemberPressMembershipIntegration' => __DIR__ . '/../..' . '/src/Integration/MemberPressMembershipIntegration.php',
         'Metodo\\SchemaMarkupGenerator\\Integration\\RankMathIntegration' => __DIR__ . '/../..' . '/src/Integration/RankMathIntegration.php',
+        'Metodo\\SchemaMarkupGenerator\\Integration\\WooCommerceIntegration' => __DIR__ . '/../..' . '/src/Integration/WooCommerceIntegration.php',
+        'Metodo\\SchemaMarkupGenerator\\Integration\\YouTubeIntegration' => __DIR__ . '/../..' . '/src/Integration/YouTubeIntegration.php',
         'Metodo\\SchemaMarkupGenerator\\Logger\\Logger' => __DIR__ . '/../..' . '/src/Logger/Logger.php',
         'Metodo\\SchemaMarkupGenerator\\Mapper\\DynamicContentBuilder' => __DIR__ . '/../..' . '/src/Mapper/DynamicContentBuilder.php',
         'Metodo\\SchemaMarkupGenerator\\Mapper\\FieldMapper' => __DIR__ . '/../..' . '/src/Mapper/FieldMapper.php',
@@ -63,6 +73,7 @@ class ComposerStaticInit508961aaa9473d923d9e95aba666bd64
         'Metodo\\SchemaMarkupGenerator\\Schema\\Types\\CourseSchema' => __DIR__ . '/../..' . '/src/Schema/Types/CourseSchema.php',
         'Metodo\\SchemaMarkupGenerator\\Schema\\Types\\EventSchema' => __DIR__ . '/../..' . '/src/Schema/Types/EventSchema.php',
         'Metodo\\SchemaMarkupGenerator\\Schema\\Types\\FAQSchema' => __DIR__ . '/../..' . '/src/Schema/Types/FAQSchema.php',
+        'Metodo\\SchemaMarkupGenerator\\Schema\\Types\\FinancialProductSchema' => __DIR__ . '/../..' . '/src/Schema/Types/FinancialProductSchema.php',
         'Metodo\\SchemaMarkupGenerator\\Schema\\Types\\HowToSchema' => __DIR__ . '/../..' . '/src/Schema/Types/HowToSchema.php',
         'Metodo\\SchemaMarkupGenerator\\Schema\\Types\\LearningResourceSchema' => __DIR__ . '/../..' . '/src/Schema/Types/LearningResourceSchema.php',
         'Metodo\\SchemaMarkupGenerator\\Schema\\Types\\OrganizationSchema' => __DIR__ . '/../..' . '/src/Schema/Types/OrganizationSchema.php',
@@ -72,6 +83,7 @@ class ComposerStaticInit508961aaa9473d923d9e95aba666bd64
         'Metodo\\SchemaMarkupGenerator\\Schema\\Types\\ReviewSchema' => __DIR__ . '/../..' . '/src/Schema/Types/ReviewSchema.php',
         'Metodo\\SchemaMarkupGenerator\\Schema\\Types\\SoftwareAppSchema' => __DIR__ . '/../..' . '/src/Schema/Types/SoftwareAppSchema.php',
         'Metodo\\SchemaMarkupGenerator\\Schema\\Types\\VideoObjectSchema' => __DIR__ . '/../..' . '/src/Schema/Types/VideoObjectSchema.php',
+        'Metodo\\SchemaMarkupGenerator\\Schema\\Types\\WebApplicationSchema' => __DIR__ . '/../..' . '/src/Schema/Types/WebApplicationSchema.php',
         'Metodo\\SchemaMarkupGenerator\\Schema\\Types\\WebPageSchema' => __DIR__ . '/../..' . '/src/Schema/Types/WebPageSchema.php',
         'Metodo\\SchemaMarkupGenerator\\Schema\\Types\\WebSiteSchema' => __DIR__ . '/../..' . '/src/Schema/Types/WebSiteSchema.php',
         'Metodo\\SchemaMarkupGenerator\\Security\\Encryption' => __DIR__ . '/../..' . '/src/Security/Encryption.php',

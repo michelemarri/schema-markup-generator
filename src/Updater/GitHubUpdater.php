@@ -227,7 +227,7 @@ class GitHubUpdater
             return;
         }
 
-        $settings_url = admin_url('admin.php?page=schema-markup-generator&tab=update');
+        $settings_url = admin_url('options-general.php?page=schema-markup-generator&tab=settings-update');
         
         printf(
             '<div class="notice notice-warning is-dismissible"><p><strong>%s:</strong> %s <a href="%s">%s</a></p></div>',

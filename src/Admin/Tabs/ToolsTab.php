@@ -127,27 +127,8 @@ class ToolsTab extends AbstractTab
                 ?>
             </div>
 
-            <?php $this->renderSection(
-                __('Cache Management', 'schema-markup-generator'),
-                __('Clear cached schema data.', 'schema-markup-generator')
-            ); ?>
-
-            <div class="flex flex-col gap-4">
-                <form method="post">
-                    <?php wp_nonce_field('smg_clear_cache', 'smg_clear_cache_nonce'); ?>
-                    <button type="submit" name="smg_clear_cache" class="smg-btn smg-btn-secondary">
-                        <span class="dashicons dashicons-trash"></span>
-                        <?php esc_html_e('Clear Schema Cache', 'schema-markup-generator'); ?>
-                    </button>
-                </form>
-                <p class="smg-text-muted">
-                    <?php esc_html_e('This will clear all cached schema data. The cache will be rebuilt automatically.', 'schema-markup-generator'); ?>
-                </p>
-            </div>
         </div>
         <?php
-
-        $this->handleClearCache();
     }
 
     /**
@@ -215,30 +196,5 @@ class ToolsTab extends AbstractTab
         }
     }
 
-    /**
-     * Handle cache clear request
-     */
-    private function handleClearCache(): void
-    {
-        if (!isset($_POST['smg_clear_cache']) || !check_admin_referer('smg_clear_cache', 'smg_clear_cache_nonce')) {
-            return;
-        }
-
-        // Clear transients
-        global $wpdb;
-        $wpdb->query(
-            $wpdb->prepare(
-                "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
-                $wpdb->esc_like('_transient_smg_') . '%'
-            )
-        );
-
-        // Clear object cache if available
-        if (function_exists('wp_cache_flush_group')) {
-            wp_cache_flush_group('smg_schema');
-        }
-
-        add_settings_error('smg_cache', 'cleared', __('Schema cache cleared successfully.', 'schema-markup-generator'), 'success');
-    }
 }
 

@@ -1644,6 +1644,69 @@
   @apply flex gap-3 mt-8 pt-6 border-t border-gray-200;
 }
 
+/* ========================================
+   Auto-save Indicator
+   ======================================== */
+
+.smg-autosave-indicator {
+  @apply flex items-center gap-2 mt-8 pt-6 border-t border-gray-200 text-sm text-gray-500;
+  transition: all 200ms ease;
+}
+
+.smg-autosave-indicator .dashicons {
+  @apply text-gray-400;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  transition: all 200ms ease;
+}
+
+.smg-autosave-indicator.saving {
+  @apply text-orange-600;
+}
+
+.smg-autosave-indicator.saving .dashicons {
+  @apply text-orange-600;
+  animation: smg-spin 1s linear infinite;
+}
+
+.smg-autosave-indicator.saving .dashicons::before {
+  content: "\f463"; /* dashicons-update */
+}
+
+.smg-autosave-indicator.saved {
+  @apply text-green-600;
+}
+
+.smg-autosave-indicator.saved .dashicons {
+  @apply text-green-600;
+}
+
+.smg-autosave-indicator.saved .dashicons::before {
+  content: "\f147"; /* dashicons-yes */
+}
+
+.smg-autosave-indicator.error {
+  @apply text-red-600;
+}
+
+.smg-autosave-indicator.error .dashicons {
+  @apply text-red-600;
+}
+
+.smg-autosave-indicator.error .dashicons::before {
+  content: "\f335"; /* dashicons-no-alt */
+}
+
+@keyframes smg-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .smg-fields-description {
   @apply text-sm text-gray-500 mb-4;
 }

@@ -12,11 +12,14 @@ Complete documentation for the Schema Markup Generator WordPress plugin.
 6. [MemberPress Courses Integration](#memberpress-courses-integration)
 7. [MemberPress Membership Integration](#memberpress-membership-integration)
 8. [WooCommerce Integration](#woocommerce-integration)
-9. [Advanced Settings](#advanced-settings)
-10. [Caching](#caching)
-11. [REST API](#rest-api)
-12. [Import/Export](#importexport)
-13. [Troubleshooting](#troubleshooting)
+9. [Settings](#settings)
+   - [Organization](#organization-settings)
+   - [Performance](#performance-settings)
+   - [Debug](#debug-settings)
+   - [Update](#update-settings)
+10. [REST API](#rest-api)
+11. [Import/Export](#importexport)
+12. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -43,7 +46,7 @@ The plugin includes automatic update functionality from GitHub. When a new relea
 
 #### Update Settings
 
-Navigate to **Settings → Schema Markup → Update** to configure:
+Navigate to **Settings → Schema Markup → Settings → Update** to configure:
 
 - **Current Version**: See installed version and last update check
 - **Auto-Update**: Enable automatic updates when new versions are available
@@ -52,26 +55,44 @@ Navigate to **Settings → Schema Markup → Update** to configure:
 
 ## Configuration
 
-### General Settings
+### Home Tab
 
-Navigate to **Settings → Schema Markup** to access the plugin settings.
+Navigate to **Settings → Schema Markup** to access the plugin settings. The **Home** tab provides a statistics dashboard:
 
-#### Schema Output
+- **Summary Stats**: Quick overview showing:
+  - Posts with schema
+  - Posts without schema (not configured)
+  - Posts with individual overrides
+  - Posts with schema disabled
+- **Coverage by Post Type**: Table showing ALL public post types:
+  - Post type name and assigned schema (or "Not configured" warning)
+  - Total published posts
+  - Posts with schema enabled
+  - Coverage percentage with visual progress bar
+- **Content by Schema Type**: Breakdown of content count per schema type
+- **Overall Coverage**: Percentage of all content that has schema
+
+### Schema Output Settings
+
+Schema output settings are located in **Settings → General** sub-tab:
 
 - **Enable Schema Markup**: Toggle schema output on/off globally
 - **WebSite Schema**: Adds WebSite schema with SearchAction for sitelinks
 - **Breadcrumb Schema**: Adds BreadcrumbList schema for navigation
+- **Auto-detect Videos**: Automatically add VideoObject schema when YouTube/Vimeo videos are detected
 
-#### Organization Info
+All changes in this tab are saved automatically (auto-save enabled).
 
-The General tab shows a read-only summary of your organization info. Click "Edit Organization Info" to customize these settings in the Advanced tab.
+### Organization Info
+
+Organization settings are in **Settings → Organization** sub-tab.
 
 Organization data is used in:
 - Organization schema type
 - Publisher info in Article schemas
 - WebSite schema
 
-See [Advanced Settings → Organization Info](#organization-info-advanced) for customization options.
+See [Organization Settings](#organization-settings) for customization options.
 
 ### Post Type Configuration
 
@@ -129,13 +150,14 @@ This feature helps you:
 - Test different posts to ensure consistent schema generation
 - Debug issues by examining actual generated data
 
-### Advanced Settings
+### Settings Tab
 
-In the **Advanced** tab:
+The **Settings** tab is organized into sub-tabs for better organization:
 
-- **Cache Settings**: Enable/disable caching and set TTL
-- **Debug Mode**: Enable logging for troubleshooting
-- **System Info**: View technical details about your installation
+- **Organization**: Organization name, URL, logo, and fallback image
+- **Performance**: Cache settings and cache management
+- **Debug**: Debug mode, logs, and system information
+- **Update**: Plugin updates and GitHub authentication
 
 ---
 
@@ -518,17 +540,28 @@ Video chapters are automatically extracted from multiple sources and added to th
 </p>
 ```
 
+**Automatic endOffset Calculation:**
+
+The plugin automatically calculates `endOffset` for each chapter to comply with Google's requirements:
+
+- **For each chapter (except last):** `endOffset` = `startOffset` of the next chapter
+- **For the last chapter:** `endOffset` = total video duration (if available)
+
+This eliminates the "Missing field endOffset" warning in Google Search Console.
+
 **Generated schema structure:**
 
 ```json
 {
   "@type": "VideoObject",
   "name": "Lesson Title",
+  "duration": "PT5M30S",
   "hasPart": [
     {
       "@type": "Clip",
       "name": "Why crypto and why now",
       "startOffset": 0,
+      "endOffset": 80,
       "position": 1,
       "url": "https://example.com/lessons/my-lesson/#t=0"
     },
@@ -536,6 +569,7 @@ Video chapters are automatically extracted from multiple sources and added to th
       "@type": "Clip",
       "name": "Crypto becoming investable",
       "startOffset": 80,
+      "endOffset": 330,
       "position": 2,
       "url": "https://example.com/lessons/my-lesson/#t=80"
     }
@@ -1194,11 +1228,13 @@ The integration uses these filters:
 
 ---
 
-## Advanced Settings
+## Settings
 
-### Organization Info (Advanced) {#organization-info-advanced}
+The Settings tab is organized into sub-tabs for better organization of plugin configuration.
 
-Navigate to **Settings → Schema Markup → Advanced** to customize your organization data.
+### Organization Settings {#organization-settings}
+
+Navigate to **Settings → Schema Markup → Settings → Organization** to customize your organization data.
 
 | Field | Custom Setting | Fallback (if empty) |
 |-------|----------------|---------------------|
@@ -1237,18 +1273,18 @@ add_filter('smg_organization_data', function($data) {
 });
 ```
 
-### Fallback Image {#fallback-image}
+#### Fallback Image
 
-Navigate to **Settings → Schema Markup → Advanced** to configure a fallback image for schemas.
+Navigate to **Settings → Schema Markup → Settings → Organization** to configure a fallback image for schemas.
 
 Many schema types (Product, Article, Course, Event, etc.) require an `image` property. When a post doesn't have a featured image, the plugin uses a fallback chain:
 
 1. **Featured Image** (post thumbnail)
-2. **Custom Fallback Image** (configured in Advanced settings)
+2. **Custom Fallback Image** (configured in Organization settings)
 3. **Site Favicon** (WordPress site icon)
 
 **Setting the Fallback Image:**
-1. Go to **Advanced** tab in plugin settings
+1. Go to **Settings → Organization** sub-tab
 2. Find the **Fallback Image** section
 3. Click "Select Image" to open the Media Library
 4. Choose an image (recommended: at least 1200×630 pixels for social sharing)
@@ -1287,17 +1323,31 @@ add_filter('smg_fallback_image', function($image) {
 });
 ```
 
----
+### Performance Settings {#performance-settings}
 
-## Caching
+Navigate to **Settings → Schema Markup → Settings → Performance** to configure caching.
 
-### How Caching Works
+#### Cache Configuration
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| **Enable Caching** | Toggle schema caching on/off | Enabled |
+| **Cache TTL** | Time-to-live in seconds | 3600 (1 hour) |
+
+#### Cache Management
+
+The Performance sub-tab includes cache management tools:
+
+- **Clear Schema Cache**: Removes all cached schema data
+- **Cache Status**: Shows current cache type (Object Cache or Transients)
+
+#### How Caching Works
 
 1. Schema data is generated once and cached
 2. Cache is keyed by post ID and modification date
 3. Cache is automatically invalidated when post is updated
 
-### Cache Types
+#### Cache Types
 
 **Object Cache (Preferred)**
 When Redis or Memcached is available, the plugin uses WordPress object cache for optimal performance.
@@ -1305,18 +1355,73 @@ When Redis or Memcached is available, the plugin uses WordPress object cache for
 **Transients (Fallback)**
 When object cache is not available, WordPress transients are used.
 
-### Cache Settings
-
-- **Enable Caching**: Toggle on/off
-- **Cache TTL**: Time-to-live in seconds (default: 3600)
-- **Clear Cache**: Manually clear all cached schema data
-
-### Cache Invalidation
+#### Cache Invalidation
 
 Cache is automatically cleared when:
 - Post is saved or updated
 - Post is deleted
 - Plugin settings are changed
+
+### Debug Settings {#debug-settings}
+
+Navigate to **Settings → Schema Markup → Settings → Debug** for troubleshooting tools.
+
+#### Debug Mode
+
+Enable debug mode to log schema generation details:
+
+1. Toggle **Enable Debug Mode** on
+2. Check logs in `/wp-content/plugins/schema-markup-generator/logs/`
+3. Recent logs are displayed directly in the tab
+
+#### System Information
+
+The Debug sub-tab displays:
+
+**Environment:**
+- Plugin Version
+- WordPress Version
+- PHP Version
+
+**Server Limits:**
+- Max Execution Time
+- Memory Limit
+- Upload Max Size
+
+**Active Integrations:**
+- Status of ACF, WooCommerce, Rank Math, MemberPress
+
+### Update Settings {#update-settings}
+
+Navigate to **Settings → Schema Markup → Settings → Update** to configure plugin updates.
+
+#### Current Version
+
+Shows:
+- Installed version with badge
+- GitHub repository link
+- Last update check time
+
+#### GitHub Authentication
+
+For private repositories, configure a GitHub Personal Access Token:
+
+1. Generate a token at [GitHub Settings](https://github.com/settings/tokens?type=beta)
+2. Enter the token in the **GitHub Personal Access Token** field
+3. Token is encrypted using AES-256-CBC before storage
+
+**Alternative:** Define the token in `wp-config.php`:
+```php
+define('SMG_GITHUB_TOKEN', 'your-token');
+```
+
+#### Auto-Update
+
+Enable **Auto-Updates** to automatically update the plugin when new versions are available.
+
+#### Manual Check
+
+Click **Check for Updates** to force a check for new versions.
 
 ---
 
@@ -1436,7 +1541,7 @@ The export uses auto-discovery, meaning all options with `smg_` prefix are autom
 #### What's Included
 
 - General settings (enabled, WebSite schema, breadcrumbs)
-- Advanced settings
+- Settings (organization, performance, debug)
 - Integration settings
 - Post type mappings (which schema type for each post type)
 - Page mappings (specific page settings)
@@ -1537,7 +1642,7 @@ Use the built-in validation:
 
 ### Debug Logging
 
-1. Go to Settings → Schema Markup → Advanced
+1. Go to Settings → Schema Markup → Settings → Debug
 2. Enable Debug Mode
 3. Check logs in `/wp-content/plugins/schema-markup-generator/logs/`
 

@@ -428,6 +428,10 @@ class LearningResourceSchema extends AbstractSchema
         $chapters = $this->getMappedValue($post, $mapping, 'videoChapters');
         if (is_array($chapters) && !empty($chapters)) {
             $video['hasPart'] = $this->buildVideoChapters($chapters);
+            
+            // Auto-calculate endOffset for chapters based on next chapter's startOffset
+            $videoDuration = isset($video['duration']) ? $this->parseDurationToSeconds($video['duration']) : null;
+            $video['hasPart'] = $this->addEndOffsetsToChapters($video['hasPart'], $videoDuration);
         }
 
         return $video;
@@ -623,6 +627,10 @@ class LearningResourceSchema extends AbstractSchema
         }
         if (!empty($chapters)) {
             $video['hasPart'] = $chapters;
+            
+            // Auto-calculate endOffset for chapters based on next chapter's startOffset
+            $videoDuration = isset($video['duration']) ? $this->parseDurationToSeconds($video['duration']) : null;
+            $video['hasPart'] = $this->addEndOffsetsToChapters($video['hasPart'], $videoDuration);
         }
 
         // Try to get transcript - priority order:
@@ -999,6 +1007,70 @@ class LearningResourceSchema extends AbstractSchema
         }
         
         return 0;
+    }
+
+    /**
+     * Parse ISO 8601 duration to seconds
+     * 
+     * Handles formats like PT1H30M45S, PT45M, PT30S, etc.
+     */
+    private function parseDurationToSeconds(string $duration): ?int
+    {
+        // Already numeric seconds
+        if (is_numeric($duration)) {
+            return (int) $duration;
+        }
+
+        // Parse ISO 8601 duration (e.g., PT1H30M45S)
+        if (preg_match('/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/', $duration, $matches)) {
+            $hours = !empty($matches[1]) ? (int) $matches[1] : 0;
+            $minutes = !empty($matches[2]) ? (int) $matches[2] : 0;
+            $seconds = !empty($matches[3]) ? (int) $matches[3] : 0;
+            
+            return ($hours * 3600) + ($minutes * 60) + $seconds;
+        }
+
+        // Try HH:MM:SS or MM:SS format
+        $parsed = $this->parseTimeToSeconds($duration);
+        return $parsed > 0 ? $parsed : null;
+    }
+
+    /**
+     * Add endOffset to chapters based on next chapter's startOffset
+     * 
+     * For each chapter, the endOffset is calculated as the startOffset of the next chapter.
+     * For the last chapter, the video duration is used if available.
+     * 
+     * @param array $chapters Array of Clip objects
+     * @param int|null $videoDuration Total video duration in seconds
+     * @return array Chapters with endOffset added
+     */
+    private function addEndOffsetsToChapters(array $chapters, ?int $videoDuration): array
+    {
+        $count = count($chapters);
+        
+        for ($i = 0; $i < $count; $i++) {
+            // Skip if endOffset is already set
+            if (!empty($chapters[$i]['endOffset'])) {
+                continue;
+            }
+            
+            // Skip if no startOffset
+            if (!isset($chapters[$i]['startOffset'])) {
+                continue;
+            }
+            
+            // For all chapters except the last, use next chapter's startOffset
+            if ($i < $count - 1 && isset($chapters[$i + 1]['startOffset'])) {
+                $chapters[$i]['endOffset'] = $chapters[$i + 1]['startOffset'];
+            }
+            // For the last chapter, use video duration if available
+            elseif ($i === $count - 1 && $videoDuration !== null) {
+                $chapters[$i]['endOffset'] = $videoDuration;
+            }
+        }
+        
+        return $chapters;
     }
 
     /**

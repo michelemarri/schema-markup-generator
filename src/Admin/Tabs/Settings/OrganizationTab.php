@@ -2,31 +2,43 @@
 
 declare(strict_types=1);
 
-namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
+namespace Metodo\SchemaMarkupGenerator\Admin\Tabs\Settings;
+
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\AbstractTab;
 
 /**
- * Advanced Tab
+ * Organization Tab
  *
- * Advanced settings including cache, logging, and debug options.
+ * Organization settings and fallback image configuration.
  *
- * @package Metodo\SchemaMarkupGenerator\Admin\Tabs
+ * @package Metodo\SchemaMarkupGenerator\Admin\Tabs\Settings
  * @author  Michele Marri <plugins@metodo.dev>
  */
-class AdvancedTab extends AbstractTab
+class OrganizationTab extends AbstractTab
 {
     public function getTitle(): string
     {
-        return __('Advanced', 'schema-markup-generator');
+        return __('Organization', 'schema-markup-generator');
     }
 
     public function getIcon(): string
     {
-        return 'dashicons-admin-generic';
+        return 'dashicons-building';
     }
 
     public function getSettingsGroup(): string
     {
         return 'smg_advanced';
+    }
+
+    public function isAutoSaveEnabled(): bool
+    {
+        return true;
+    }
+
+    public function getAutoSaveOptionName(): string
+    {
+        return 'smg_advanced_settings';
     }
 
     public function getRegisteredOptions(): array
@@ -49,20 +61,33 @@ class AdvancedTab extends AbstractTab
     }
 
     /**
-     * Sanitize advanced settings
+     * Sanitize ALL advanced settings
+     * 
+     * This is the central sanitize callback for smg_advanced_settings.
+     * Other Settings sub-tabs (Performance, Debug) do NOT register this option
+     * to avoid callback conflicts. All fields are sanitized here.
      */
     public function sanitizeSettings(?array $input): array
     {
         $input = $input ?? [];
 
+        // Get existing settings to preserve values from other tabs
+        $existing = get_option('smg_advanced_settings', []);
+        if (!is_array($existing)) {
+            $existing = [];
+        }
+
         return [
-            'cache_enabled' => !empty($input['cache_enabled']),
-            'cache_ttl' => absint($input['cache_ttl'] ?? 3600),
-            'debug_mode' => !empty($input['debug_mode']),
-            'organization_name' => sanitize_text_field($input['organization_name'] ?? ''),
-            'organization_url' => esc_url_raw($input['organization_url'] ?? ''),
-            'organization_logo' => absint($input['organization_logo'] ?? 0),
-            'fallback_image' => absint($input['fallback_image'] ?? 0),
+            // Organization fields
+            'organization_name' => sanitize_text_field($input['organization_name'] ?? $existing['organization_name'] ?? ''),
+            'organization_url' => esc_url_raw($input['organization_url'] ?? $existing['organization_url'] ?? ''),
+            'organization_logo' => absint($input['organization_logo'] ?? $existing['organization_logo'] ?? 0),
+            'fallback_image' => absint($input['fallback_image'] ?? $existing['fallback_image'] ?? 0),
+            // Performance fields
+            'cache_enabled' => isset($input['cache_enabled']) ? !empty($input['cache_enabled']) : ($existing['cache_enabled'] ?? true),
+            'cache_ttl' => absint($input['cache_ttl'] ?? $existing['cache_ttl'] ?? 3600),
+            // Debug fields
+            'debug_mode' => isset($input['debug_mode']) ? !empty($input['debug_mode']) : ($existing['debug_mode'] ?? false),
         ];
     }
 
@@ -76,7 +101,7 @@ class AdvancedTab extends AbstractTab
         $fallbackLogoId = get_theme_mod('custom_logo');
 
         ?>
-        <div class="smg-tab-panel flex flex-col gap-6" id="tab-advanced">
+        <div class="smg-tab-panel flex flex-col gap-6" id="tab-settings-organization">
             <?php $this->renderSection(
                 __('Organization Info', 'schema-markup-generator'),
                 __('Customize organization data used in schema markup. Leave fields empty to use WordPress defaults.', 'schema-markup-generator')
@@ -221,149 +246,6 @@ class AdvancedTab extends AbstractTab
                     </p>
                     <?php
                 }, 'dashicons-info');
-                ?>
-            </div>
-
-            <?php $this->renderSection(
-                __('Performance', 'schema-markup-generator'),
-                __('Configure caching and performance settings.', 'schema-markup-generator')
-            ); ?>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <?php
-                $this->renderCard(__('Cache Configuration', 'schema-markup-generator'), function () use ($settings) {
-                    $this->renderToggle(
-                        'smg_advanced_settings[cache_enabled]',
-                        $settings['cache_enabled'] ?? true,
-                        __('Enable Caching', 'schema-markup-generator'),
-                        __('Cache generated schema data for faster page loads.', 'schema-markup-generator')
-                    );
-
-                    $this->renderNumberField(
-                        'smg_advanced_settings[cache_ttl]',
-                        (int) ($settings['cache_ttl'] ?? 3600),
-                        __('Cache TTL (seconds)', 'schema-markup-generator'),
-                        __('How long to keep cached data. Default: 3600 (1 hour).', 'schema-markup-generator'),
-                        60,
-                        86400
-                    );
-                }, 'dashicons-performance');
-                ?>
-
-                <?php
-                $this->renderCard(__('Cache Status', 'schema-markup-generator'), function () {
-                    $cacheType = wp_using_ext_object_cache()
-                        ? __('Object Cache (Redis/Memcached)', 'schema-markup-generator')
-                        : __('WordPress Transients', 'schema-markup-generator');
-                    ?>
-                    <div class="smg-info-grid">
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('Cache Type', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value"><?php echo esc_html($cacheType); ?></span>
-                        </div>
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('Object Cache', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value">
-                                <?php
-                                if (wp_using_ext_object_cache()) {
-                                    echo '<span class="smg-badge smg-badge-success">' . esc_html__('Enabled', 'schema-markup-generator') . '</span>';
-                                } else {
-                                    echo '<span class="smg-badge smg-badge-warning">' . esc_html__('Not Available', 'schema-markup-generator') . '</span>';
-                                }
-                                ?>
-                            </span>
-                        </div>
-                    </div>
-                    <?php
-                }, 'dashicons-chart-bar');
-                ?>
-            </div>
-
-            <?php $this->renderSection(
-                __('Debug & Logging', 'schema-markup-generator'),
-                __('Enable debug mode and logging for troubleshooting.', 'schema-markup-generator')
-            ); ?>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <?php
-                $this->renderCard(__('Debug Mode', 'schema-markup-generator'), function () use ($settings) {
-                    $this->renderToggle(
-                        'smg_advanced_settings[debug_mode]',
-                        $settings['debug_mode'] ?? false,
-                        __('Enable Debug Mode', 'schema-markup-generator'),
-                        __('Log schema generation details for troubleshooting.', 'schema-markup-generator')
-                    );
-
-                    $logDir = SMG_PLUGIN_DIR . 'logs';
-                    ?>
-                    <div class="smg-info-item mt-4">
-                        <span class="smg-info-label"><?php esc_html_e('Log Location', 'schema-markup-generator'); ?></span>
-                        <code class="smg-info-value text-xs"><?php echo esc_html($logDir); ?></code>
-                    </div>
-                    <?php
-                }, 'dashicons-visibility');
-                ?>
-
-                <?php
-                $logFile = SMG_PLUGIN_DIR . 'logs/smg-' . date('Y-m-d') . '.log';
-                if (file_exists($logFile)):
-                    $this->renderCard(__('Recent Logs', 'schema-markup-generator'), function () use ($logFile) {
-                        $lines = file($logFile);
-                        $lastLines = array_slice($lines, -8);
-                        ?>
-                        <pre class="smg-code-block text-xs max-h-48 overflow-auto"><?php echo esc_html(implode('', $lastLines)); ?></pre>
-                        <?php
-                    }, 'dashicons-text-page');
-                endif;
-                ?>
-            </div>
-
-            <?php $this->renderSection(
-                __('System Information', 'schema-markup-generator'),
-                __('Technical details about your installation.', 'schema-markup-generator')
-            ); ?>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <?php
-                $this->renderCard(__('Environment', 'schema-markup-generator'), function () {
-                    ?>
-                    <div class="smg-info-grid">
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('Plugin Version', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value"><?php echo esc_html(SMG_VERSION); ?></span>
-                        </div>
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('WordPress', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value"><?php echo esc_html(get_bloginfo('version')); ?></span>
-                        </div>
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('PHP', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value"><?php echo esc_html(PHP_VERSION); ?></span>
-                        </div>
-                    </div>
-                    <?php
-                }, 'dashicons-wordpress');
-                ?>
-
-                <?php
-                $this->renderCard(__('Server Limits', 'schema-markup-generator'), function () {
-                    ?>
-                    <div class="smg-info-grid">
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('Max Execution Time', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value"><?php echo esc_html(ini_get('max_execution_time')); ?>s</span>
-                        </div>
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('Memory Limit', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value"><?php echo esc_html(ini_get('memory_limit')); ?></span>
-                        </div>
-                        <div class="smg-info-item">
-                            <span class="smg-info-label"><?php esc_html_e('Upload Max', 'schema-markup-generator'); ?></span>
-                            <span class="smg-info-value"><?php echo esc_html(ini_get('upload_max_filesize')); ?></span>
-                        </div>
-                    </div>
-                    <?php
-                }, 'dashicons-cloud');
                 ?>
             </div>
         </div>

@@ -277,6 +277,101 @@ add_filter('smg_settings_tabs', function(array $tabs): array {
 });
 ```
 
+### Enabling Auto-Save for Custom Tabs
+
+To enable automatic saving (without form submission) for your custom tab, override the `isAutoSaveEnabled()` and `getAutoSaveOptionName()` methods:
+
+```php
+<?php
+
+namespace MyPlugin\Admin;
+
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\AbstractTab;
+
+class AutoSavePodcastTab extends AbstractTab
+{
+    public function getTitle(): string
+    {
+        return __('Podcast', 'my-plugin');
+    }
+
+    public function getIcon(): string
+    {
+        return 'dashicons-microphone';
+    }
+
+    /**
+     * Enable auto-save for this tab
+     * 
+     * When enabled, fields will save automatically when changed
+     * without requiring a form submission.
+     */
+    public function isAutoSaveEnabled(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Specify which WordPress option stores this tab's settings
+     * 
+     * Must be one of the allowed options in MappingSaveHandler.
+     * Contact the plugin author to add new option names.
+     */
+    public function getAutoSaveOptionName(): string
+    {
+        return 'smg_general_settings'; // Or 'smg_advanced_settings'
+    }
+
+    public function getSettingsGroup(): string
+    {
+        return 'smg_general';
+    }
+
+    public function render(): void
+    {
+        $settings = get_option('smg_general_settings', []);
+        ?>
+        <div class="smg-tab-panel" id="tab-podcast">
+            <?php $this->renderSection(
+                __('Podcast Settings', 'my-plugin'),
+                __('Changes are saved automatically.', 'my-plugin')
+            ); ?>
+            
+            <div class="smg-cards-grid">
+                <?php
+                // Fields rendered with renderTextField, renderToggle, etc.
+                // will automatically include auto-save attributes
+                $this->renderCard(__('Settings', 'my-plugin'), function() use ($settings) {
+                    $this->renderTextField(
+                        'smg_general_settings[podcast_name]',
+                        $settings['podcast_name'] ?? '',
+                        __('Podcast Name', 'my-plugin'),
+                        __('Your podcast name.', 'my-plugin')
+                    );
+                    
+                    $this->renderToggle(
+                        'smg_general_settings[podcast_enabled]',
+                        $settings['podcast_enabled'] ?? false,
+                        __('Enable Podcast Schema', 'my-plugin'),
+                        __('Generate schema for podcast episodes.', 'my-plugin')
+                    );
+                }, 'dashicons-microphone');
+                ?>
+            </div>
+        </div>
+        <?php
+    }
+}
+```
+
+When auto-save is enabled:
+- The "Save Changes" button is hidden
+- An auto-save indicator appears showing save status
+- Field changes trigger immediate AJAX saves
+- Users get real-time feedback (saving, saved, error states)
+
+**Note:** The field name format must match `option_name[setting_key]` (e.g., `smg_general_settings[podcast_name]`) for auto-save to extract the correct keys.
+
 ---
 
 ## Integration with Other Plugins

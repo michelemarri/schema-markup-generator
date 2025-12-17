@@ -542,7 +542,7 @@ add_filter('smg_fallback_image', function(?array $image): ?array {
 
 **Fallback Chain:**
 1. Post featured image
-2. Custom fallback image (from Advanced settings)
+2. Custom fallback image (from Settings → Organization)
 3. Site favicon (WordPress site icon)
 
 **Schema Types Using Fallback:**
@@ -762,6 +762,35 @@ Auto-saves field mapping for a schema property.
         "post_type": "product",
         "property": "price",
         "field_key": "product_price"
+    }
+}
+```
+
+---
+
+#### `wp_ajax_smg_save_advanced_setting`
+
+Auto-saves individual settings from Settings sub-tabs (Organization, Performance, Debug).
+
+**POST parameters:**
+- `nonce` - Security nonce (`smg_admin_nonce`)
+- `option_name` - The WordPress option name (e.g., `smg_advanced_settings`)
+- `setting_key` - The setting key within the option (e.g., `cache_enabled`)
+- `setting_value` - The new value for the setting
+
+**Allowed option names:**
+- `smg_advanced_settings`
+- `smg_general_settings`
+
+**Response:**
+```json
+{
+    "success": true,
+    "data": {
+        "message": "Setting saved",
+        "option_name": "smg_advanced_settings",
+        "setting_key": "cache_enabled",
+        "setting_value": true
     }
 }
 ```

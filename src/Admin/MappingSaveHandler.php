@@ -225,6 +225,97 @@ class MappingSaveHandler
     }
 
     /**
+     * Handle AJAX request for saving advanced settings
+     * 
+     * Auto-saves individual settings from the Settings sub-tabs
+     * (Organization, Performance, Debug) when fields are modified.
+     */
+    public function handleSaveAdvancedSetting(): void
+    {
+        check_ajax_referer('smg_admin_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Permission denied', 'schema-markup-generator')]);
+        }
+
+        $optionName = isset($_POST['option_name']) ? sanitize_text_field($_POST['option_name']) : '';
+        $settingKey = isset($_POST['setting_key']) ? sanitize_text_field($_POST['setting_key']) : '';
+        $settingValue = $_POST['setting_value'] ?? '';
+
+        // Only allow known option names for security
+        $allowedOptions = [
+            'smg_advanced_settings',
+            'smg_general_settings',
+        ];
+
+        if (empty($optionName) || !in_array($optionName, $allowedOptions, true)) {
+            wp_send_json_error(['message' => __('Invalid option name', 'schema-markup-generator')]);
+        }
+
+        if (empty($settingKey)) {
+            wp_send_json_error(['message' => __('Invalid setting key', 'schema-markup-generator')]);
+        }
+
+        // Force fresh read from database (bypass alloptions cache)
+        wp_cache_delete('alloptions', 'options');
+        wp_cache_delete($optionName, 'options');
+        
+        // Get current settings
+        $settings = get_option($optionName, []);
+        
+        // Ensure it's an array
+        if (!is_array($settings)) {
+            $settings = [];
+        }
+
+        // Handle different value types
+        if ($settingValue === 'true' || $settingValue === '1') {
+            // Handle boolean true
+            $settings[$settingKey] = true;
+        } elseif ($settingValue === 'false' || $settingValue === '0') {
+            // Handle boolean false (but allow empty string for text fields)
+            $settings[$settingKey] = false;
+        } elseif (is_numeric($settingValue) && strpos($settingValue, '.') === false) {
+            // Handle integer values
+            $settings[$settingKey] = absint($settingValue);
+        } elseif (filter_var($settingValue, FILTER_VALIDATE_URL)) {
+            // Handle URL values
+            $settings[$settingKey] = esc_url_raw($settingValue);
+        } else {
+            // Handle string values (including empty strings for text fields)
+            $settings[$settingKey] = sanitize_text_field($settingValue);
+        }
+
+        // Clear cache before save
+        wp_cache_delete('alloptions', 'options');
+        wp_cache_delete($optionName, 'options');
+        
+        // Save the settings
+        update_option($optionName, $settings, true);
+
+        // Clear cache after save
+        wp_cache_delete('alloptions', 'options');
+        wp_cache_delete($optionName, 'options');
+
+        // Verify save worked
+        $verify = get_option($optionName, []);
+        $success = array_key_exists($settingKey, $verify);
+
+        if ($success) {
+            wp_send_json_success([
+                'message' => __('Setting saved', 'schema-markup-generator'),
+                'option_name' => $optionName,
+                'setting_key' => $settingKey,
+                'setting_value' => $settings[$settingKey],
+            ]);
+        } else {
+            wp_send_json_error([
+                'message' => __('Failed to save setting', 'schema-markup-generator'),
+            ]);
+        }
+    }
+
+    /**
      * Handle AJAX request for saving integration setting
      * 
      * Auto-saves individual integration settings when modified in modal.

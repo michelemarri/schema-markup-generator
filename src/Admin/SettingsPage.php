@@ -15,8 +15,11 @@ use Metodo\SchemaMarkupGenerator\Admin\Tabs\PagesTab;
 use Metodo\SchemaMarkupGenerator\Admin\Tabs\SchemaTypesTab;
 use Metodo\SchemaMarkupGenerator\Admin\Tabs\IntegrationsTab;
 use Metodo\SchemaMarkupGenerator\Admin\Tabs\ToolsTab;
-use Metodo\SchemaMarkupGenerator\Admin\Tabs\AdvancedTab;
 use Metodo\SchemaMarkupGenerator\Admin\Tabs\UpdateTab;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\Settings\GeneralTab as SettingsGeneralTab;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\Settings\OrganizationTab;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\Settings\PerformanceTab;
+use Metodo\SchemaMarkupGenerator\Admin\Tabs\Settings\DebugTab;
 
 /**
  * Settings Page
@@ -92,6 +95,15 @@ class SettingsPage
             'schemas-pages' => new PagesTab(),
         ];
 
+        // Define sub-tabs for the "Settings" group
+        $settingsSubTabs = [
+            'settings-general' => new SettingsGeneralTab(),
+            'settings-organization' => new OrganizationTab(),
+            'settings-performance' => new PerformanceTab(),
+            'settings-debug' => new DebugTab(),
+            'settings-update' => new UpdateTab(),
+        ];
+
         // Register tab groups (tabs with sub-tabs)
         $this->tabGroups = [
             'schemas' => [
@@ -99,6 +111,12 @@ class SettingsPage
                 'icon' => 'dashicons-networking',
                 'subtabs' => $schemasSubTabs,
                 'default' => 'schemas-post-types',
+            ],
+            'settings' => [
+                'title' => __('Settings', 'schema-markup-generator'),
+                'icon' => 'dashicons-admin-generic',
+                'subtabs' => $settingsSubTabs,
+                'default' => 'settings-general',
             ],
         ];
 
@@ -113,8 +131,12 @@ class SettingsPage
             'schema-types' => new SchemaTypesTab(),
             'integrations' => new IntegrationsTab(),
             'tools' => new ToolsTab(),
-            'advanced' => new AdvancedTab(),
-            'update' => new UpdateTab(),
+            // Settings sub-tabs
+            'settings-general' => $settingsSubTabs['settings-general'],
+            'settings-organization' => $settingsSubTabs['settings-organization'],
+            'settings-performance' => $settingsSubTabs['settings-performance'],
+            'settings-debug' => $settingsSubTabs['settings-debug'],
+            'settings-update' => $settingsSubTabs['settings-update'],
         ];
 
         /**
@@ -278,10 +300,13 @@ class SettingsPage
                     // Check if the current tab has settings to save
                     $settingsGroup = $this->tabs[$currentTab]->getSettingsGroup();
                     $hasSettings = !empty($settingsGroup);
+                    
+                    // Check if auto-save is enabled for this tab
+                    $isAutoSave = $this->tabs[$currentTab]->isAutoSaveEnabled();
 
                     if ($hasSettings):
                     ?>
-                    <form method="post" action="options.php" id="smg-settings-form">
+                    <form method="post" action="options.php" id="smg-settings-form" <?php echo $isAutoSave ? 'data-autosave="true"' : ''; ?>>
                         <?php
                         // Use the tab's specific settings group
                         settings_fields($settingsGroup);
@@ -290,9 +315,16 @@ class SettingsPage
                         $this->tabs[$currentTab]->render();
                         ?>
 
+                        <?php if (!$isAutoSave): ?>
                         <div class="smg-actions">
                             <?php submit_button(__('Save Changes', 'schema-markup-generator'), 'primary', 'submit', false); ?>
                         </div>
+                        <?php else: ?>
+                        <div class="smg-autosave-indicator" id="smg-autosave-indicator">
+                            <span class="dashicons dashicons-saved"></span>
+                            <span class="smg-autosave-text"><?php esc_html_e('Changes are saved automatically', 'schema-markup-generator'); ?></span>
+                        </div>
+                        <?php endif; ?>
                     </form>
                     <?php else: ?>
                     <div id="smg-settings-readonly">
