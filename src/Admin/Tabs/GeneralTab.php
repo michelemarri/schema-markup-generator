@@ -55,7 +55,11 @@ class GeneralTab extends AbstractTab
             if (!empty($propDef['required'])) {
                 $stats['total']++;
                 
-                if (!empty($postTypeMappings[$propName])) {
+                // Consider as configured if has manual mapping OR auto mapping
+                $hasManualMapping = !empty($postTypeMappings[$propName]);
+                $hasAutoMapping = !empty($propDef['auto']);
+                
+                if ($hasManualMapping || $hasAutoMapping) {
                     $stats['configured']++;
                 } else {
                     $stats['missing'][] = $propName;

@@ -189,8 +189,8 @@ class MetaBoxPropertiesHandler
                         <div class="smg-field-override-value">
                             <!-- Field selector (shown when type=field) -->
                             <div class="smg-override-field-select" <?php echo $overrideType !== 'field' ? 'style="display:none;"' : ''; ?>>
-                                <select class="smg-select smg-override-select" data-property="<?php echo esc_attr($propName); ?>">
-                                    <option value=""><?php esc_html_e('— Select Field —', 'schema-markup-generator'); ?></option>
+                                <select class="smg-select smg-override-select" data-property="<?php echo esc_attr($propName); ?>" autocomplete="off">
+                                    <option value="" selected><?php esc_html_e('— Select Field —', 'schema-markup-generator'); ?></option>
                                     <optgroup label="<?php esc_attr_e('Post Fields', 'schema-markup-generator'); ?>">
                                         <option value="post_title" <?php selected($overrideType === 'field' ? $overrideValue : '', 'post_title'); ?>>
                                             <?php esc_html_e('Post Title', 'schema-markup-generator'); ?>

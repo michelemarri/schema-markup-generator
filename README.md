@@ -239,6 +239,14 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.48.2
+- **Fixed**: Required fields count now includes auto-mapped properties (e.g., post_title, post_excerpt)
+- **Improved**: Dashboard statistics accurately reflect configured required fields including auto mappings
+
+### 1.48.1
+- **Fixed**: Field mapping dropdowns showing incorrect default value instead of "— Select Field —"
+- **Fixed**: Added `autocomplete="off"` to prevent browser from auto-filling field selects
+
 ### 1.48.0
 - **New**: Required fields indicator for rich results - Shows which schema properties are required
 - **New**: "Required" badge in Post Types mapping table for properties needed by search engines

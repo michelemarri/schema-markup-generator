@@ -276,8 +276,9 @@ class PostTypesTab extends AbstractTab
                                                     </td>
                                                     <td>
                                                         <select name="smg_field_mappings[<?php echo esc_attr($postType); ?>][<?php echo esc_attr($propName); ?>]"
-                                                                class="smg-select smg-field-select">
-                                                            <option value=""><?php esc_html_e('— Select Field —', 'schema-markup-generator'); ?></option>
+                                                                class="smg-select smg-field-select"
+                                                                autocomplete="off">
+                                                            <option value="" <?php selected(empty($currentFieldMapping[$propName] ?? ''), true); ?>><?php esc_html_e('— Select Field —', 'schema-markup-generator'); ?></option>
                                                             <optgroup label="<?php esc_attr_e('Post Fields', 'schema-markup-generator'); ?>">
                                                                 <option value="post_title" <?php selected($currentFieldMapping[$propName] ?? '', 'post_title'); ?>>
                                                                     <?php esc_html_e('Post Title', 'schema-markup-generator'); ?>
