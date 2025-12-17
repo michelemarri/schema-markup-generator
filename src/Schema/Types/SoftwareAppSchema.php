@@ -196,6 +196,7 @@ class SoftwareAppSchema extends AbstractSchema
         return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('App/software name. Shown in software rich results.', 'schema-markup-generator'),
                 'description_long' => __('The name of the software application. This is the primary identifier shown in software rich results and app listings. Use the official product name.', 'schema-markup-generator'),
                 'example' => __('Slack, Adobe Photoshop, Zoom, Microsoft Teams', 'schema-markup-generator'),
@@ -260,6 +261,7 @@ class SoftwareAppSchema extends AbstractSchema
             ],
             'price' => [
                 'type' => 'number',
+                'required' => true,
                 'description' => __('Price in specified currency. Use 0 for free apps.', 'schema-markup-generator'),
                 'description_long' => __('The price of the software. Use 0 for free apps (this will display "Free" in search results). For subscription-based software, use the starting price.', 'schema-markup-generator'),
                 'example' => __('0 (free), 9.99, 29.99', 'schema-markup-generator'),

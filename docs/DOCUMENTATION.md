@@ -66,11 +66,15 @@ Navigate to **Settings → Schema Markup** to access the plugin settings. The **
   - Posts with schema disabled
 - **Coverage by Post Type**: Table showing ALL public post types:
   - Post type name and assigned schema (or "Not configured" warning)
+  - **Required fields status**: Shows X/Y format (configured/total required) with visual indicator:
+    - Green checkmark: All required fields are configured
+    - Orange warning: Some required fields are missing (hover for list)
   - Total published posts
   - Posts with schema enabled
   - Coverage percentage with visual progress bar
 - **Content by Schema Type**: Breakdown of content count per schema type
 - **Overall Coverage**: Percentage of all content that has schema
+- **Required Fields**: Percentage of required fields configured across all post types
 
 ### Schema Output Settings
 

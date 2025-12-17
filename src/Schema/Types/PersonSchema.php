@@ -171,6 +171,7 @@ class PersonSchema extends AbstractSchema
         return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Full name. Displayed in author knowledge panels and bylines.', 'schema-markup-generator'),
                 'description_long' => __('The full name of the person. This is the primary identifier displayed in author knowledge panels, bylines, and when this person is referenced as an author or creator.', 'schema-markup-generator'),
                 'example' => __('John Smith, Dr. Jane Doe, Maria García López', 'schema-markup-generator'),

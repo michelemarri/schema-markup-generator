@@ -198,6 +198,7 @@ class OrganizationSchema extends AbstractSchema
         return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Business/organization name. Shown in knowledge panels and local search.', 'schema-markup-generator'),
                 'description_long' => __('The official name of the organization or business. This is the primary identifier shown in Google Knowledge Panels, local search results, and Maps.', 'schema-markup-generator'),
                 'example' => __('Acme Corporation, The Coffee House, Smith & Associates Law Firm', 'schema-markup-generator'),

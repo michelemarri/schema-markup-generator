@@ -132,6 +132,7 @@ class FAQSchema extends AbstractSchema
         return array_merge(self::getAdditionalTypeDefinition(), [
             'faqItems' => [
                 'type' => 'repeater',
+                'required' => true,
                 'description' => __('Question/Answer pairs. Enables expandable FAQ rich results in Google - major SERP real estate boost.', 'schema-markup-generator'),
                 'description_long' => __('A list of frequently asked questions and their answers. FAQ rich results display as expandable Q&A sections directly in search results, dramatically increasing your SERP visibility. Each question should match common user search queries.', 'schema-markup-generator'),
                 'example' => __('Q: How long does shipping take? A: Standard shipping takes 3-5 business days. Express shipping delivers within 1-2 days.', 'schema-markup-generator'),

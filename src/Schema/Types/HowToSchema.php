@@ -1159,6 +1159,7 @@ class HowToSchema extends AbstractSchema
         return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Guide title. Displayed as the main heading in how-to rich results.', 'schema-markup-generator'),
                 'description_long' => __('The title of your how-to guide. Should clearly describe what the user will learn to do. Start with action verbs like "How to", "Build", "Create", "Make", etc.', 'schema-markup-generator'),
                 'example' => __('How to Change a Flat Tire, Build a Raised Garden Bed, Create a Budget Spreadsheet', 'schema-markup-generator'),
@@ -1205,6 +1206,7 @@ class HowToSchema extends AbstractSchema
             ],
             'steps' => [
                 'type' => 'repeater',
+                'required' => true,
                 'description' => __('Step-by-step instructions. Core content for how-to rich results display.', 'schema-markup-generator'),
                 'description_long' => __('The sequence of steps to complete the task. Each step should be clear and actionable. Google displays these as expandable accordion items in how-to rich results.', 'schema-markup-generator'),
                 'example' => __('Step 1: Gather your materials... Step 2: Prepare the workspace... Step 3: Begin assembly...', 'schema-markup-generator'),

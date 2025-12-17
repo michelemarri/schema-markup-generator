@@ -312,6 +312,7 @@ class ProductSchema extends AbstractSchema
         return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Product title. Shown in Google Shopping and product rich results.', 'schema-markup-generator'),
                 'description_long' => __('The name of the product. This is the primary identifier shown in search results, Google Shopping, and product rich snippets. Use clear, descriptive names that include key product attributes.', 'schema-markup-generator'),
                 'example' => __('Apple iPhone 15 Pro Max 256GB - Natural Titanium, Sony WH-1000XM5 Wireless Headphones', 'schema-markup-generator'),

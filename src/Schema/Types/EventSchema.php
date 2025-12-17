@@ -229,6 +229,7 @@ class EventSchema extends AbstractSchema
         return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Event title. Shown in Google Events rich results and calendar integration.', 'schema-markup-generator'),
                 'description_long' => __('The name or title of the event. This is the primary text shown in Google Events search results and can appear in Google Calendar integrations. Be specific and include key details.', 'schema-markup-generator'),
                 'example' => __('Web Summit 2025, Taylor Swift - The Eras Tour, Annual Marketing Conference', 'schema-markup-generator'),
@@ -245,6 +246,7 @@ class EventSchema extends AbstractSchema
             ],
             'startDate' => [
                 'type' => 'datetime',
+                'required' => true,
                 'description' => __('Required. When the event begins. Enables event rich results display.', 'schema-markup-generator'),
                 'description_long' => __('The start date and time of the event in ISO 8601 format. This is required for event rich results. Include timezone information for accurate display across regions.', 'schema-markup-generator'),
                 'example' => __('2025-06-15T09:00:00+02:00, 2025-12-01T19:30:00-05:00', 'schema-markup-generator'),
@@ -275,6 +277,7 @@ class EventSchema extends AbstractSchema
             ],
             'locationName' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Venue or platform name. Required for in-person events.', 'schema-markup-generator'),
                 'description_long' => __('The name of the venue, location, or online platform where the event takes place. For online events, use the platform name (Zoom, YouTube Live, etc.).', 'schema-markup-generator'),
                 'example' => __('Madison Square Garden, Zoom Webinar, Convention Center Hall A', 'schema-markup-generator'),

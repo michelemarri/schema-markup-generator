@@ -184,6 +184,7 @@ class WebPageSchema extends AbstractSchema
         return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Page title. Establishes page identity in site hierarchy.', 'schema-markup-generator'),
                 'description_long' => __('The name of the web page. This helps establish the page\'s identity within the site hierarchy and is used by search engines to understand the page structure.', 'schema-markup-generator'),
                 'example' => __('About Us, Contact, Privacy Policy, Services', 'schema-markup-generator'),

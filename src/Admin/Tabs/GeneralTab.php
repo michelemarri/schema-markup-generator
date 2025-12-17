@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
 
+use Metodo\SchemaMarkupGenerator\Schema\SchemaFactory;
+
 /**
  * General Tab (Home/Dashboard)
  *
@@ -14,6 +16,56 @@ namespace Metodo\SchemaMarkupGenerator\Admin\Tabs;
  */
 class GeneralTab extends AbstractTab
 {
+    private SchemaFactory $schemaFactory;
+
+    public function __construct()
+    {
+        $this->schemaFactory = new SchemaFactory();
+    }
+
+    /**
+     * Get required fields statistics for a post type
+     *
+     * @param string $postType The post type slug
+     * @param string $schemaType The schema type
+     * @return array{total: int, configured: int, missing: array<string>}
+     */
+    private function getRequiredFieldsStats(string $postType, string $schemaType): array
+    {
+        $stats = [
+            'total' => 0,
+            'configured' => 0,
+            'missing' => [],
+        ];
+
+        if (empty($schemaType)) {
+            return $stats;
+        }
+
+        $schema = $this->schemaFactory->create($schemaType);
+        if (!$schema) {
+            return $stats;
+        }
+
+        $propertyDefs = $schema->getPropertyDefinitions();
+        $fieldMappings = get_option('smg_field_mappings', []);
+        $postTypeMappings = $fieldMappings[$postType] ?? [];
+
+        foreach ($propertyDefs as $propName => $propDef) {
+            if (!empty($propDef['required'])) {
+                $stats['total']++;
+                
+                if (!empty($postTypeMappings[$propName])) {
+                    $stats['configured']++;
+                } else {
+                    $stats['missing'][] = $propName;
+                }
+            }
+        }
+
+        return $stats;
+    }
+
     public function getTitle(): string
     {
         return __('Home', 'schema-markup-generator');
@@ -128,6 +180,9 @@ class GeneralTab extends AbstractTab
                 $stats['total_with_schema'] += $overrideCount;
             }
 
+            // Get required fields stats for this post type
+            $requiredStats = $this->getRequiredFieldsStats($postType, $schemaType);
+
             $stats['by_post_type'][$postType] = [
                 'label' => $postTypeObject->labels->name,
                 'schema' => $schemaType,
@@ -136,6 +191,9 @@ class GeneralTab extends AbstractTab
                 'disabled' => $disabledCount,
                 'overrides' => $overrideCount,
                 'has_config' => $hasConfig,
+                'required_total' => $requiredStats['total'],
+                'required_configured' => $requiredStats['configured'],
+                'required_missing' => $requiredStats['missing'],
             ];
         }
 
@@ -211,6 +269,7 @@ class GeneralTab extends AbstractTab
                             <tr class="border-b border-gray-200 bg-gray-50">
                                 <th class="text-left py-3 px-4 font-medium text-gray-600 uppercase text-xs tracking-wider"><?php esc_html_e('Post Type', 'schema-markup-generator'); ?></th>
                                 <th class="text-left py-3 px-4 font-medium text-gray-600 uppercase text-xs tracking-wider"><?php esc_html_e('Schema Type', 'schema-markup-generator'); ?></th>
+                                <th class="text-center py-3 px-4 font-medium text-gray-600 uppercase text-xs tracking-wider"><?php esc_html_e('Required', 'schema-markup-generator'); ?></th>
                                 <th class="text-right py-3 px-4 font-medium text-gray-600 uppercase text-xs tracking-wider"><?php esc_html_e('Total', 'schema-markup-generator'); ?></th>
                                 <th class="text-right py-3 px-4 font-medium text-gray-600 uppercase text-xs tracking-wider"><?php esc_html_e('With Schema', 'schema-markup-generator'); ?></th>
                                 <th class="text-center py-3 px-4 font-medium text-gray-600 uppercase text-xs tracking-wider"><?php esc_html_e('Coverage', 'schema-markup-generator'); ?></th>
@@ -233,6 +292,38 @@ class GeneralTab extends AbstractTab
                                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 hover:bg-amber-200">
                                             <?php esc_html_e('Not configured', 'schema-markup-generator'); ?>
                                         </a>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    <?php if ($data['has_config'] && $data['required_total'] > 0): ?>
+                                        <?php
+                                        $requiredConfigured = $data['required_configured'];
+                                        $requiredTotal = $data['required_total'];
+                                        $allRequired = $requiredConfigured === $requiredTotal;
+                                        $badgeClass = $allRequired
+                                            ? 'bg-green-100 text-green-800 border-green-200'
+                                            : 'bg-orange-100 text-orange-800 border-orange-200';
+                                        $tooltip = $allRequired
+                                            ? __('All required fields configured', 'schema-markup-generator')
+                                            : sprintf(
+                                                /* translators: %s: comma-separated list of missing fields */
+                                                __('Missing: %s', 'schema-markup-generator'),
+                                                implode(', ', $data['required_missing'])
+                                            );
+                                        ?>
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border <?php echo esc_attr($badgeClass); ?>"
+                                              title="<?php echo esc_attr($tooltip); ?>">
+                                            <?php if ($allRequired): ?>
+                                                <span class="dashicons dashicons-yes-alt" style="font-size: 14px; width: 14px; height: 14px; line-height: 14px;"></span>
+                                            <?php else: ?>
+                                                <span class="dashicons dashicons-warning" style="font-size: 14px; width: 14px; height: 14px; line-height: 14px;"></span>
+                                            <?php endif; ?>
+                                            <?php echo esc_html($requiredConfigured . '/' . $requiredTotal); ?>
+                                        </span>
+                                    <?php elseif ($data['has_config']): ?>
+                                        <span class="text-gray-400 text-xs">—</span>
+                                    <?php else: ?>
+                                        <span class="text-gray-400 text-xs">—</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="py-3 px-4 text-right font-mono"><?php echo esc_html(number_format_i18n($data['total'])); ?></td>
@@ -262,7 +353,7 @@ class GeneralTab extends AbstractTab
             </div>
 
             <?php if (!empty($contentStats['by_schema_type'])): ?>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <?php
                 $this->renderCard(__('Content by Schema Type', 'schema-markup-generator'), function () use ($contentStats) {
                     ?>
@@ -307,6 +398,59 @@ class GeneralTab extends AbstractTab
                     </div>
                     <?php
                 }, 'dashicons-chart-pie');
+                ?>
+
+                <?php
+                $this->renderCard(__('Required Fields', 'schema-markup-generator'), function () use ($contentStats) {
+                    // Calculate totals for required fields across all configured post types
+                    $totalRequired = 0;
+                    $totalConfiguredRequired = 0;
+                    $postTypesWithMissing = [];
+                    
+                    foreach ($contentStats['by_post_type'] as $postType => $data) {
+                        if ($data['has_config'] && $data['required_total'] > 0) {
+                            $totalRequired += $data['required_total'];
+                            $totalConfiguredRequired += $data['required_configured'];
+                            if (!empty($data['required_missing'])) {
+                                $postTypesWithMissing[$data['label']] = $data['required_missing'];
+                            }
+                        }
+                    }
+                    
+                    $requiredCoverage = $totalRequired > 0 ? round(($totalConfiguredRequired / $totalRequired) * 100) : 100;
+                    ?>
+                    <div class="text-center">
+                        <div class="text-5xl font-bold <?php echo $requiredCoverage === 100 ? 'text-green-600' : ($requiredCoverage >= 75 ? 'text-yellow-600' : 'text-red-600'); ?>">
+                            <?php echo esc_html($requiredCoverage); ?>%
+                        </div>
+                        <div class="text-sm text-gray-500 mt-1"><?php esc_html_e('fields configured', 'schema-markup-generator'); ?></div>
+                        <div class="text-xs text-gray-400 mt-3">
+                            <?php
+                            printf(
+                                /* translators: %1$s: configured count, %2$s: total count */
+                                esc_html__('%1$s of %2$s required fields', 'schema-markup-generator'),
+                                '<span class="font-medium">' . esc_html(number_format_i18n($totalConfiguredRequired)) . '</span>',
+                                '<span class="font-medium">' . esc_html(number_format_i18n($totalRequired)) . '</span>'
+                            );
+                            ?>
+                        </div>
+                        <?php if (!empty($postTypesWithMissing)): ?>
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                            <div class="text-xs text-orange-600">
+                                <?php 
+                                $missing_count = count($postTypesWithMissing);
+                                printf(
+                                    /* translators: %d: number of post types with missing fields */
+                                    esc_html(_n('%d post type has missing fields', '%d post types have missing fields', $missing_count, 'schema-markup-generator')),
+                                    $missing_count
+                                );
+                                ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                    <?php
+                }, 'dashicons-editor-help');
                 ?>
             </div>
             <?php endif; ?>

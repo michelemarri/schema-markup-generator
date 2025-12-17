@@ -1532,6 +1532,7 @@ class LearningResourceSchema extends AbstractSchema
         return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Lesson/resource title. Displayed in educational content rich results.', 'schema-markup-generator'),
                 'description_long' => __('The title of the learning resource. This is the primary identifier displayed in educational content search results. Be descriptive and include the main topic covered.', 'schema-markup-generator'),
                 'example' => __('Introduction to Python Variables, Understanding Gamma Levels in Options Trading, SEO Fundamentals: On-Page Optimization', 'schema-markup-generator'),
@@ -1540,6 +1541,7 @@ class LearningResourceSchema extends AbstractSchema
             ],
             'description' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('What this lesson covers. Helps search engines and AI understand the content.', 'schema-markup-generator'),
                 'description_long' => __('A description of what the learning resource covers and what students will learn. This is crucial for AI systems to understand and match the content with relevant user queries.', 'schema-markup-generator'),
                 'example' => __('Learn the fundamentals of Python variables, including data types, naming conventions, and best practices. Perfect for beginners with no prior programming experience.', 'schema-markup-generator'),
@@ -1548,6 +1550,7 @@ class LearningResourceSchema extends AbstractSchema
             ],
             'learningResourceType' => [
                 'type' => 'select',
+                'required' => true,
                 'description' => __('Content format. Helps categorize and match with user search intent.', 'schema-markup-generator'),
                 'description_long' => __('The type or format of the learning resource. This helps search engines categorize your content and match it with users looking for specific types of educational materials.', 'schema-markup-generator'),
                 'example' => __('Lesson for written content, Video for video lessons, Quiz for assessments, Tutorial for step-by-step guides', 'schema-markup-generator'),

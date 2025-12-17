@@ -130,6 +130,7 @@ class ArticleSchema extends AbstractSchema
         return array_merge(self::getAdditionalTypeDefinition(), [
             'headline' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Article title. Required for Google News and Discover eligibility.', 'schema-markup-generator'),
                 'description_long' => __('The headline of the article. Headlines should not exceed 110 characters. For AMP stories, the headline must match the first-cover text. This is the primary text shown in search results and social shares.', 'schema-markup-generator'),
                 'example' => __('10 Tips for Better SEO in 2025, Breaking: Major Tech Announcement Today', 'schema-markup-generator'),
@@ -146,6 +147,7 @@ class ArticleSchema extends AbstractSchema
             ],
             'image' => [
                 'type' => 'image',
+                'required' => true,
                 'description' => __('Required for rich results. Use high-quality images (min 1200px wide recommended).', 'schema-markup-generator'),
                 'description_long' => __('The representative image of the article. For best results in Google Discover and search, provide images at least 1200 pixels wide with 16x9, 4x3, or 1x1 aspect ratio. Images must be crawlable and indexable.', 'schema-markup-generator'),
                 'example' => __('https://example.com/images/article-hero.jpg', 'schema-markup-generator'),
@@ -154,6 +156,7 @@ class ArticleSchema extends AbstractSchema
             ],
             'author' => [
                 'type' => 'person',
+                'required' => true,
                 'description' => __('Content creator. Important for E-E-A-T signals and author knowledge panels.', 'schema-markup-generator'),
                 'description_long' => __('The author of the article. Including author information helps establish E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) and can lead to author knowledge panels in search results.', 'schema-markup-generator'),
                 'example' => __('John Smith, Dr. Jane Doe', 'schema-markup-generator'),
@@ -162,6 +165,7 @@ class ArticleSchema extends AbstractSchema
             ],
             'datePublished' => [
                 'type' => 'datetime',
+                'required' => true,
                 'description' => __('First publication date. Affects freshness signals for time-sensitive content.', 'schema-markup-generator'),
                 'description_long' => __('The date and time the article was originally published. Use ISO 8601 format. This date is used by Google to determine content freshness, especially important for news and time-sensitive topics.', 'schema-markup-generator'),
                 'example' => __('2025-01-15T09:00:00+01:00', 'schema-markup-generator'),

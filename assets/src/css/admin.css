@@ -1544,6 +1544,14 @@
   @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-500 bg-gray-100 rounded;
 }
 
+.smg-required-badge {
+  @apply inline-flex items-center gap-1 ml-2 px-2 py-0.5 text-xs font-semibold rounded;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+  vertical-align: middle;
+}
+
 /* Auto badge with tooltip on hover */
 .smg-auto-badge-wrapper {
   @apply relative inline-flex items-center;

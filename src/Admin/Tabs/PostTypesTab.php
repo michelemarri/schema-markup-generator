@@ -266,6 +266,11 @@ class PostTypesTab extends AbstractTab
                                                            data-schema-url="<?php echo esc_attr($propDef['schema_url'] ?? ''); ?>">
                                                             <?php echo esc_html($propName); ?>
                                                         </a>
+                                                        <?php if (!empty($propDef['required'])): ?>
+                                                            <span class="smg-required-badge" title="<?php esc_attr_e('Required for rich results', 'schema-markup-generator'); ?>">
+                                                                <?php esc_html_e('Required', 'schema-markup-generator'); ?>
+                                                            </span>
+                                                        <?php endif; ?>
                                                         <br>
                                                         <small class="text-gray-500"><?php echo esc_html($propDef['description'] ?? ''); ?></small>
                                                     </td>

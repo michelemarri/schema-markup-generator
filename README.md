@@ -239,6 +239,14 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 ## Changelog
 
+### 1.48.0
+- **New**: Required fields indicator for rich results - Shows which schema properties are required
+- **New**: "Required" badge in Post Types mapping table for properties needed by search engines
+- **New**: Required fields column in "Coverage by Post Type" dashboard table
+- **New**: "Required Fields" statistics card in Home tab showing overall completion percentage
+- **Improved**: Visual indication (orange warning or green checkmark) when required fields are missing/complete
+- **Improved**: Tooltip shows list of missing required fields for quick reference
+
 ### 1.47.0
 - **New**: Auto-calculate endOffset for video chapters (Clip schema)
 - **Improved**: Each chapter's endOffset is now automatically set to the next chapter's startOffset

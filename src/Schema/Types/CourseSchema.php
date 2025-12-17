@@ -467,6 +467,7 @@ class CourseSchema extends AbstractSchema
             // ========================================
             'name' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Course title. Shown in Google rich results and AI answers.', 'schema-markup-generator'),
                 'description_long' => __('The name of the course. This is the primary text displayed in course rich results and educational search features. Be specific and include key details like the technology or skill taught.', 'schema-markup-generator'),
                 'example' => __('Complete Python Bootcamp, Advanced SEO Masterclass, Introduction to Machine Learning', 'schema-markup-generator'),
@@ -475,6 +476,7 @@ class CourseSchema extends AbstractSchema
             ],
             'description' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Course summary. Used by search engines and LLMs to understand and present your course.', 'schema-markup-generator'),
                 'description_long' => __('A comprehensive description of what the course covers, who it is for, and what students will achieve. This is heavily used by AI and search engines to match courses with user queries.', 'schema-markup-generator'),
                 'example' => __('Master Python programming from scratch. This comprehensive course covers fundamentals to advanced topics including web development, data analysis, and automation.', 'schema-markup-generator'),
@@ -483,6 +485,7 @@ class CourseSchema extends AbstractSchema
             ],
             'provider' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Organization/school offering the course. Builds brand recognition in search results.', 'schema-markup-generator'),
                 'description_long' => __('The organization, school, or platform providing the course. This builds brand recognition and helps establish credibility in search results.', 'schema-markup-generator'),
                 'example' => __('Udemy, Coursera, Harvard University, Your Academy Name', 'schema-markup-generator'),

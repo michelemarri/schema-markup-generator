@@ -751,6 +751,7 @@ class VideoObjectSchema extends AbstractSchema
         return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Video title. Required for video rich results in Google Search.', 'schema-markup-generator'),
                 'description_long' => __('The title of the video. This is required for video rich results and is the primary text shown in video search results and carousels. Be descriptive and include key topics covered.', 'schema-markup-generator'),
                 'example' => __('Complete Python Tutorial for Beginners, How to Bake Sourdough Bread, Product Demo: New Features in v2.0', 'schema-markup-generator'),
@@ -759,6 +760,7 @@ class VideoObjectSchema extends AbstractSchema
             ],
             'description' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Video summary. Required. Max 2048 characters for Google.', 'schema-markup-generator'),
                 'description_long' => __('A description of the video content. Required for video rich results. Google recommends keeping it under 2048 characters. Include key topics, what viewers will learn, and any notable features.', 'schema-markup-generator'),
                 'example' => __('In this comprehensive tutorial, you\'ll learn Python programming from scratch. We cover variables, data types, functions, and build a real project together.', 'schema-markup-generator'),
@@ -767,6 +769,7 @@ class VideoObjectSchema extends AbstractSchema
             ],
             'thumbnailUrl' => [
                 'type' => 'image',
+                'required' => true,
                 'description' => __('Required. Preview image shown in search results. Min 120x120px recommended.', 'schema-markup-generator'),
                 'description_long' => __('A URL pointing to the video thumbnail image. Required for video rich results. Google recommends images at least 120x120 pixels. For best results, use 1280x720 pixels (HD) or larger.', 'schema-markup-generator'),
                 'example' => __('https://example.com/videos/thumbnails/python-tutorial.jpg', 'schema-markup-generator'),

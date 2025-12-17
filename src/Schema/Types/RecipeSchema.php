@@ -273,6 +273,7 @@ class RecipeSchema extends AbstractSchema
         return array_merge(self::getAdditionalTypeDefinition(), [
             'name' => [
                 'type' => 'text',
+                'required' => true,
                 'description' => __('Recipe title. Shown prominently in recipe rich results.', 'schema-markup-generator'),
                 'description_long' => __('The name of the dish. This is the primary text shown in recipe rich results. Be descriptive but concise - include key details like "Easy", "Homemade", or cooking method.', 'schema-markup-generator'),
                 'example' => __('Classic Italian Carbonara, Easy 30-Minute Chicken Stir-Fry, Grandma\'s Apple Pie', 'schema-markup-generator'),
@@ -331,6 +332,7 @@ class RecipeSchema extends AbstractSchema
             ],
             'recipeIngredient' => [
                 'type' => 'repeater',
+                'required' => true,
                 'description' => __('Required. Complete ingredient list. Core content for recipe rich results.', 'schema-markup-generator'),
                 'description_long' => __('The list of ingredients needed. Each ingredient should be a single text string including quantity, unit, and ingredient name. Be specific about brands or varieties when relevant.', 'schema-markup-generator'),
                 'example' => __('200g spaghetti, 4 large eggs, 100g pecorino romano cheese (grated), 150g guanciale', 'schema-markup-generator'),
@@ -338,6 +340,7 @@ class RecipeSchema extends AbstractSchema
             ],
             'recipeInstructions' => [
                 'type' => 'repeater',
+                'required' => true,
                 'description' => __('Required. Step-by-step cooking instructions. Shown in recipe rich results.', 'schema-markup-generator'),
                 'description_long' => __('Step-by-step instructions for preparing the recipe. Each step should be clear and actionable. Google may display these as expandable steps in rich results.', 'schema-markup-generator'),
                 'example' => __('Bring a large pot of salted water to boil. Cook the spaghetti according to package directions until al dente.', 'schema-markup-generator'),
